@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { findRentSnippets } from "@/lib/analysis/rules";
+import { getBysAiKey } from "@/lib/env/bys-ai-key";
 import { extractPdfTextPages } from "@/lib/pdf/extract-text";
 
 export const runtime = "nodejs";
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
           pages: extractedPages.length,
           charsPerPage: extractedPages.map((p) => p.text.length),
           rentSnippets: rentSnippets.length,
+          hasBysAiKey: Boolean(getBysAiKey()),
         }),
       );
     }

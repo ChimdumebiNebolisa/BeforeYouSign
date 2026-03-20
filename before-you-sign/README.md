@@ -6,11 +6,13 @@
 npm install
 ```
 
-2. Configure your Gemini API key (placeholder):
+2. Configure your AI key in `.env.local` (server-side only). Copy the example and set `BYS_AI_KEY`:
 
 ```bash
 copy .env.local.example .env.local
 ```
+
+Do not use `NEXT_PUBLIC_` for this value — it must never be exposed to the client.
 
 3. Start the dev server:
 

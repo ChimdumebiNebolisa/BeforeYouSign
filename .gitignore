@@ -1,9 +1,10 @@
 docs/
 
-# Local environment files (never commit)
+# Local environment files (never commit secrets)
 .env
 .env.local
 .env.*
+# Allow only the non-secret example file(s)
 !/before-you-sign/.env.local.example
 !.env.local.example
 
