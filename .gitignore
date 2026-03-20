@@ -4,6 +4,8 @@ docs/
 .env
 .env.local
 .env.*
+!/before-you-sign/.env.local.example
+!.env.local.example
 
 # Next.js build output
 .next/
