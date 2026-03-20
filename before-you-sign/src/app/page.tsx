@@ -1,6 +1,7 @@
 import { LandingShell } from "@/components/beforeyousign/landing-shell";
 import { UploadLeaseCta } from "@/components/beforeyousign/upload-lease-cta";
 import { SampleLeaseCta } from "@/components/beforeyousign/sample-lease-cta";
+import { PasteTextDialog } from "@/components/beforeyousign/paste-text-dialog";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
             </p>
             <UploadLeaseCta />
             <SampleLeaseCta />
+            <PasteTextDialog />
           </div>
         </main>
       </div>
