@@ -1,0 +1,27 @@
+docs/
+
+# Local environment files (never commit)
+.env
+.env.local
+.env.*
+
+# Next.js build output
+.next/
+out/
+.vercel/
+
+# Dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
