@@ -2,6 +2,8 @@ import { PDFParse } from "pdf-parse";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
+import { normalizeLeasePageText } from "@/lib/pdf/normalize";
+
 export type ExtractedTextPage = {
   page: number;
   text: string;
@@ -31,7 +33,7 @@ export async function extractPdfTextPages(arrayBuffer: ArrayBuffer): Promise<Ext
     const pages: ExtractedTextPage[] = [];
     for (let pageNumber = 1; pageNumber <= totalPages; pageNumber++) {
       const pageText = await parser.getText({ partial: [pageNumber] });
-      const text = pageText.text.replace(/\s+/g, " ").trim();
+      const text = normalizeLeasePageText(pageText.text);
       pages.push({ page: pageNumber, text });
     }
 
