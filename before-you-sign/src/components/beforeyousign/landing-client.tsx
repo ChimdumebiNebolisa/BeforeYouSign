@@ -17,6 +17,7 @@ export function LandingClient() {
     fileName: string;
     fileSizeBytes: number;
     contentType: string | null;
+    extractedPages?: { page: number; text: string }[];
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -87,6 +88,7 @@ export function LandingClient() {
                       fileName: string;
                       fileSizeBytes: number;
                       contentType: string | null;
+                      extractedPages?: { page: number; text: string }[];
                     };
                     setUploadReceipt(data);
                   } catch (e) {
@@ -109,6 +111,12 @@ export function LandingClient() {
               Backend received: <span className="font-medium">{uploadReceipt.fileName}</span> (
               {uploadReceipt.fileSizeBytes.toLocaleString()} bytes)
               {uploadReceipt.contentType ? `, ${uploadReceipt.contentType}` : null}
+              {uploadReceipt.extractedPages?.length ? (
+                <div className="mt-2 text-xs text-slate-700">
+                  Extracted {uploadReceipt.extractedPages.length} page(s). First page snippet:{" "}
+                  {uploadReceipt.extractedPages[0]?.text.slice(0, 200) || "—"}
+                </div>
+              ) : null}
             </div>
           ) : null}
 

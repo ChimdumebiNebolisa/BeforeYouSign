@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { extractPdfTextPages } from "@/lib/pdf/extract-text";
+
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
@@ -17,11 +19,25 @@ export async function POST(request: Request) {
   const fileSizeBytes = file.size;
   const contentType = file.type || null;
 
-  return NextResponse.json({
-    ok: true,
-    fileName,
-    fileSizeBytes,
-    contentType,
-  });
+  try {
+    const bytes = await file.arrayBuffer();
+    const extractedPages = await extractPdfTextPages(bytes);
+
+    return NextResponse.json({
+      ok: true,
+      fileName,
+      fileSizeBytes,
+      contentType,
+      extractedPages,
+    });
+  } catch (e) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Failed to extract text from this PDF.",
+      },
+      { status: 400 },
+    );
+  }
 }
 
