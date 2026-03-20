@@ -20,6 +20,7 @@ export function LandingClient() {
     contentType: string | null;
     extractedPages?: { page: number; text: string }[];
     rentSnippets?: { page: number; quote: string }[];
+    depositSnippets?: { page: number; quote: string }[];
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -111,6 +112,7 @@ export function LandingClient() {
                       contentType: string | null;
                       extractedPages?: { page: number; text: string }[];
                       rentSnippets?: { page: number; quote: string }[];
+                      depositSnippets?: { page: number; quote: string }[];
                     };
                     setUploadReceipt(data);
                   } catch (e) {
@@ -150,6 +152,13 @@ export function LandingClient() {
                   Rent mentions found: {uploadReceipt.rentSnippets.length}. Example (page{" "}
                   {uploadReceipt.rentSnippets[0]?.page}):{" "}
                   <span className="font-medium">{uploadReceipt.rentSnippets[0]?.quote}</span>
+                </div>
+              ) : null}
+              {uploadReceipt.depositSnippets?.length ? (
+                <div className="mt-2 text-xs text-slate-700">
+                  Deposit mentions found: {uploadReceipt.depositSnippets.length}. Example (page{" "}
+                  {uploadReceipt.depositSnippets[0]?.page}):{" "}
+                  <span className="font-medium">{uploadReceipt.depositSnippets[0]?.quote}</span>
                 </div>
               ) : null}
             </div>

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { findRentSnippets } from "@/lib/analysis/rules";
+import { findDepositSnippets, findRentSnippets } from "@/lib/analysis/rules";
 import { getBysAiKey } from "@/lib/env/bys-ai-key";
 import { extractPdfTextPages } from "@/lib/pdf/extract-text";
 import { normalizeLeasePageText } from "@/lib/pdf/normalize";
@@ -49,6 +49,7 @@ export async function POST(request: Request) {
 
     const extractedPages = [{ page: 1, text: normalizedText }];
     const rentSnippets = findRentSnippets(extractedPages);
+    const depositSnippets = findDepositSnippets(extractedPages);
     const fileSizeBytes = Buffer.byteLength(normalizedText, "utf8");
 
     if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
@@ -59,6 +60,7 @@ export async function POST(request: Request) {
           pages: extractedPages.length,
           charsPerPage: extractedPages.map((p) => p.text.length),
           rentSnippets: rentSnippets.length,
+          depositSnippets: depositSnippets.length,
           hasBysAiKey: Boolean(getBysAiKey()),
         }),
       );
@@ -71,6 +73,7 @@ export async function POST(request: Request) {
       contentType: "text/plain",
       extractedPages,
       rentSnippets,
+      depositSnippets,
     });
   }
 
@@ -92,6 +95,7 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const extractedPages = await extractPdfTextPages(bytes);
     const rentSnippets = findRentSnippets(extractedPages);
+    const depositSnippets = findDepositSnippets(extractedPages);
 
     if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
       console.log(
@@ -101,6 +105,7 @@ export async function POST(request: Request) {
           pages: extractedPages.length,
           charsPerPage: extractedPages.map((p) => p.text.length),
           rentSnippets: rentSnippets.length,
+          depositSnippets: depositSnippets.length,
           hasBysAiKey: Boolean(getBysAiKey()),
         }),
       );
@@ -113,6 +118,7 @@ export async function POST(request: Request) {
       contentType,
       extractedPages,
       rentSnippets,
+      depositSnippets,
     });
   } catch {
     return NextResponse.json(
