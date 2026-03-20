@@ -1,10 +1,13 @@
+# Design/spec docs (local source of truth; do not commit)
 docs/
 
-# Local environment files (never commit secrets)
+# Local environment — never commit secrets
 .env
 .env.local
 .env.*
-# Allow only the non-secret example file(s)
+.envrc
+*.pem
+# Allow only non-secret example env files
 !/before-you-sign/.env.local.example
 !.env.local.example
 
