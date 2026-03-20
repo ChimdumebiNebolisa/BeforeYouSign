@@ -8,12 +8,18 @@ export function UploadLeaseCta() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const maybeAcceptFile = (file: File | null | undefined) => {
+  const handleFile = (file: File | null | undefined) => {
     if (!file) return;
     const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
-    if (!isPdf) return;
+    if (!isPdf) {
+      setErrorMessage("Please upload a PDF lease file.");
+      return;
+    }
+
     setSelectedFileName(file.name);
+    setErrorMessage(null);
   };
 
   return (
@@ -26,7 +32,7 @@ export function UploadLeaseCta() {
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0] ?? null;
-          maybeAcceptFile(file);
+          handleFile(file);
         }}
       />
 
@@ -62,7 +68,7 @@ export function UploadLeaseCta() {
           e.stopPropagation();
           setIsDragActive(false);
           const file = e.dataTransfer.files?.[0];
-          maybeAcceptFile(file);
+          handleFile(file);
         }}
       >
         <Button
@@ -80,6 +86,10 @@ export function UploadLeaseCta() {
           Or drag and drop a PDF lease here.
         </p>
       </div>
+
+      {errorMessage ? (
+        <p className="mt-3 text-sm font-medium text-red-600">{errorMessage}</p>
+      ) : null}
 
       {selectedFileName ? (
         <p className="mt-3 text-sm text-slate-700">
