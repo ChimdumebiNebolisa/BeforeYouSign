@@ -19,6 +19,7 @@ export function LandingClient() {
     fileSizeBytes: number;
     contentType: string | null;
     extractedPages?: { page: number; text: string }[];
+    rentSnippets?: { page: number; quote: string }[];
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -90,6 +91,7 @@ export function LandingClient() {
                       fileSizeBytes: number;
                       contentType: string | null;
                       extractedPages?: { page: number; text: string }[];
+                      rentSnippets?: { page: number; quote: string }[];
                     };
                     setUploadReceipt(data);
                   } catch (e) {
@@ -116,6 +118,13 @@ export function LandingClient() {
                 <div className="mt-2 text-xs text-slate-700">
                   Extracted {uploadReceipt.extractedPages.length} page(s). First page snippet:{" "}
                   {uploadReceipt.extractedPages[0]?.text.slice(0, 200) || "—"}
+                </div>
+              ) : null}
+              {uploadReceipt.rentSnippets?.length ? (
+                <div className="mt-2 text-xs text-slate-700">
+                  Rent mentions found: {uploadReceipt.rentSnippets.length}. Example (page{" "}
+                  {uploadReceipt.rentSnippets[0]?.page}):{" "}
+                  <span className="font-medium">{uploadReceipt.rentSnippets[0]?.quote}</span>
                 </div>
               ) : null}
             </div>

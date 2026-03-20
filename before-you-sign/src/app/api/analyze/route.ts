@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { findRentSnippets } from "@/lib/analysis/rules";
 import { extractPdfTextPages } from "@/lib/pdf/extract-text";
 
 export const runtime = "nodejs";
@@ -22,6 +23,7 @@ export async function POST(request: Request) {
   try {
     const bytes = await file.arrayBuffer();
     const extractedPages = await extractPdfTextPages(bytes);
+    const rentSnippets = findRentSnippets(extractedPages);
 
     if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
       console.log(
@@ -30,6 +32,7 @@ export async function POST(request: Request) {
           fileName,
           pages: extractedPages.length,
           charsPerPage: extractedPages.map((p) => p.text.length),
+          rentSnippets: rentSnippets.length,
         }),
       );
     }
@@ -40,6 +43,7 @@ export async function POST(request: Request) {
       fileSizeBytes,
       contentType,
       extractedPages,
+      rentSnippets,
     });
   } catch (e) {
     return NextResponse.json(
