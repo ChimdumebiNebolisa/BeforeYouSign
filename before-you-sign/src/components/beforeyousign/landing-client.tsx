@@ -13,6 +13,19 @@ type IntakeState =
 
 export function LandingClient() {
   const [intake, setIntake] = useState<IntakeState | null>(null);
+  const [uploadReceipt, setUploadReceipt] = useState<{
+    fileName: string;
+    fileSizeBytes: number;
+    contentType: string | null;
+  } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const resetIntakeUi = () => {
+    setUploadReceipt(null);
+    setIsSubmitting(false);
+    setErrorMessage(null);
+  };
 
   if (intake) {
     return (
@@ -39,19 +52,71 @@ export function LandingClient() {
             <Button
               variant="outline"
               className="rounded-full border-slate-200/70 bg-white/40 hover:bg-white/60"
-              onClick={() => setIntake(null)}
+              onClick={() => {
+                resetIntakeUi();
+                setIntake(null);
+              }}
             >
               Back to landing
             </Button>
             <Button
               className="rounded-full"
               onClick={() => {
-                // Next milestones will start extraction/analysis; for now we only prove routing into intake.
+                if (intake.kind !== "upload") return;
+
+                const run = async () => {
+                  try {
+                    setIsSubmitting(true);
+                    setErrorMessage(null);
+                    setUploadReceipt(null);
+
+                    const formData = new FormData();
+                    formData.append("file", intake.file, intake.file.name);
+
+                    const res = await fetch("/api/analyze", {
+                      method: "POST",
+                      body: formData,
+                    });
+
+                    if (!res.ok) {
+                      const text = await res.text();
+                      throw new Error(text || `Request failed with ${res.status}`);
+                    }
+
+                    const data = (await res.json()) as {
+                      fileName: string;
+                      fileSizeBytes: number;
+                      contentType: string | null;
+                    };
+                    setUploadReceipt(data);
+                  } catch (e) {
+                    setErrorMessage(e instanceof Error ? e.message : "Failed to send PDF to backend.");
+                  } finally {
+                    setIsSubmitting(false);
+                  }
+                };
+
+                void run();
               }}
+              disabled={intake.kind !== "upload" || isSubmitting}
             >
-              Continue to analysis
+              {isSubmitting ? "Sending PDF..." : "Continue to analysis"}
             </Button>
           </div>
+
+          {uploadReceipt ? (
+            <div className="mt-2 rounded-xl border border-slate-200/70 bg-white/60 p-3 text-sm text-slate-800">
+              Backend received: <span className="font-medium">{uploadReceipt.fileName}</span> (
+              {uploadReceipt.fileSizeBytes.toLocaleString()} bytes)
+              {uploadReceipt.contentType ? `, ${uploadReceipt.contentType}` : null}
+            </div>
+          ) : null}
+
+          {errorMessage ? (
+            <div className="mt-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              {errorMessage}
+            </div>
+          ) : null}
         </main>
       </div>
     );
@@ -70,16 +135,19 @@ export function LandingClient() {
 
           <UploadLeaseCta
             onStartUpload={(file) => {
+              resetIntakeUi();
               setIntake({ kind: "upload", file });
             }}
           />
           <SampleLeaseCta
             onStartSample={(text) => {
+              resetIntakeUi();
               setIntake({ kind: "sample", text });
             }}
           />
           <PasteTextDialog
             onStartPaste={(text) => {
+              resetIntakeUi();
               setIntake({ kind: "paste", text });
             }}
           />
