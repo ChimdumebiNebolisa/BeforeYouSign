@@ -3,10 +3,77 @@ import { NextResponse } from "next/server";
 import { findRentSnippets } from "@/lib/analysis/rules";
 import { getBysAiKey } from "@/lib/env/bys-ai-key";
 import { extractPdfTextPages } from "@/lib/pdf/extract-text";
+import { normalizeLeasePageText } from "@/lib/pdf/normalize";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  const headerContentType = request.headers.get("content-type") ?? "";
+
+  if (headerContentType.includes("application/json")) {
+    let parsed: unknown;
+    try {
+      parsed = await request.json();
+    } catch {
+      return NextResponse.json({ ok: false, error: "Invalid JSON body." }, { status: 400 });
+    }
+
+    if (!parsed || typeof parsed !== "object" || !("leaseText" in parsed)) {
+      return NextResponse.json(
+        { ok: false, error: "Missing leaseText in JSON body." },
+        { status: 400 },
+      );
+    }
+
+    const rawText = (parsed as { leaseText: unknown }).leaseText;
+    if (typeof rawText !== "string") {
+      return NextResponse.json(
+        { ok: false, error: "leaseText must be a string." },
+        { status: 400 },
+      );
+    }
+
+    const normalizedText = normalizeLeasePageText(rawText);
+    if (!normalizedText) {
+      return NextResponse.json(
+        { ok: false, error: "leaseText is empty after normalization." },
+        { status: 400 },
+      );
+    }
+
+    const fileNameField = (parsed as { fileName?: unknown }).fileName;
+    const fileName =
+      typeof fileNameField === "string" && fileNameField.trim().length > 0
+        ? fileNameField.trim()
+        : "pasted-lease.txt";
+
+    const extractedPages = [{ page: 1, text: normalizedText }];
+    const rentSnippets = findRentSnippets(extractedPages);
+    const fileSizeBytes = Buffer.byteLength(normalizedText, "utf8");
+
+    if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
+      console.log(
+        "[beforeyousign][text] normalized",
+        JSON.stringify({
+          fileName,
+          pages: extractedPages.length,
+          charsPerPage: extractedPages.map((p) => p.text.length),
+          rentSnippets: rentSnippets.length,
+          hasBysAiKey: Boolean(getBysAiKey()),
+        }),
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
+      fileName,
+      fileSizeBytes,
+      contentType: "text/plain",
+      extractedPages,
+      rentSnippets,
+    });
+  }
+
   const formData = await request.formData();
   const file = formData.get("file");
 
@@ -47,7 +114,7 @@ export async function POST(request: Request) {
       extractedPages,
       rentSnippets,
     });
-  } catch (e) {
+  } catch {
     return NextResponse.json(
       {
         ok: false,

@@ -65,25 +65,44 @@ export function LandingClient() {
             <Button
               className="rounded-full"
               onClick={() => {
-                if (intake.kind !== "upload") return;
-
                 const run = async () => {
                   try {
                     setIsSubmitting(true);
                     setErrorMessage(null);
                     setUploadReceipt(null);
 
-                    const formData = new FormData();
-                    formData.append("file", intake.file, intake.file.name);
-
-                    const res = await fetch("/api/analyze", {
-                      method: "POST",
-                      body: formData,
-                    });
+                    let res: Response;
+                    if (intake.kind === "upload") {
+                      const formData = new FormData();
+                      formData.append("file", intake.file, intake.file.name);
+                      res = await fetch("/api/analyze", {
+                        method: "POST",
+                        body: formData,
+                      });
+                    } else {
+                      res = await fetch("/api/analyze", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          leaseText: intake.text,
+                          fileName:
+                            intake.kind === "sample" ? "sample-lease.txt" : "pasted-lease.txt",
+                        }),
+                      });
+                    }
 
                     if (!res.ok) {
                       const text = await res.text();
-                      throw new Error(text || `Request failed with ${res.status}`);
+                      let message = text || `Request failed with ${res.status}`;
+                      try {
+                        const errJson = JSON.parse(text) as { error?: unknown };
+                        if (typeof errJson.error === "string" && errJson.error) {
+                          message = errJson.error;
+                        }
+                      } catch {
+                        // use raw body or status message
+                      }
+                      throw new Error(message);
                     }
 
                     const data = (await res.json()) as {
@@ -95,7 +114,9 @@ export function LandingClient() {
                     };
                     setUploadReceipt(data);
                   } catch (e) {
-                    setErrorMessage(e instanceof Error ? e.message : "Failed to send PDF to backend.");
+                    setErrorMessage(
+                      e instanceof Error ? e.message : "Failed to run analysis on the server.",
+                    );
                   } finally {
                     setIsSubmitting(false);
                   }
@@ -103,9 +124,13 @@ export function LandingClient() {
 
                 void run();
               }}
-              disabled={intake.kind !== "upload" || isSubmitting}
+              disabled={isSubmitting}
             >
-              {isSubmitting ? "Sending PDF..." : "Continue to analysis"}
+              {isSubmitting
+                ? intake.kind === "upload"
+                  ? "Sending PDF..."
+                  : "Analyzing text..."
+                : "Continue to analysis"}
             </Button>
           </div>
 
