@@ -5,8 +5,8 @@ import { LandingShell } from "@/components/beforeyousign/landing-shell";
 export default function Home() {
   return (
     <LandingShell>
-      <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-        <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+      <div className="flex flex-col flex-1 items-center justify-center font-sans">
+        <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between rounded-3xl border border-slate-200/60 bg-white/60 px-8 py-12 backdrop-blur shadow-sm sm:items-start">
           <Image
             className="dark:invert"
             src="/next.svg"
