@@ -13,7 +13,7 @@ Utilities: Tenant is responsible for electricity and gas.
 Maintenance: Tenant maintains cleanliness and minor repairs; Landlord maintains major structural repairs.
 Landlord entry: Landlord may enter with reasonable notice (generally 24 hours) for repairs or inspections.`;
 
-export function SampleLeaseCta() {
+export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string) => void }) {
   const [isOpen, setIsOpen] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
 
@@ -24,6 +24,7 @@ export function SampleLeaseCta() {
         className="mt-3 w-full rounded-full border-slate-200/70 bg-white/40 hover:bg-white/60"
         onClick={() => {
           setHasLoaded(true);
+          onStartSample(SAMPLE_LEASE_TEXT);
           setIsOpen(true);
         }}
       >

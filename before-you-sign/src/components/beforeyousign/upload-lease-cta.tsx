@@ -3,7 +3,7 @@
 import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export function UploadLeaseCta() {
+export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) => void }) {
   const fileInputId = useId();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
@@ -20,6 +20,7 @@ export function UploadLeaseCta() {
 
     setSelectedFileName(file.name);
     setErrorMessage(null);
+    onStartUpload(file);
   };
 
   return (

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export function PasteTextDialog() {
+export function PasteTextDialog({ onStartPaste }: { onStartPaste: (text: string) => void }) {
   const [isOpen, setIsOpen] = useState(false);
   const [pasted, setPasted] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -54,6 +54,7 @@ export function PasteTextDialog() {
                   const next = draft.trim();
                   setPasted(next.length ? next : null);
                   setIsOpen(false);
+                  if (next.length) onStartPaste(next);
                 }}
               >
                 Use Pasted Text
