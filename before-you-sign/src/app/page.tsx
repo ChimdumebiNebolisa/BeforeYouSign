@@ -1,5 +1,6 @@
 import { LandingShell } from "@/components/beforeyousign/landing-shell";
 import { UploadLeaseCta } from "@/components/beforeyousign/upload-lease-cta";
+import { SampleLeaseCta } from "@/components/beforeyousign/sample-lease-cta";
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
               Upload or paste your lease text to understand key terms before you sign.
             </p>
             <UploadLeaseCta />
+            <SampleLeaseCta />
           </div>
         </main>
       </div>
