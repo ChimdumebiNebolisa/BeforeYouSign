@@ -7,6 +7,14 @@ export function UploadLeaseCta() {
   const fileInputId = useId();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+  const [isDragActive, setIsDragActive] = useState(false);
+
+  const maybeAcceptFile = (file: File | null | undefined) => {
+    if (!file) return;
+    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    if (!isPdf) return;
+    setSelectedFileName(file.name);
+  };
 
   return (
     <div className="w-full">
@@ -18,18 +26,60 @@ export function UploadLeaseCta() {
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0] ?? null;
-          setSelectedFileName(file?.name ?? null);
+          maybeAcceptFile(file);
         }}
       />
 
-      <Button
-        className="mt-6 rounded-full"
-        onClick={() => {
-          fileInputRef.current?.click();
+      <div
+        className={[
+          "mt-6 w-full cursor-pointer rounded-2xl border px-5 py-6 text-center transition-colors",
+          "border-slate-200/70 bg-white/35 backdrop-blur",
+          isDragActive ? "border-slate-300 bg-white/60" : "hover:bg-white/45",
+        ].join(" ")}
+        role="button"
+        tabIndex={0}
+        onClick={() => fileInputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click();
+        }}
+        onDragEnter={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDragActive(true);
+        }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDragActive(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDragActive(false);
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDragActive(false);
+          const file = e.dataTransfer.files?.[0];
+          maybeAcceptFile(file);
         }}
       >
-        Upload Lease
-      </Button>
+        <Button
+          type="button"
+          className="rounded-full"
+          onClick={(e) => {
+            e.stopPropagation();
+            fileInputRef.current?.click();
+          }}
+        >
+          Upload Lease
+        </Button>
+
+        <p className="mt-2 text-xs text-slate-600">
+          Or drag and drop a PDF lease here.
+        </p>
+      </div>
 
       {selectedFileName ? (
         <p className="mt-3 text-sm text-slate-700">
