@@ -22,7 +22,10 @@ export function SampleLeaseCta() {
       <Button
         variant="outline"
         className="mt-3 w-full rounded-full border-slate-200/70 bg-white/40 hover:bg-white/60"
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          setHasLoaded(true);
+          setIsOpen(true);
+        }}
       >
         Try Sample Lease
       </Button>
