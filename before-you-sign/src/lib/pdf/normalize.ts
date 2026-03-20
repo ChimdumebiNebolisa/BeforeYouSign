@@ -4,6 +4,13 @@ export function normalizeLeasePageText(raw: string): string {
   // Non-breaking spaces often appear in PDF text runs.
   text = text.replace(/\u00a0/g, " ");
 
+  // Hyphenation from line wraps: "some-\nthing" -> "something"
+  text = text.replace(/-\n/g, "");
+
+  // Hard wraps mid-word/sentence (common in PDF text extraction): join when it looks like a continuation.
+  // Conservative: lowercase letter at end of line + lowercase letter at start of next line.
+  text = text.replace(/(?<=[a-z])\n(?=[a-z])/g, " ");
+
   // Collapse horizontal whitespace (excluding newlines).
   text = text.replace(/[ \t\f\v]+/g, " ");
 
