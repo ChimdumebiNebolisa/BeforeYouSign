@@ -23,6 +23,17 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const extractedPages = await extractPdfTextPages(bytes);
 
+    if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
+      console.log(
+        "[beforeyousign][pdf] extracted",
+        JSON.stringify({
+          fileName,
+          pages: extractedPages.length,
+          charsPerPage: extractedPages.map((p) => p.text.length),
+        }),
+      );
+    }
+
     return NextResponse.json({
       ok: true,
       fileName,
