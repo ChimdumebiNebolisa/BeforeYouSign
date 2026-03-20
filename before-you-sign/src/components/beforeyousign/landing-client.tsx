@@ -13,6 +13,7 @@ type IntakeState =
 
 export function LandingClient() {
   const [intake, setIntake] = useState<IntakeState | null>(null);
+  const [pasteOpenNonce, setPasteOpenNonce] = useState(0);
   const [uploadReceipt, setUploadReceipt] = useState<{
     fileName: string;
     fileSizeBytes: number;
@@ -123,6 +124,21 @@ export function LandingClient() {
           {errorMessage ? (
             <div className="mt-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
               {errorMessage}
+              {intake.kind === "upload" ? (
+                <div className="mt-3">
+                  <Button
+                    variant="outline"
+                    className="rounded-full border-red-200 bg-white/70 hover:bg-white"
+                    onClick={() => {
+                      resetIntakeUi();
+                      setIntake(null);
+                      setPasteOpenNonce((x) => x + 1);
+                    }}
+                  >
+                    Paste Lease Text Instead
+                  </Button>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </main>
@@ -154,6 +170,7 @@ export function LandingClient() {
             }}
           />
           <PasteTextDialog
+            openRequestVersion={pasteOpenNonce}
             onStartPaste={(text) => {
               resetIntakeUi();
               setIntake({ kind: "paste", text });

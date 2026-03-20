@@ -1,12 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export function PasteTextDialog({ onStartPaste }: { onStartPaste: (text: string) => void }) {
+export function PasteTextDialog({
+  onStartPaste,
+  openRequestVersion = 0,
+}: {
+  onStartPaste: (text: string) => void;
+  openRequestVersion?: number;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [pasted, setPasted] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
+
+  useEffect(() => {
+    if (openRequestVersion <= 0) return;
+    setIsOpen(true);
+  }, [openRequestVersion]);
 
   return (
     <>
