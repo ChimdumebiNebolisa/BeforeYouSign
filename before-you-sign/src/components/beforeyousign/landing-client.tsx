@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { UploadLeaseCta } from "@/components/beforeyousign/upload-lease-cta";
 import { SampleLeaseCta } from "@/components/beforeyousign/sample-lease-cta";
@@ -20,6 +20,85 @@ function riskBadgeClasses(level: RiskLevel): string {
     case "high":
       return "border-red-200/80 bg-red-50 text-red-950";
   }
+}
+
+const ANALYSIS_STEP_LABELS_UPLOAD = [
+  "Extracting lease text",
+  "Checking key terms",
+  "Identifying potential risks",
+  "Generating plain-English report",
+] as const;
+
+const ANALYSIS_STEP_LABELS_TEXT = [
+  "Reading lease text",
+  "Checking key terms",
+  "Identifying potential risks",
+  "Generating plain-English report",
+] as const;
+
+function AnalysisProgressSteps({
+  active,
+  variant,
+}: {
+  active: boolean;
+  variant: "upload" | "text";
+}) {
+  const labels = variant === "upload" ? ANALYSIS_STEP_LABELS_UPLOAD : ANALYSIS_STEP_LABELS_TEXT;
+  const [stepIndex, setStepIndex] = useState(0);
+
+  useEffect(() => {
+    if (!active) {
+      setStepIndex(0);
+      return;
+    }
+    setStepIndex(0);
+    const id = window.setInterval(() => {
+      setStepIndex((i) => Math.min(i + 1, labels.length - 1));
+    }, 1600);
+    return () => window.clearInterval(id);
+  }, [active, labels.length]);
+
+  if (!active) return null;
+
+  return (
+    <div
+      className="mt-4 rounded-xl border border-slate-200/70 bg-white/50 p-3 text-sm text-slate-800"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Progress</p>
+      <ol className="mt-2 space-y-2">
+        {labels.map((label, i) => {
+          const done = i < stepIndex;
+          const current = i === stepIndex;
+          return (
+            <li key={label} className="flex items-start gap-2">
+              <span
+                className={[
+                  "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-semibold",
+                  done
+                    ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                    : current
+                      ? "border-slate-400 bg-white text-slate-900"
+                      : "border-slate-200/80 bg-white/40 text-slate-400",
+                ].join(" ")}
+                aria-hidden="true"
+              >
+                {done ? "✓" : i + 1}
+              </span>
+              <span
+                className={
+                  current ? "font-medium text-slate-900" : done ? "text-slate-700" : "text-slate-400"
+                }
+              >
+                {label}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
 }
 
 type IntakeState =
@@ -184,6 +263,11 @@ export function LandingClient() {
                 : "Continue to analysis"}
             </Button>
           </div>
+
+          <AnalysisProgressSteps
+            active={isSubmitting}
+            variant={intake.kind === "upload" ? "upload" : "text"}
+          />
 
           {uploadReceipt ? (
             <div className="mt-2 rounded-xl border border-slate-200/70 bg-white/60 p-3 text-sm text-slate-800">
