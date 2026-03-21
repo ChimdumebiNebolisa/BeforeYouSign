@@ -301,7 +301,7 @@ export function LeaseReportView({
                 <div key={`${row.label}-${i}`} className="rounded-md bg-[#ffffff] p-3 shadow-sm">
                   <p className="text-[13px] font-semibold text-[#191c1e]">{row.label}</p>
                   <p className="mt-0.5 text-[13px] leading-snug text-[#444651]">{row.value}</p>
-                  {row.evidence?.length ? (
+                  {row.evidence?.[0] ? (
                     <p className="mt-1.5 text-[11px] text-[#757682]">
                       <span className="font-medium text-[#191c1e]">p. {row.evidence[0].page}: </span>
                       <q>{trimQuote(row.evidence[0].quote, 140)}</q>
