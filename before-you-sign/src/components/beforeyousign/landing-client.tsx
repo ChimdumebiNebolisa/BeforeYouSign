@@ -22,6 +22,7 @@ export function LandingClient() {
     rentSnippets?: { page: number; quote: string }[];
     depositSnippets?: { page: number; quote: string }[];
     feeSnippets?: { page: number; quote: string }[];
+    noticeSnippets?: { page: number; quote: string }[];
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -115,6 +116,7 @@ export function LandingClient() {
                       rentSnippets?: { page: number; quote: string }[];
                       depositSnippets?: { page: number; quote: string }[];
                       feeSnippets?: { page: number; quote: string }[];
+                      noticeSnippets?: { page: number; quote: string }[];
                     };
                     setUploadReceipt(data);
                   } catch (e) {
@@ -168,6 +170,13 @@ export function LandingClient() {
                   Fee mentions found: {uploadReceipt.feeSnippets.length}. Example (page{" "}
                   {uploadReceipt.feeSnippets[0]?.page}):{" "}
                   <span className="font-medium">{uploadReceipt.feeSnippets[0]?.quote}</span>
+                </div>
+              ) : null}
+              {uploadReceipt.noticeSnippets?.length ? (
+                <div className="mt-2 text-xs text-slate-700">
+                  Notice language found: {uploadReceipt.noticeSnippets.length}. Example (page{" "}
+                  {uploadReceipt.noticeSnippets[0]?.page}):{" "}
+                  <span className="font-medium">{uploadReceipt.noticeSnippets[0]?.quote}</span>
                 </div>
               ) : null}
             </div>

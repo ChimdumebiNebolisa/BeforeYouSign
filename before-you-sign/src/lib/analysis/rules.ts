@@ -74,6 +74,34 @@ export function findFeeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   return dedupeSnippets(matches);
 }
 
+export function findNoticeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
+  const patterns: RegExp[] = [
+    /\b\d{1,3}\s*(?:calendar\s+)?days?'?\s+(?:written\s+)?notice\b[^.\n]{0,120}/gi,
+    /\bwritten\s+notice\b[^.\n]{0,160}\b(?:at\s+least\s+)?\d{1,3}\s*days?\b/gi,
+    /\bnotice\s+period\b[^.\n]{0,160}/gi,
+    /\b(?:terminate|termination)\b[^.\n]{0,120}\b\d{1,3}\s*days?'?\s+(?:written\s+)?notice\b/gi,
+  ];
+
+  const matches: RentSnippet[] = [];
+
+  for (const page of pages) {
+    const text = page.text;
+    if (!text) continue;
+
+    for (const pattern of patterns) {
+      pattern.lastIndex = 0;
+      let match: RegExpExecArray | null;
+      while ((match = pattern.exec(text)) !== null) {
+        const quote = match[0].replace(/\s+/g, " ").trim();
+        if (quote.length < 15) continue;
+        matches.push({ page: page.page, quote });
+      }
+    }
+  }
+
+  return dedupeSnippets(matches);
+}
+
 export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\brent\b[^.\n]{0,200}\$[\d,]+(?:\.\d{2})?\b/gi,
