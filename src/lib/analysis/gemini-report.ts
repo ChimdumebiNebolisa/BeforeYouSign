@@ -8,8 +8,7 @@ import {
   tryParseModelJson,
 } from "@/lib/analysis/schema";
 import type { DeterministicLeaseRisk } from "@/lib/analysis/scoring";
-
-const MODEL_NAME = "gemini-2.0-flash";
+import { getBysGeminiModel } from "@/lib/env/bys-gemini-model";
 
 export async function runStructuredLeaseAnalysis(input: {
   apiKey: string;
@@ -21,7 +20,7 @@ export async function runStructuredLeaseAnalysis(input: {
 > {
   const genAI = new GoogleGenerativeAI(input.apiKey);
   const model = genAI.getGenerativeModel({
-    model: MODEL_NAME,
+    model: getBysGeminiModel(),
     generationConfig: {
       responseMimeType: "application/json",
       temperature: 0.4,

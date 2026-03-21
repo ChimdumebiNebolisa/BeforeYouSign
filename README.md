@@ -10,13 +10,13 @@ The Next.js app lives at the **repository root** (`BeforeYouSign/`). Run all `np
 npm install
 ```
 
-2. Configure your AI key in `.env.local` (server-side only). Copy the example and set `BYS_AI_KEY`:
+2. Configure your AI key in `.env.local` (server-side only). Copy the example and set `BYS_AI_KEY`. Optionally set `BYS_GEMINI_MODEL` (defaults to `gemini-2.5-flash`).
 
 ```bash
 copy .env.local.example .env.local
 ```
 
-Do not use `NEXT_PUBLIC_` for this value — it must never be exposed to the client.
+Do not use `NEXT_PUBLIC_` for these values — they must never be exposed to the client.
 
 3. Start the dev server:
 
