@@ -4,6 +4,7 @@ import {
   findDepositSnippets,
   findFeeSnippets,
   findNoticeSnippets,
+  findRenewalSnippets,
   findRentSnippets,
 } from "@/lib/analysis/rules";
 import { getBysAiKey } from "@/lib/env/bys-ai-key";
@@ -57,6 +58,7 @@ export async function POST(request: Request) {
     const depositSnippets = findDepositSnippets(extractedPages);
     const feeSnippets = findFeeSnippets(extractedPages);
     const noticeSnippets = findNoticeSnippets(extractedPages);
+    const renewalSnippets = findRenewalSnippets(extractedPages);
     const fileSizeBytes = Buffer.byteLength(normalizedText, "utf8");
 
     if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
@@ -70,6 +72,7 @@ export async function POST(request: Request) {
           depositSnippets: depositSnippets.length,
           feeSnippets: feeSnippets.length,
           noticeSnippets: noticeSnippets.length,
+          renewalSnippets: renewalSnippets.length,
           hasBysAiKey: Boolean(getBysAiKey()),
         }),
       );
@@ -85,6 +88,7 @@ export async function POST(request: Request) {
       depositSnippets,
       feeSnippets,
       noticeSnippets,
+      renewalSnippets,
     });
   }
 
@@ -109,6 +113,7 @@ export async function POST(request: Request) {
     const depositSnippets = findDepositSnippets(extractedPages);
     const feeSnippets = findFeeSnippets(extractedPages);
     const noticeSnippets = findNoticeSnippets(extractedPages);
+    const renewalSnippets = findRenewalSnippets(extractedPages);
 
     if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
       console.log(
@@ -121,6 +126,7 @@ export async function POST(request: Request) {
           depositSnippets: depositSnippets.length,
           feeSnippets: feeSnippets.length,
           noticeSnippets: noticeSnippets.length,
+          renewalSnippets: renewalSnippets.length,
           hasBysAiKey: Boolean(getBysAiKey()),
         }),
       );
@@ -136,6 +142,7 @@ export async function POST(request: Request) {
       depositSnippets,
       feeSnippets,
       noticeSnippets,
+      renewalSnippets,
     });
   } catch {
     return NextResponse.json(

@@ -23,6 +23,7 @@ export function LandingClient() {
     depositSnippets?: { page: number; quote: string }[];
     feeSnippets?: { page: number; quote: string }[];
     noticeSnippets?: { page: number; quote: string }[];
+    renewalSnippets?: { page: number; quote: string }[];
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -117,6 +118,7 @@ export function LandingClient() {
                       depositSnippets?: { page: number; quote: string }[];
                       feeSnippets?: { page: number; quote: string }[];
                       noticeSnippets?: { page: number; quote: string }[];
+                      renewalSnippets?: { page: number; quote: string }[];
                     };
                     setUploadReceipt(data);
                   } catch (e) {
@@ -177,6 +179,13 @@ export function LandingClient() {
                   Notice language found: {uploadReceipt.noticeSnippets.length}. Example (page{" "}
                   {uploadReceipt.noticeSnippets[0]?.page}):{" "}
                   <span className="font-medium">{uploadReceipt.noticeSnippets[0]?.quote}</span>
+                </div>
+              ) : null}
+              {uploadReceipt.renewalSnippets?.length ? (
+                <div className="mt-2 text-xs text-slate-700">
+                  Renewal language found: {uploadReceipt.renewalSnippets.length}. Example (page{" "}
+                  {uploadReceipt.renewalSnippets[0]?.page}):{" "}
+                  <span className="font-medium">{uploadReceipt.renewalSnippets[0]?.quote}</span>
                 </div>
               ) : null}
             </div>

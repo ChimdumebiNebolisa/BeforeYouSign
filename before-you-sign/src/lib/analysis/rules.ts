@@ -102,6 +102,34 @@ export function findNoticeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   return dedupeSnippets(matches);
 }
 
+export function findRenewalSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
+  const patterns: RegExp[] = [
+    /\bautomatic\s+renewal\b[^.\n]{0,200}/gi,
+    /\bmonth-?to-?month\b[^.\n]{0,200}/gi,
+    /\brenew(?:s|al|ed)?\b[^.\n]{0,200}\b(?:term|lease|agreement)\b/gi,
+    /\b(?:extends?|extension)\b[^.\n]{0,160}\b(?:automatically|unless)\b/gi,
+  ];
+
+  const matches: RentSnippet[] = [];
+
+  for (const page of pages) {
+    const text = page.text;
+    if (!text) continue;
+
+    for (const pattern of patterns) {
+      pattern.lastIndex = 0;
+      let match: RegExpExecArray | null;
+      while ((match = pattern.exec(text)) !== null) {
+        const quote = match[0].replace(/\s+/g, " ").trim();
+        if (quote.length < 12) continue;
+        matches.push({ page: page.page, quote });
+      }
+    }
+  }
+
+  return dedupeSnippets(matches);
+}
+
 export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\brent\b[^.\n]{0,200}\$[\d,]+(?:\.\d{2})?\b/gi,
