@@ -321,6 +321,49 @@ export function LandingClient() {
                       </p>
                     </div>
                   </section>
+                  <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
+                    <h3 className="text-sm font-semibold text-slate-900">Potential red flags</h3>
+                    {uploadReceipt.report.potentialRedFlags.length ? (
+                      <ul className="mt-2 space-y-4">
+                        {uploadReceipt.report.potentialRedFlags.map((f) => (
+                          <li
+                            key={f.id}
+                            className="rounded-lg border border-slate-200/60 bg-white/40 p-3 text-slate-800"
+                          >
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-sm font-semibold text-slate-900">{f.title}</span>
+                              <span className="rounded-full border border-slate-200/80 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-700">
+                                {f.severity}
+                              </span>
+                              <span className="text-xs text-slate-500">{f.category}</span>
+                            </div>
+                            <p className="mt-2 text-sm leading-relaxed text-slate-700">{f.explanation}</p>
+                            <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                              <span className="font-medium text-slate-800">Why it matters: </span>
+                              {f.whyItMatters}
+                            </p>
+                            {f.evidence.length ? (
+                              <div className="mt-2 border-t border-slate-200/50 pt-2">
+                                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                                  From your lease
+                                </p>
+                                <ul className="mt-1 space-y-1 text-sm text-slate-700">
+                                  {f.evidence.map((ev, i) => (
+                                    <li key={`${f.id}-ev-${i}`}>
+                                      <span className="font-medium text-slate-800">p. {ev.page}: </span>
+                                      <q className="text-slate-700">{ev.quote}</q>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ) : null}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
+                    )}
+                  </section>
                   {uploadReceipt.report.questionsToAsk.length ? (
                     <div>
                       <p className="font-medium text-slate-900">Questions to ask</p>
