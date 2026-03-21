@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import {
   findDepositSnippets,
   findFeeSnippets,
+  findMaintenanceSnippets,
   findNoticeSnippets,
   findRenewalSnippets,
   findRentSnippets,
@@ -59,6 +60,7 @@ export async function POST(request: Request) {
     const feeSnippets = findFeeSnippets(extractedPages);
     const noticeSnippets = findNoticeSnippets(extractedPages);
     const renewalSnippets = findRenewalSnippets(extractedPages);
+    const maintenanceSnippets = findMaintenanceSnippets(extractedPages);
     const fileSizeBytes = Buffer.byteLength(normalizedText, "utf8");
 
     if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
@@ -73,6 +75,7 @@ export async function POST(request: Request) {
           feeSnippets: feeSnippets.length,
           noticeSnippets: noticeSnippets.length,
           renewalSnippets: renewalSnippets.length,
+          maintenanceSnippets: maintenanceSnippets.length,
           hasBysAiKey: Boolean(getBysAiKey()),
         }),
       );
@@ -89,6 +92,7 @@ export async function POST(request: Request) {
       feeSnippets,
       noticeSnippets,
       renewalSnippets,
+      maintenanceSnippets,
     });
   }
 
@@ -114,6 +118,7 @@ export async function POST(request: Request) {
     const feeSnippets = findFeeSnippets(extractedPages);
     const noticeSnippets = findNoticeSnippets(extractedPages);
     const renewalSnippets = findRenewalSnippets(extractedPages);
+    const maintenanceSnippets = findMaintenanceSnippets(extractedPages);
 
     if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
       console.log(
@@ -127,6 +132,7 @@ export async function POST(request: Request) {
           feeSnippets: feeSnippets.length,
           noticeSnippets: noticeSnippets.length,
           renewalSnippets: renewalSnippets.length,
+          maintenanceSnippets: maintenanceSnippets.length,
           hasBysAiKey: Boolean(getBysAiKey()),
         }),
       );
@@ -143,6 +149,7 @@ export async function POST(request: Request) {
       feeSnippets,
       noticeSnippets,
       renewalSnippets,
+      maintenanceSnippets,
     });
   } catch {
     return NextResponse.json(

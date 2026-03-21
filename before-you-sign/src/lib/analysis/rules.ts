@@ -130,6 +130,34 @@ export function findRenewalSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   return dedupeSnippets(matches);
 }
 
+export function findMaintenanceSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
+  const patterns: RegExp[] = [
+    /\btenant\b[^.\n]{0,120}\b(?:maintain|maintenance|repair|clean|cleanliness)\b[^.\n]{0,120}/gi,
+    /\blandlord\b[^.\n]{0,120}\b(?:maintain|maintenance|repair|structural)\b[^.\n]{0,120}/gi,
+    /\b(?:minor|major)\s+repairs?\b[^.\n]{0,160}/gi,
+    /\bmaintenance\s+and\s+repairs?\b[^.\n]{0,160}/gi,
+  ];
+
+  const matches: RentSnippet[] = [];
+
+  for (const page of pages) {
+    const text = page.text;
+    if (!text) continue;
+
+    for (const pattern of patterns) {
+      pattern.lastIndex = 0;
+      let match: RegExpExecArray | null;
+      while ((match = pattern.exec(text)) !== null) {
+        const quote = match[0].replace(/\s+/g, " ").trim();
+        if (quote.length < 18) continue;
+        matches.push({ page: page.page, quote });
+      }
+    }
+  }
+
+  return dedupeSnippets(matches);
+}
+
 export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\brent\b[^.\n]{0,200}\$[\d,]+(?:\.\d{2})?\b/gi,
