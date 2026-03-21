@@ -5,6 +5,49 @@ export type RentSnippet = {
   quote: string;
 };
 
+export type RuleBasedFindingCategory =
+  | "rent"
+  | "deposit"
+  | "fees"
+  | "notice"
+  | "renewal"
+  | "maintenance"
+  | "utilities";
+
+export type RuleBasedFinding = {
+  category: RuleBasedFindingCategory;
+  page: number;
+  quote: string;
+};
+
+export function buildRuleBasedFindings(groups: {
+  rent: RentSnippet[];
+  deposit: RentSnippet[];
+  fees: RentSnippet[];
+  notice: RentSnippet[];
+  renewal: RentSnippet[];
+  maintenance: RentSnippet[];
+  utilities: RentSnippet[];
+}): RuleBasedFinding[] {
+  const out: RuleBasedFinding[] = [];
+
+  const append = (category: RuleBasedFindingCategory, items: RentSnippet[]) => {
+    for (const item of items) {
+      out.push({ category, page: item.page, quote: item.quote });
+    }
+  };
+
+  append("rent", groups.rent);
+  append("deposit", groups.deposit);
+  append("fees", groups.fees);
+  append("notice", groups.notice);
+  append("renewal", groups.renewal);
+  append("maintenance", groups.maintenance);
+  append("utilities", groups.utilities);
+
+  return out;
+}
+
 function dedupeSnippets(items: RentSnippet[]): RentSnippet[] {
   const seen = new Set<string>();
   const out: RentSnippet[] = [];

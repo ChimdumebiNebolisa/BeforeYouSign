@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import {
+  buildRuleBasedFindings,
   findDepositSnippets,
   findFeeSnippets,
   findMaintenanceSnippets,
@@ -63,6 +64,15 @@ export async function POST(request: Request) {
     const renewalSnippets = findRenewalSnippets(extractedPages);
     const maintenanceSnippets = findMaintenanceSnippets(extractedPages);
     const utilitiesSnippets = findUtilitiesSnippets(extractedPages);
+    const ruleBasedFindings = buildRuleBasedFindings({
+      rent: rentSnippets,
+      deposit: depositSnippets,
+      fees: feeSnippets,
+      notice: noticeSnippets,
+      renewal: renewalSnippets,
+      maintenance: maintenanceSnippets,
+      utilities: utilitiesSnippets,
+    });
     const fileSizeBytes = Buffer.byteLength(normalizedText, "utf8");
 
     if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
@@ -79,6 +89,7 @@ export async function POST(request: Request) {
           renewalSnippets: renewalSnippets.length,
           maintenanceSnippets: maintenanceSnippets.length,
           utilitiesSnippets: utilitiesSnippets.length,
+          ruleBasedFindings: ruleBasedFindings.length,
           hasBysAiKey: Boolean(getBysAiKey()),
         }),
       );
@@ -97,6 +108,7 @@ export async function POST(request: Request) {
       renewalSnippets,
       maintenanceSnippets,
       utilitiesSnippets,
+      ruleBasedFindings,
     });
   }
 
@@ -124,6 +136,15 @@ export async function POST(request: Request) {
     const renewalSnippets = findRenewalSnippets(extractedPages);
     const maintenanceSnippets = findMaintenanceSnippets(extractedPages);
     const utilitiesSnippets = findUtilitiesSnippets(extractedPages);
+    const ruleBasedFindings = buildRuleBasedFindings({
+      rent: rentSnippets,
+      deposit: depositSnippets,
+      fees: feeSnippets,
+      notice: noticeSnippets,
+      renewal: renewalSnippets,
+      maintenance: maintenanceSnippets,
+      utilities: utilitiesSnippets,
+    });
 
     if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
       console.log(
@@ -139,6 +160,7 @@ export async function POST(request: Request) {
           renewalSnippets: renewalSnippets.length,
           maintenanceSnippets: maintenanceSnippets.length,
           utilitiesSnippets: utilitiesSnippets.length,
+          ruleBasedFindings: ruleBasedFindings.length,
           hasBysAiKey: Boolean(getBysAiKey()),
         }),
       );
@@ -157,6 +179,7 @@ export async function POST(request: Request) {
       renewalSnippets,
       maintenanceSnippets,
       utilitiesSnippets,
+      ruleBasedFindings,
     });
   } catch {
     return NextResponse.json(

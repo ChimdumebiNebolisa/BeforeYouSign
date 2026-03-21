@@ -26,6 +26,7 @@ export function LandingClient() {
     renewalSnippets?: { page: number; quote: string }[];
     maintenanceSnippets?: { page: number; quote: string }[];
     utilitiesSnippets?: { page: number; quote: string }[];
+    ruleBasedFindings?: { category: string; page: number; quote: string }[];
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -123,6 +124,7 @@ export function LandingClient() {
                       renewalSnippets?: { page: number; quote: string }[];
                       maintenanceSnippets?: { page: number; quote: string }[];
                       utilitiesSnippets?: { page: number; quote: string }[];
+                      ruleBasedFindings?: { category: string; page: number; quote: string }[];
                     };
                     setUploadReceipt(data);
                   } catch (e) {
@@ -204,6 +206,20 @@ export function LandingClient() {
                   Utilities language found: {uploadReceipt.utilitiesSnippets.length}. Example (page{" "}
                   {uploadReceipt.utilitiesSnippets[0]?.page}):{" "}
                   <span className="font-medium">{uploadReceipt.utilitiesSnippets[0]?.quote}</span>
+                </div>
+              ) : null}
+              {uploadReceipt.ruleBasedFindings?.length ? (
+                <div className="mt-2 text-xs text-slate-700">
+                  Rule-based findings: {uploadReceipt.ruleBasedFindings.length} (page + quote). First:{" "}
+                  <span className="font-medium">
+                    [{uploadReceipt.ruleBasedFindings[0]?.category}] p.
+                    {uploadReceipt.ruleBasedFindings[0]?.page}:{" "}
+                    {uploadReceipt.ruleBasedFindings[0]?.quote.slice(0, 120)}
+                    {uploadReceipt.ruleBasedFindings[0] &&
+                    uploadReceipt.ruleBasedFindings[0].quote.length > 120
+                      ? "…"
+                      : ""}
+                  </span>
                 </div>
               ) : null}
             </div>
