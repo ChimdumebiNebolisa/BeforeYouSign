@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { UploadLeaseCta } from "@/components/beforeyousign/upload-lease-cta";
 import { SampleLeaseCta } from "@/components/beforeyousign/sample-lease-cta";
@@ -138,6 +138,83 @@ export function LandingClient() {
     setErrorMessage(null);
   };
 
+  const runLeaseAnalysis = useCallback(async () => {
+    if (!intake) return;
+    try {
+      setIsSubmitting(true);
+      setErrorMessage(null);
+      setUploadReceipt(null);
+
+      let res: Response;
+      if (intake.kind === "upload") {
+        const formData = new FormData();
+        formData.append("file", intake.file, intake.file.name);
+        res = await fetch("/api/analyze", {
+          method: "POST",
+          body: formData,
+        });
+      } else {
+        res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            leaseText: intake.text,
+            fileName: intake.kind === "sample" ? "sample-lease.txt" : "pasted-lease.txt",
+          }),
+        });
+      }
+
+      if (!res.ok) {
+        const text = await res.text();
+        let message = text || `Request failed with ${res.status}`;
+        try {
+          const errJson = JSON.parse(text) as { error?: unknown };
+          if (typeof errJson.error === "string" && errJson.error) {
+            message = errJson.error;
+          }
+        } catch {
+          // use raw body or status message
+        }
+        throw new Error(message);
+      }
+
+      const data = (await res.json()) as {
+        fileName: string;
+        fileSizeBytes: number;
+        contentType: string | null;
+        extractedPages?: { page: number; text: string }[];
+        rentSnippets?: { page: number; quote: string }[];
+        depositSnippets?: { page: number; quote: string }[];
+        feeSnippets?: { page: number; quote: string }[];
+        noticeSnippets?: { page: number; quote: string }[];
+        renewalSnippets?: { page: number; quote: string }[];
+        maintenanceSnippets?: { page: number; quote: string }[];
+        utilitiesSnippets?: { page: number; quote: string }[];
+        ruleBasedFindings?: { category: string; page: number; quote: string }[];
+        unclearLeasePhrases?: { page: number; quote: string }[];
+        deterministicRiskScore?: number;
+        deterministicRiskBand?: "low" | "medium" | "high";
+        deterministicRiskReasons?: string[];
+        report?: unknown;
+        reportError?: string | null;
+      };
+
+      const report =
+        data.report === undefined || data.report === null
+          ? null
+          : parseBeforeYouSignReportJson(data.report);
+      setUploadReceipt({
+        ...data,
+        report,
+        reportError: typeof data.reportError === "string" ? data.reportError : null,
+      });
+    } catch (e) {
+      setErrorMessage(e instanceof Error ? e.message : "Failed to run analysis on the server.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [intake]);
+
   if (intake) {
     return (
       <div className="flex flex-col flex-1 items-center justify-center font-sans">
@@ -172,88 +249,7 @@ export function LandingClient() {
             </Button>
             <Button
               className="rounded-full"
-              onClick={() => {
-                const run = async () => {
-                  try {
-                    setIsSubmitting(true);
-                    setErrorMessage(null);
-                    setUploadReceipt(null);
-
-                    let res: Response;
-                    if (intake.kind === "upload") {
-                      const formData = new FormData();
-                      formData.append("file", intake.file, intake.file.name);
-                      res = await fetch("/api/analyze", {
-                        method: "POST",
-                        body: formData,
-                      });
-                    } else {
-                      res = await fetch("/api/analyze", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          leaseText: intake.text,
-                          fileName:
-                            intake.kind === "sample" ? "sample-lease.txt" : "pasted-lease.txt",
-                        }),
-                      });
-                    }
-
-                    if (!res.ok) {
-                      const text = await res.text();
-                      let message = text || `Request failed with ${res.status}`;
-                      try {
-                        const errJson = JSON.parse(text) as { error?: unknown };
-                        if (typeof errJson.error === "string" && errJson.error) {
-                          message = errJson.error;
-                        }
-                      } catch {
-                        // use raw body or status message
-                      }
-                      throw new Error(message);
-                    }
-
-                    const data = (await res.json()) as {
-                      fileName: string;
-                      fileSizeBytes: number;
-                      contentType: string | null;
-                      extractedPages?: { page: number; text: string }[];
-                      rentSnippets?: { page: number; quote: string }[];
-                      depositSnippets?: { page: number; quote: string }[];
-                      feeSnippets?: { page: number; quote: string }[];
-                      noticeSnippets?: { page: number; quote: string }[];
-                      renewalSnippets?: { page: number; quote: string }[];
-                      maintenanceSnippets?: { page: number; quote: string }[];
-                      utilitiesSnippets?: { page: number; quote: string }[];
-                      ruleBasedFindings?: { category: string; page: number; quote: string }[];
-                      unclearLeasePhrases?: { page: number; quote: string }[];
-                      deterministicRiskScore?: number;
-                      deterministicRiskBand?: "low" | "medium" | "high";
-                      deterministicRiskReasons?: string[];
-                      report?: unknown;
-                      reportError?: string | null;
-                    };
-
-                    const report =
-                      data.report === undefined || data.report === null
-                        ? null
-                        : parseBeforeYouSignReportJson(data.report);
-                    setUploadReceipt({
-                      ...data,
-                      report,
-                      reportError: typeof data.reportError === "string" ? data.reportError : null,
-                    });
-                  } catch (e) {
-                    setErrorMessage(
-                      e instanceof Error ? e.message : "Failed to run analysis on the server.",
-                    );
-                  } finally {
-                    setIsSubmitting(false);
-                  }
-                };
-
-                void run();
-              }}
+              onClick={() => void runLeaseAnalysis()}
               disabled={isSubmitting}
             >
               {isSubmitting
@@ -562,13 +558,26 @@ export function LandingClient() {
           ) : null}
 
           {errorMessage ? (
-            <div className="mt-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              {errorMessage}
-              {intake.kind === "upload" ? (
-                <div className="mt-3">
+            <div className="mt-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+              <h2 className="text-base font-semibold text-red-950">We couldn&apos;t finish analysis</h2>
+              <p className="mt-2 leading-relaxed text-red-800">{errorMessage}</p>
+              <p className="mt-2 text-xs text-red-800/90">
+                Your lease text was not changed. You can retry, go back to pick a different file, or paste the
+                text instead.
+              </p>
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                <Button
+                  className="rounded-full"
+                  disabled={isSubmitting}
+                  onClick={() => void runLeaseAnalysis()}
+                >
+                  Try again
+                </Button>
+                {intake.kind === "upload" ? (
                   <Button
                     variant="outline"
                     className="rounded-full border-red-200 bg-white/70 hover:bg-white"
+                    disabled={isSubmitting}
                     onClick={() => {
                       resetIntakeUi();
                       setIntake(null);
@@ -577,8 +586,8 @@ export function LandingClient() {
                   >
                     Paste Lease Text Instead
                   </Button>
-                </div>
-              ) : null}
+                ) : null}
+              </div>
             </div>
           ) : null}
         </main>
