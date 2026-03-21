@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { UploadLeaseCta } from "@/components/beforeyousign/upload-lease-cta";
 import { SampleLeaseCta } from "@/components/beforeyousign/sample-lease-cta";
 import { PasteTextDialog } from "@/components/beforeyousign/paste-text-dialog";
+import { LeaseTextViewer } from "@/components/beforeyousign/lease-text-viewer";
 import {
   parseBeforeYouSignReportJson,
   type BeforeYouSignReport,
@@ -218,7 +219,12 @@ export function LandingClient() {
   if (intake) {
     return (
       <div className="flex flex-col flex-1 items-center justify-center font-sans">
-        <main className="flex w-full min-w-0 max-w-3xl flex-col gap-4 rounded-3xl border border-slate-200/60 bg-white/60 px-4 py-8 backdrop-blur shadow-sm sm:px-6 sm:py-10">
+        <main
+          className={[
+            "flex w-full min-w-0 flex-col gap-4 rounded-3xl border border-slate-200/60 bg-white/60 px-4 py-8 backdrop-blur shadow-sm sm:px-6 sm:py-10",
+            uploadReceipt ? "max-w-6xl" : "max-w-3xl",
+          ].join(" ")}
+        >
           <h1 className="text-2xl font-semibold text-slate-900">Lease intake</h1>
           {intake.kind === "upload" ? (
             <p className="text-sm text-slate-700">
@@ -266,7 +272,13 @@ export function LandingClient() {
           />
 
           {uploadReceipt ? (
-            <div className="mt-2 rounded-xl border border-slate-200/70 bg-white/60 p-3 text-sm text-slate-800">
+            <div className="mt-2 flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start">
+              {uploadReceipt.extractedPages && uploadReceipt.extractedPages.length > 0 ? (
+                <div className="w-full min-w-0 lg:w-[55%] lg:max-w-[55%] lg:shrink-0">
+                  <LeaseTextViewer pages={uploadReceipt.extractedPages} />
+                </div>
+              ) : null}
+              <div className="min-w-0 flex-1 rounded-xl border border-slate-200/70 bg-white/60 p-3 text-sm text-slate-800 sm:p-4">
               Backend received: <span className="font-medium">{uploadReceipt.fileName}</span> (
               {uploadReceipt.fileSizeBytes.toLocaleString()} bytes)
               {uploadReceipt.contentType ? `, ${uploadReceipt.contentType}` : null}
@@ -554,6 +566,7 @@ export function LandingClient() {
                   <p className="text-xs text-slate-500">{uploadReceipt.report.disclaimer}</p>
                 </div>
               ) : null}
+              </div>
             </div>
           ) : null}
 
