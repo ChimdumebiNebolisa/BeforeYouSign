@@ -11,6 +11,16 @@ type IntakeState =
   | { kind: "sample"; text: string }
   | { kind: "paste"; text: string };
 
+type LeaseReportSnapshot = {
+  summary: string;
+  whatYoureAgreeingTo: string[];
+  riskLevel: string;
+  riskReason: string;
+  questionsToAsk: string[];
+  nextSteps: string[];
+  disclaimer: string;
+};
+
 export function LandingClient() {
   const [intake, setIntake] = useState<IntakeState | null>(null);
   const [pasteOpenNonce, setPasteOpenNonce] = useState(0);
@@ -31,6 +41,8 @@ export function LandingClient() {
     deterministicRiskScore?: number;
     deterministicRiskBand?: "low" | "medium" | "high";
     deterministicRiskReasons?: string[];
+    report?: LeaseReportSnapshot | null;
+    reportError?: string | null;
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -133,8 +145,47 @@ export function LandingClient() {
                       deterministicRiskScore?: number;
                       deterministicRiskBand?: "low" | "medium" | "high";
                       deterministicRiskReasons?: string[];
+                      report?: unknown;
+                      reportError?: string | null;
                     };
-                    setUploadReceipt(data);
+
+                    const reportRaw = data.report;
+                    const report: LeaseReportSnapshot | null =
+                      reportRaw &&
+                      typeof reportRaw === "object" &&
+                      reportRaw !== null &&
+                      typeof (reportRaw as { summary?: unknown }).summary === "string"
+                        ? {
+                            summary: (reportRaw as { summary: string }).summary,
+                            whatYoureAgreeingTo: Array.isArray(
+                              (reportRaw as { whatYoureAgreeingTo?: unknown }).whatYoureAgreeingTo,
+                            )
+                              ? (reportRaw as { whatYoureAgreeingTo: string[] }).whatYoureAgreeingTo.filter(
+                                  (x) => typeof x === "string",
+                                )
+                              : [],
+                            riskLevel: String((reportRaw as { riskLevel?: unknown }).riskLevel ?? ""),
+                            riskReason: String((reportRaw as { riskReason?: unknown }).riskReason ?? ""),
+                            questionsToAsk: Array.isArray(
+                              (reportRaw as { questionsToAsk?: unknown }).questionsToAsk,
+                            )
+                              ? (reportRaw as { questionsToAsk: string[] }).questionsToAsk.filter(
+                                  (x) => typeof x === "string",
+                                )
+                              : [],
+                            nextSteps: Array.isArray((reportRaw as { nextSteps?: unknown }).nextSteps)
+                              ? (reportRaw as { nextSteps: string[] }).nextSteps.filter(
+                                  (x) => typeof x === "string",
+                                )
+                              : [],
+                            disclaimer: String((reportRaw as { disclaimer?: unknown }).disclaimer ?? ""),
+                          }
+                        : null;
+                    setUploadReceipt({
+                      ...data,
+                      report,
+                      reportError: typeof data.reportError === "string" ? data.reportError : null,
+                    });
                   } catch (e) {
                     setErrorMessage(
                       e instanceof Error ? e.message : "Failed to run analysis on the server.",
@@ -253,6 +304,53 @@ export function LandingClient() {
                   ) : (
                     <p className="mt-1 text-slate-600">No strong risk signals from rule scan.</p>
                   )}
+                </div>
+              ) : null}
+              {uploadReceipt.reportError ? (
+                <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs text-amber-950">
+                  {uploadReceipt.reportError}
+                </div>
+              ) : null}
+              {uploadReceipt.report ? (
+                <div className="mt-3 space-y-3 rounded-lg border border-slate-200/80 bg-white/60 p-3 text-sm text-slate-800">
+                  <h2 className="text-base font-semibold text-slate-900">Structured lease report</h2>
+                  <p className="text-slate-700">{uploadReceipt.report.summary}</p>
+                  <p className="text-xs font-medium text-slate-700">
+                    Model risk level:{" "}
+                    <span className="uppercase">{uploadReceipt.report.riskLevel}</span>
+                    <span className="font-normal text-slate-600"> — {uploadReceipt.report.riskReason}</span>
+                  </p>
+                  {uploadReceipt.report.whatYoureAgreeingTo.length ? (
+                    <div>
+                      <p className="font-medium text-slate-900">What you&apos;re agreeing to</p>
+                      <ul className="mt-1 list-inside list-disc text-slate-700">
+                        {uploadReceipt.report.whatYoureAgreeingTo.map((line, i) => (
+                          <li key={`${i}-${line.slice(0, 40)}`}>{line}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {uploadReceipt.report.questionsToAsk.length ? (
+                    <div>
+                      <p className="font-medium text-slate-900">Questions to ask</p>
+                      <ul className="mt-1 list-inside list-disc text-slate-700">
+                        {uploadReceipt.report.questionsToAsk.map((q, i) => (
+                          <li key={`${i}-${q.slice(0, 40)}`}>{q}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {uploadReceipt.report.nextSteps.length ? (
+                    <div>
+                      <p className="font-medium text-slate-900">Next steps</p>
+                      <ul className="mt-1 list-inside list-disc text-slate-700">
+                        {uploadReceipt.report.nextSteps.map((s, i) => (
+                          <li key={`${i}-${s.slice(0, 40)}`}>{s}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  <p className="text-xs text-slate-500">{uploadReceipt.report.disclaimer}</p>
                 </div>
               ) : null}
             </div>

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { runStructuredLeaseAnalysis } from "@/lib/analysis/gemini-report";
 import {
   buildRuleBasedFindings,
   findDepositSnippets,
@@ -10,13 +11,43 @@ import {
   findRentSnippets,
   findUnclearLeasePhrases,
   findUtilitiesSnippets,
+  type RuleBasedFinding,
 } from "@/lib/analysis/rules";
-import { computeDeterministicLeaseRisk } from "@/lib/analysis/scoring";
+import type { BeforeYouSignReport } from "@/lib/analysis/schema";
+import { computeDeterministicLeaseRisk, type DeterministicLeaseRisk } from "@/lib/analysis/scoring";
 import { getBysAiKey } from "@/lib/env/bys-ai-key";
 import { extractPdfTextPages } from "@/lib/pdf/extract-text";
 import { normalizeLeasePageText } from "@/lib/pdf/normalize";
 
 export const runtime = "nodejs";
+
+async function buildLeaseAiFields(input: {
+  fullLeaseText: string;
+  ruleBasedFindings: RuleBasedFinding[];
+  deterministicRisk: DeterministicLeaseRisk;
+}): Promise<{ report: BeforeYouSignReport | null; reportError: string | null }> {
+  const apiKey = getBysAiKey();
+  if (!apiKey?.trim()) {
+    return {
+      report: null,
+      reportError:
+        "Structured AI report skipped: add BYS_AI_KEY to .env.local on the server (never use NEXT_PUBLIC_).",
+    };
+  }
+
+  const ai = await runStructuredLeaseAnalysis({
+    apiKey: apiKey.trim(),
+    leaseText: input.fullLeaseText,
+    ruleBasedFindings: input.ruleBasedFindings,
+    deterministicRisk: input.deterministicRisk,
+  });
+
+  if (ai.ok) {
+    return { report: ai.report, reportError: null };
+  }
+
+  return { report: null, reportError: ai.error };
+}
 
 export async function POST(request: Request) {
   const headerContentType = request.headers.get("content-type") ?? "";
@@ -105,6 +136,12 @@ export async function POST(request: Request) {
       );
     }
 
+    const aiFields = await buildLeaseAiFields({
+      fullLeaseText,
+      ruleBasedFindings,
+      deterministicRisk,
+    });
+
     return NextResponse.json({
       ok: true,
       fileName,
@@ -123,6 +160,8 @@ export async function POST(request: Request) {
       deterministicRiskScore: deterministicRisk.score,
       deterministicRiskBand: deterministicRisk.band,
       deterministicRiskReasons: deterministicRisk.reasons,
+      report: aiFields.report,
+      reportError: aiFields.reportError,
     });
   }
 
@@ -188,6 +227,12 @@ export async function POST(request: Request) {
       );
     }
 
+    const aiFields = await buildLeaseAiFields({
+      fullLeaseText,
+      ruleBasedFindings,
+      deterministicRisk,
+    });
+
     return NextResponse.json({
       ok: true,
       fileName,
@@ -206,6 +251,8 @@ export async function POST(request: Request) {
       deterministicRiskScore: deterministicRisk.score,
       deterministicRiskBand: deterministicRisk.band,
       deterministicRiskReasons: deterministicRisk.reasons,
+      report: aiFields.report,
+      reportError: aiFields.reportError,
     });
   } catch {
     return NextResponse.json(
