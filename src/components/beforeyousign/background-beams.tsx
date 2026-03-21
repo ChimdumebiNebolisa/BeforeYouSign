@@ -17,7 +17,7 @@ export function BackgroundBeams() {
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
     camera.position.set(0, 0, 8);
 
-    const lightBlue = new THREE.Color("#60a5fa");
+    const beamTint = new THREE.Color("#5eead4");
 
     const beams: Array<{
       mesh: THREE.Mesh;
@@ -37,7 +37,7 @@ export function BackgroundBeams() {
 
       const geometry = new THREE.PlaneGeometry(width, height, 1, 1);
       const material = new THREE.MeshBasicMaterial({
-        color: lightBlue,
+        color: beamTint,
         transparent: true,
         opacity: 0.06 + Math.random() * 0.05,
         side: THREE.DoubleSide,

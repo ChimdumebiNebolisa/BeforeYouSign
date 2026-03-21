@@ -46,14 +46,14 @@ function LeasePageBlock({
 
   return (
     <article ref={rootRef} id={`bys-page-${pageNumber}`} className="mb-6 last:mb-0">
-      <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Page {pageNumber}</h4>
-      <div className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-800">
+      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Page {pageNumber}</h4>
+      <div className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground/90">
         {match ? (
           <>
             {match.before}
             <mark
               data-bys-quote-highlight
-              className="bys-quote-highlight rounded-sm px-0.5 text-slate-900"
+              className="bys-quote-highlight rounded-sm px-0.5 text-foreground"
             >
               {match.match}
             </mark>
@@ -81,13 +81,13 @@ export function LeaseTextViewer({
   const sorted = [...pages].sort((a, b) => a.page - b.page);
 
   return (
-    <div className="flex max-h-[min(70vh,720px)] min-h-[200px] flex-col rounded-xl border border-slate-200/70 bg-white/50 shadow-sm">
-      <div className="border-b border-slate-200/60 px-3 py-2 text-xs font-medium text-slate-600">
-        <div>
+    <div className="flex max-h-[min(70vh,720px)] min-h-[200px] flex-col overflow-hidden rounded-xl border border-border/90 bg-card shadow-sm shadow-slate-900/[0.04]">
+      <div className="border-b border-border/80 bg-muted/20 px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <div className="normal-case tracking-normal text-foreground">
           Lease text ({sorted.length} page{sorted.length === 1 ? "" : "s"})
         </div>
         {extractedFromPdf ? (
-          <p className="mt-1 text-[11px] font-normal leading-snug text-slate-500">
+          <p className="mt-1 text-[11px] font-normal normal-case leading-snug text-muted-foreground">
             Extracted from your PDF. This text view is the fallback when precise PDF highlighting is not
             available.
           </p>

@@ -63,11 +63,11 @@ function AnalysisProgressSteps({
 
   return (
     <div
-      className="mt-4 rounded-xl border border-slate-200/70 bg-white/50 p-3 text-sm text-slate-800"
+      className="mt-4 rounded-xl border border-primary/15 bg-primary/[0.06] p-3 text-sm text-foreground shadow-sm shadow-slate-900/[0.03]"
       aria-live="polite"
       aria-busy="true"
     >
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Progress</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">Progress</p>
       <ol className="mt-2 space-y-2">
         {labels.map((label, i) => {
           const done = i < stepIndex;
@@ -79,9 +79,9 @@ function AnalysisProgressSteps({
                   "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-semibold",
                   done
                     ? "border-emerald-300 bg-emerald-50 text-emerald-800"
-                    : current
-                      ? "border-slate-400 bg-white text-slate-900"
-                      : "border-slate-200/80 bg-white/40 text-slate-400",
+                    :                   current
+                    ? "border-primary/50 bg-primary/10 text-primary"
+                    : "border-border bg-muted/40 text-muted-foreground",
                 ].join(" ")}
                 aria-hidden="true"
               >
@@ -89,7 +89,7 @@ function AnalysisProgressSteps({
               </span>
               <span
                 className={
-                  current ? "font-medium text-slate-900" : done ? "text-slate-700" : "text-slate-400"
+                  current ? "font-medium text-foreground" : done ? "text-foreground/90" : "text-muted-foreground"
                 }
               >
                 {label}
@@ -227,23 +227,26 @@ export function LandingClient() {
       <div className="flex flex-col flex-1 items-center justify-center font-sans">
         <main
           className={[
-            "flex w-full min-w-0 flex-col gap-4 rounded-3xl border border-slate-200/60 bg-white/60 px-4 py-8 backdrop-blur shadow-sm sm:px-6 sm:py-10",
+            "flex w-full min-w-0 flex-col gap-5 rounded-3xl border border-border/90 bg-card px-4 py-8 shadow-lg shadow-slate-900/[0.04] sm:px-6 sm:py-10",
             uploadReceipt ? "max-w-6xl" : "max-w-3xl",
           ].join(" ")}
         >
-          <h1 className="text-2xl font-semibold text-slate-900">Lease intake</h1>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Lease review</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Lease intake</h1>
+          </div>
           {intake.kind === "upload" ? (
-            <p className="text-sm text-slate-700">
+            <p className="text-sm text-muted-foreground">
               Upload received: <span className="font-medium">{intake.file.name}</span>
             </p>
           ) : null}
           {intake.kind === "sample" ? (
-            <p className="text-sm text-slate-700">
+            <p className="text-sm text-muted-foreground">
               Sample loaded: <span className="font-medium">{intake.text.length.toLocaleString()} chars</span>
             </p>
           ) : null}
           {intake.kind === "paste" ? (
-            <p className="text-sm text-slate-700">
+            <p className="text-sm text-muted-foreground">
               Pasted text loaded: <span className="font-medium">{intake.text.length.toLocaleString()} chars</span>
             </p>
           ) : null}
@@ -251,7 +254,7 @@ export function LandingClient() {
           <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
             <Button
               variant="outline"
-              className="rounded-full border-slate-200/70 bg-white/40 hover:bg-white/60"
+              className="rounded-full border-border bg-background/80 hover:bg-muted/80"
               onClick={() => {
                 resetIntakeUi();
                 setIntake(null);
@@ -260,7 +263,7 @@ export function LandingClient() {
               Back to landing
             </Button>
             <Button
-              className="rounded-full"
+              className="rounded-full shadow-sm shadow-primary/20"
               onClick={() => void runLeaseAnalysis()}
               disabled={isSubmitting}
             >
@@ -292,67 +295,70 @@ export function LandingClient() {
                   />
                 </div>
               ) : null}
-              <div className="min-w-0 flex-1 rounded-xl border border-slate-200/70 bg-white/60 p-3 text-sm text-slate-800 sm:p-4">
+              <div className="min-w-0 flex-1 space-y-1 rounded-xl border border-border/90 bg-muted/30 p-3 text-sm text-foreground sm:p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                Analysis output
+              </p>
               Backend received: <span className="font-medium">{uploadReceipt.fileName}</span> (
               {uploadReceipt.fileSizeBytes.toLocaleString()} bytes)
               {uploadReceipt.contentType ? `, ${uploadReceipt.contentType}` : null}
               {uploadReceipt.extractedPages?.length ? (
-                <div className="mt-2 text-xs text-slate-700">
+                <div className="mt-2 text-xs text-muted-foreground">
                   Extracted {uploadReceipt.extractedPages.length} page(s). First page snippet:{" "}
                   {uploadReceipt.extractedPages[0]?.text.slice(0, 200) || "—"}
                 </div>
               ) : null}
               {uploadReceipt.rentSnippets?.length ? (
-                <div className="mt-2 text-xs text-slate-700">
+                <div className="mt-2 text-xs text-muted-foreground">
                   Rent mentions found: {uploadReceipt.rentSnippets.length}. Example (page{" "}
                   {uploadReceipt.rentSnippets[0]?.page}):{" "}
                   <span className="font-medium">{uploadReceipt.rentSnippets[0]?.quote}</span>
                 </div>
               ) : null}
               {uploadReceipt.depositSnippets?.length ? (
-                <div className="mt-2 text-xs text-slate-700">
+                <div className="mt-2 text-xs text-muted-foreground">
                   Deposit mentions found: {uploadReceipt.depositSnippets.length}. Example (page{" "}
                   {uploadReceipt.depositSnippets[0]?.page}):{" "}
                   <span className="font-medium">{uploadReceipt.depositSnippets[0]?.quote}</span>
                 </div>
               ) : null}
               {uploadReceipt.feeSnippets?.length ? (
-                <div className="mt-2 text-xs text-slate-700">
+                <div className="mt-2 text-xs text-muted-foreground">
                   Fee mentions found: {uploadReceipt.feeSnippets.length}. Example (page{" "}
                   {uploadReceipt.feeSnippets[0]?.page}):{" "}
                   <span className="font-medium">{uploadReceipt.feeSnippets[0]?.quote}</span>
                 </div>
               ) : null}
               {uploadReceipt.noticeSnippets?.length ? (
-                <div className="mt-2 text-xs text-slate-700">
+                <div className="mt-2 text-xs text-muted-foreground">
                   Notice language found: {uploadReceipt.noticeSnippets.length}. Example (page{" "}
                   {uploadReceipt.noticeSnippets[0]?.page}):{" "}
                   <span className="font-medium">{uploadReceipt.noticeSnippets[0]?.quote}</span>
                 </div>
               ) : null}
               {uploadReceipt.renewalSnippets?.length ? (
-                <div className="mt-2 text-xs text-slate-700">
+                <div className="mt-2 text-xs text-muted-foreground">
                   Renewal language found: {uploadReceipt.renewalSnippets.length}. Example (page{" "}
                   {uploadReceipt.renewalSnippets[0]?.page}):{" "}
                   <span className="font-medium">{uploadReceipt.renewalSnippets[0]?.quote}</span>
                 </div>
               ) : null}
               {uploadReceipt.maintenanceSnippets?.length ? (
-                <div className="mt-2 text-xs text-slate-700">
+                <div className="mt-2 text-xs text-muted-foreground">
                   Maintenance language found: {uploadReceipt.maintenanceSnippets.length}. Example (page{" "}
                   {uploadReceipt.maintenanceSnippets[0]?.page}):{" "}
                   <span className="font-medium">{uploadReceipt.maintenanceSnippets[0]?.quote}</span>
                 </div>
               ) : null}
               {uploadReceipt.utilitiesSnippets?.length ? (
-                <div className="mt-2 text-xs text-slate-700">
+                <div className="mt-2 text-xs text-muted-foreground">
                   Utilities language found: {uploadReceipt.utilitiesSnippets.length}. Example (page{" "}
                   {uploadReceipt.utilitiesSnippets[0]?.page}):{" "}
                   <span className="font-medium">{uploadReceipt.utilitiesSnippets[0]?.quote}</span>
                 </div>
               ) : null}
               {uploadReceipt.ruleBasedFindings?.length ? (
-                <div className="mt-2 text-xs text-slate-700">
+                <div className="mt-2 text-xs text-muted-foreground">
                   Rule-based findings: {uploadReceipt.ruleBasedFindings.length} (page + quote). First:{" "}
                   <span className="font-medium">
                     [{uploadReceipt.ruleBasedFindings[0]?.category}] p.
@@ -373,20 +379,20 @@ export function LandingClient() {
                 </div>
               ) : null}
               {uploadReceipt.deterministicRiskBand !== undefined ? (
-                <div className="mt-3 rounded-lg border border-slate-200/80 bg-white/50 p-2 text-xs text-slate-800">
-                  <div className="font-semibold text-slate-900">
+                <div className="mt-3 rounded-lg border border-border/80 bg-card p-2 text-xs text-foreground shadow-sm">
+                  <div className="font-semibold text-foreground">
                     Rule-based risk (not legal advice):{" "}
                     <span className="uppercase">{uploadReceipt.deterministicRiskBand}</span> (score{" "}
                     {uploadReceipt.deterministicRiskScore ?? "—"})
                   </div>
                   {uploadReceipt.deterministicRiskReasons?.length ? (
-                    <ul className="mt-1 list-inside list-disc text-slate-700">
+                    <ul className="mt-1 list-inside list-disc text-muted-foreground">
                       {uploadReceipt.deterministicRiskReasons.map((r, i) => (
                         <li key={`${i}-${r}`}>{r}</li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="mt-1 text-slate-600">No strong risk signals from rule scan.</p>
+                    <p className="mt-1 text-muted-foreground">No strong risk signals from rule scan.</p>
                   )}
                 </div>
               ) : null}
@@ -396,23 +402,23 @@ export function LandingClient() {
                 </div>
               ) : null}
               {uploadReceipt.report ? (
-                <div className="mt-3 min-w-0 space-y-3 rounded-lg border border-slate-200/80 bg-white/60 p-3 text-sm text-slate-800 sm:p-4">
-                  <h2 className="text-base font-semibold text-slate-900">Structured lease report</h2>
-                  <p className="text-slate-700">{uploadReceipt.report.summary}</p>
-                  <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
-                    <h3 className="text-sm font-semibold text-slate-900">What you&apos;re agreeing to</h3>
+                <div className="mt-3 min-w-0 space-y-3 rounded-xl border border-border/90 bg-card p-3 text-sm text-foreground shadow-sm sm:p-4">
+                  <h2 className="text-base font-semibold text-foreground">Structured lease report</h2>
+                  <p className="text-muted-foreground">{uploadReceipt.report.summary}</p>
+                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
+                    <h3 className="text-sm font-semibold text-foreground">What you&apos;re agreeing to</h3>
                     {uploadReceipt.report.whatYoureAgreeingTo.length ? (
-                      <ul className="mt-2 list-inside list-disc text-slate-700">
+                      <ul className="mt-2 list-inside list-disc text-muted-foreground">
                         {uploadReceipt.report.whatYoureAgreeingTo.map((line, i) => (
                           <li key={`${i}-${line.slice(0, 40)}`}>{line}</li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
+                      <p className="mt-2 text-sm text-muted-foreground">Not clearly found in this lease text.</p>
                     )}
                   </section>
-                  <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
-                    <h3 className="text-sm font-semibold text-slate-900">Risk level</h3>
+                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
+                    <h3 className="text-sm font-semibold text-foreground">Risk level</h3>
                     <div className="mt-2 flex flex-col items-start gap-2">
                       <span
                         className={[
@@ -422,23 +428,23 @@ export function LandingClient() {
                       >
                         {uploadReceipt.report.riskLevel}
                       </span>
-                      <p className="text-sm leading-relaxed text-slate-700">
+                      <p className="text-sm leading-relaxed text-muted-foreground">
                         {uploadReceipt.report.riskReason}
                       </p>
                     </div>
                   </section>
-                  <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
-                    <h3 className="text-sm font-semibold text-slate-900">Potential red flags</h3>
+                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
+                    <h3 className="text-sm font-semibold text-foreground">Potential red flags</h3>
                     {uploadReceipt.report.potentialRedFlags.length ? (
                       <ul className="mt-2 space-y-4">
                         {uploadReceipt.report.potentialRedFlags.map((f) => (
                           <li
                             key={f.id}
-                            className="rounded-lg border border-slate-200/60 bg-white/40 text-slate-800"
+                            className="rounded-lg border border-border/70 bg-card/90 text-foreground"
                           >
                             <button
                               type="button"
-                              className="w-full rounded-lg p-3 text-left transition-colors hover:bg-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+                              className="w-full rounded-lg p-3 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
                               onClick={() => {
                                 const ev = f.evidence[0];
                                 if (ev && typeof ev.page === "number" && ev.page >= 1) {
@@ -448,27 +454,27 @@ export function LandingClient() {
                               }}
                             >
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-sm font-semibold text-slate-900">{f.title}</span>
-                              <span className="rounded-full border border-slate-200/80 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-700">
+                              <span className="text-sm font-semibold text-foreground">{f.title}</span>
+                              <span className="rounded-full border border-border/80 bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
                                 {f.severity}
                               </span>
-                              <span className="text-xs text-slate-500">{f.category}</span>
+                              <span className="text-xs text-muted-foreground">{f.category}</span>
                             </div>
-                            <p className="mt-2 text-sm leading-relaxed text-slate-700">{f.explanation}</p>
-                            <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                              <span className="font-medium text-slate-800">Why it matters: </span>
+                            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.explanation}</p>
+                            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                              <span className="font-medium text-foreground">Why it matters: </span>
                               {f.whyItMatters}
                             </p>
                             {f.evidence.length ? (
-                              <div className="mt-2 border-t border-slate-200/50 pt-2">
-                                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                              <div className="mt-2 border-t border-border/60 pt-2">
+                                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                                   From your lease
                                 </p>
-                                <ul className="mt-1 space-y-1 text-sm text-slate-700">
+                                <ul className="mt-1 space-y-1 text-sm text-muted-foreground">
                                   {f.evidence.map((ev, i) => (
                                     <li key={`${f.id}-ev-${i}`}>
-                                      <span className="font-medium text-slate-800">p. {ev.page}: </span>
-                                      <q className="break-words text-slate-700">{ev.quote}</q>
+                                      <span className="font-medium text-foreground">p. {ev.page}: </span>
+                                      <q className="break-words text-muted-foreground">{ev.quote}</q>
                                     </li>
                                   ))}
                                 </ul>
@@ -479,25 +485,25 @@ export function LandingClient() {
                         ))}
                       </ul>
                     ) : (
-                      <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
+                      <p className="mt-2 text-sm text-muted-foreground">Not clearly found in this lease text.</p>
                     )}
                   </section>
-                  <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
-                    <h3 className="text-sm font-semibold text-slate-900">Money and fees</h3>
+                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
+                    <h3 className="text-sm font-semibold text-foreground">Money and fees</h3>
                     {uploadReceipt.report.moneyAndFees.length ? (
                       <ul className="mt-2 space-y-3">
                         {uploadReceipt.report.moneyAndFees.map((row, i) => (
                           <li
                             key={`${row.label}-${i}`}
-                            className="rounded-lg border border-slate-200/60 bg-white/40 p-3"
+                            className="rounded-lg border border-border/70 bg-card/90 p-3"
                           >
-                            <p className="text-sm font-medium text-slate-900">{row.label}</p>
-                            <p className="mt-1 text-sm text-slate-700">{row.value}</p>
+                            <p className="text-sm font-medium text-foreground">{row.label}</p>
+                            <p className="mt-1 text-sm text-muted-foreground">{row.value}</p>
                             {row.evidence?.length ? (
-                              <ul className="mt-2 space-y-1 border-t border-slate-200/50 pt-2 text-sm text-slate-600">
+                              <ul className="mt-2 space-y-1 border-t border-border/60 pt-2 text-sm text-muted-foreground">
                                 {row.evidence.map((ev, j) => (
                                   <li key={`${row.label}-ev-${j}`}>
-                                    <span className="font-medium text-slate-800">p. {ev.page}: </span>
+                                    <span className="font-medium text-foreground">p. {ev.page}: </span>
                                     <q className="break-words">{ev.quote}</q>
                                   </li>
                                 ))}
@@ -507,25 +513,25 @@ export function LandingClient() {
                         ))}
                       </ul>
                     ) : (
-                      <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
+                      <p className="mt-2 text-sm text-muted-foreground">Not clearly found in this lease text.</p>
                     )}
                   </section>
-                  <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
-                    <h3 className="text-sm font-semibold text-slate-900">Deadlines and notice rules</h3>
+                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
+                    <h3 className="text-sm font-semibold text-foreground">Deadlines and notice rules</h3>
                     {uploadReceipt.report.deadlinesAndNotice.length ? (
                       <ul className="mt-2 space-y-3">
                         {uploadReceipt.report.deadlinesAndNotice.map((row, i) => (
                           <li
                             key={`${row.label}-${i}`}
-                            className="rounded-lg border border-slate-200/60 bg-white/40 p-3"
+                            className="rounded-lg border border-border/70 bg-card/90 p-3"
                           >
-                            <p className="text-sm font-medium text-slate-900">{row.label}</p>
-                            <p className="mt-1 text-sm text-slate-700">{row.value}</p>
+                            <p className="text-sm font-medium text-foreground">{row.label}</p>
+                            <p className="mt-1 text-sm text-muted-foreground">{row.value}</p>
                             {row.evidence?.length ? (
-                              <ul className="mt-2 space-y-1 border-t border-slate-200/50 pt-2 text-sm text-slate-600">
+                              <ul className="mt-2 space-y-1 border-t border-border/60 pt-2 text-sm text-muted-foreground">
                                 {row.evidence.map((ev, j) => (
                                   <li key={`${row.label}-ev-${j}`}>
-                                    <span className="font-medium text-slate-800">p. {ev.page}: </span>
+                                    <span className="font-medium text-foreground">p. {ev.page}: </span>
                                     <q className="break-words">{ev.quote}</q>
                                   </li>
                                 ))}
@@ -535,45 +541,45 @@ export function LandingClient() {
                         ))}
                       </ul>
                     ) : (
-                      <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
+                      <p className="mt-2 text-sm text-muted-foreground">Not clearly found in this lease text.</p>
                     )}
                   </section>
-                  <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
-                    <h3 className="text-sm font-semibold text-slate-900">Responsibilities</h3>
+                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
+                    <h3 className="text-sm font-semibold text-foreground">Responsibilities</h3>
                     {uploadReceipt.report.responsibilities.length ? (
-                      <ul className="mt-2 list-inside list-disc text-slate-700">
+                      <ul className="mt-2 list-inside list-disc text-muted-foreground">
                         {uploadReceipt.report.responsibilities.map((line, i) => (
                           <li key={`${i}-${line.slice(0, 40)}`}>{line}</li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
+                      <p className="mt-2 text-sm text-muted-foreground">Not clearly found in this lease text.</p>
                     )}
                   </section>
-                  <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
-                    <h3 className="text-sm font-semibold text-slate-900">
+                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
+                    <h3 className="text-sm font-semibold text-foreground">
                       Questions to ask before signing
                     </h3>
                     {uploadReceipt.report.questionsToAsk.length ? (
-                      <ul className="mt-2 list-inside list-disc text-slate-700">
+                      <ul className="mt-2 list-inside list-disc text-muted-foreground">
                         {uploadReceipt.report.questionsToAsk.map((q, i) => (
                           <li key={`${i}-${q.slice(0, 40)}`}>{q}</li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
+                      <p className="mt-2 text-sm text-muted-foreground">Not clearly found in this lease text.</p>
                     )}
                   </section>
-                  <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
-                    <h3 className="text-sm font-semibold text-slate-900">Next steps</h3>
+                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
+                    <h3 className="text-sm font-semibold text-foreground">Next steps</h3>
                     {uploadReceipt.report.nextSteps.length ? (
-                      <ul className="mt-2 list-inside list-disc text-slate-700">
+                      <ul className="mt-2 list-inside list-disc text-muted-foreground">
                         {uploadReceipt.report.nextSteps.map((s, i) => (
                           <li key={`${i}-${s.slice(0, 40)}`}>{s}</li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
+                      <p className="mt-2 text-sm text-muted-foreground">Not clearly found in this lease text.</p>
                     )}
                   </section>
                   {uploadReceipt.report.missingOrUnclear.length ? (
@@ -589,7 +595,7 @@ export function LandingClient() {
                       </ul>
                     </section>
                   ) : null}
-                  <p className="text-xs text-slate-500">{uploadReceipt.report.disclaimer}</p>
+                  <p className="text-xs text-muted-foreground">{uploadReceipt.report.disclaimer}</p>
                 </div>
               ) : null}
               </div>
@@ -636,14 +642,17 @@ export function LandingClient() {
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center font-sans">
-      <main className="flex w-full max-w-3xl flex-col items-center gap-6 rounded-3xl border border-slate-200/60 bg-white/60 px-5 py-10 backdrop-blur shadow-sm sm:px-8 sm:py-12 sm:items-start">
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-slate-900">
-            Understand your lease before you sign
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-slate-600">
-            Upload or paste your lease text to understand key terms before you sign.
-          </p>
+      <main className="flex w-full max-w-3xl flex-col items-center gap-8 rounded-3xl border border-border/90 bg-card px-5 py-10 shadow-lg shadow-slate-900/[0.04] sm:px-8 sm:py-12 sm:items-start">
+        <div className="flex w-full flex-col items-center gap-6 text-center sm:items-start sm:text-left">
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Lease clarity</p>
+            <h1 className="max-w-lg text-balance text-3xl font-semibold leading-[1.15] tracking-tight text-foreground sm:text-4xl">
+              Understand your lease before you sign
+            </h1>
+            <p className="max-w-md text-lg leading-relaxed text-muted-foreground">
+              Upload or paste your lease text to see key terms and risks in plain English.
+            </p>
+          </div>
 
           <UploadLeaseCta
             onStartUpload={(file) => {

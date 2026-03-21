@@ -23,29 +23,29 @@ export function PasteTextDialog({
     <>
       <button
         type="button"
-        className="mt-3 text-sm font-medium text-slate-700 underline-offset-4 hover:underline"
+        className="mt-3 text-sm font-medium text-primary underline-offset-4 hover:underline"
         onClick={() => setIsOpen(true)}
       >
         Paste Lease Text
       </button>
 
       {pasted ? (
-        <p className="mt-3 text-sm text-slate-700">
+        <p className="mt-3 text-sm text-muted-foreground">
           Pasted text loaded ({pasted.length.toLocaleString()} chars).
         </p>
       ) : null}
 
       {isOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-2xl rounded-2xl border border-slate-200/60 bg-white/90 p-4 shadow-lg backdrop-blur">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-4 backdrop-blur-[2px]">
+          <div className="w-full max-w-2xl rounded-2xl border border-border/90 bg-card p-4 shadow-xl shadow-slate-900/15">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-base font-semibold text-slate-900">Paste Lease Text</h2>
-                <p className="mt-1 text-sm text-slate-600">Paste the lease text you want to analyze.</p>
+                <h2 className="text-base font-semibold text-foreground">Paste Lease Text</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Paste the lease text you want to analyze.</p>
               </div>
               <button
                 type="button"
-                className="rounded-full px-3 py-1 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                className="rounded-full px-3 py-1 text-sm font-medium text-muted-foreground hover:bg-muted"
                 onClick={() => setIsOpen(false)}
               >
                 Close
@@ -55,12 +55,12 @@ export function PasteTextDialog({
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              className="mt-4 h-56 w-full resize-none rounded-xl border border-slate-200/70 bg-white/70 p-3 text-sm text-slate-900 outline-none"
+              className="mt-4 h-56 w-full resize-none rounded-xl border border-border/90 bg-muted/30 p-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
             />
 
             <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
               <Button
-                className="w-full rounded-full sm:w-auto"
+                className="w-full rounded-full shadow-sm shadow-primary/15 sm:w-auto"
                 onClick={() => {
                   const next = draft.trim();
                   setPasted(next.length ? next : null);
@@ -72,7 +72,7 @@ export function PasteTextDialog({
               </Button>
               <Button
                 variant="outline"
-                className="w-full rounded-full border-slate-200/70 bg-white/40 hover:bg-white/60 sm:w-auto"
+                className="w-full rounded-full border-border/90 bg-background/80 hover:bg-muted/80 sm:w-auto"
                 onClick={() => setIsOpen(false)}
               >
                 Cancel

@@ -39,9 +39,9 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
 
       <div
         className={[
-          "mt-6 w-full cursor-pointer rounded-2xl border px-5 py-6 text-center transition-colors",
-          "border-slate-200/70 bg-white/35 backdrop-blur",
-          isDragActive ? "border-slate-300 bg-white/60" : "hover:bg-white/45",
+          "mt-6 w-full cursor-pointer rounded-2xl border px-5 py-6 text-center shadow-sm transition-colors",
+          "border-border/90 bg-card/80 backdrop-blur-sm",
+          isDragActive ? "border-primary/35 bg-card shadow-md ring-2 ring-primary/15" : "hover:border-primary/20 hover:bg-card",
         ].join(" ")}
         role="button"
         tabIndex={0}
@@ -74,7 +74,7 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
       >
         <Button
           type="button"
-          className="rounded-full"
+          className="rounded-full shadow-sm shadow-primary/15"
           onClick={(e) => {
             e.stopPropagation();
             fileInputRef.current?.click();
@@ -83,7 +83,7 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
           Upload Lease
         </Button>
 
-        <p className="mt-2 text-xs text-slate-600">
+        <p className="mt-2 text-xs text-muted-foreground">
           Or drag and drop a PDF lease here.
         </p>
       </div>

@@ -1,3 +1,7 @@
+## Project layout
+
+The Next.js app lives at the **repository root** (`BeforeYouSign/`). Run all `npm` commands from this folder (there is no nested `before-you-sign/` app directory).
+
 ## Setup (Running locally)
 
 1. Install dependencies:
