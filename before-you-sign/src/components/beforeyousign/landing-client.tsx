@@ -28,6 +28,9 @@ export function LandingClient() {
     utilitiesSnippets?: { page: number; quote: string }[];
     ruleBasedFindings?: { category: string; page: number; quote: string }[];
     unclearLeasePhrases?: { page: number; quote: string }[];
+    deterministicRiskScore?: number;
+    deterministicRiskBand?: "low" | "medium" | "high";
+    deterministicRiskReasons?: string[];
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -127,6 +130,9 @@ export function LandingClient() {
                       utilitiesSnippets?: { page: number; quote: string }[];
                       ruleBasedFindings?: { category: string; page: number; quote: string }[];
                       unclearLeasePhrases?: { page: number; quote: string }[];
+                      deterministicRiskScore?: number;
+                      deterministicRiskBand?: "low" | "medium" | "high";
+                      deterministicRiskReasons?: string[];
                     };
                     setUploadReceipt(data);
                   } catch (e) {
@@ -229,6 +235,24 @@ export function LandingClient() {
                   Possibly unclear wording flagged: {uploadReceipt.unclearLeasePhrases.length}. Example
                   (p. {uploadReceipt.unclearLeasePhrases[0]?.page}):{" "}
                   <span className="font-medium">{uploadReceipt.unclearLeasePhrases[0]?.quote}</span>
+                </div>
+              ) : null}
+              {uploadReceipt.deterministicRiskBand !== undefined ? (
+                <div className="mt-3 rounded-lg border border-slate-200/80 bg-white/50 p-2 text-xs text-slate-800">
+                  <div className="font-semibold text-slate-900">
+                    Rule-based risk (not legal advice):{" "}
+                    <span className="uppercase">{uploadReceipt.deterministicRiskBand}</span> (score{" "}
+                    {uploadReceipt.deterministicRiskScore ?? "—"})
+                  </div>
+                  {uploadReceipt.deterministicRiskReasons?.length ? (
+                    <ul className="mt-1 list-inside list-disc text-slate-700">
+                      {uploadReceipt.deterministicRiskReasons.map((r, i) => (
+                        <li key={`${i}-${r}`}>{r}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-1 text-slate-600">No strong risk signals from rule scan.</p>
+                  )}
                 </div>
               ) : null}
             </div>

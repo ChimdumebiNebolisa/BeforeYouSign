@@ -11,6 +11,7 @@ import {
   findUnclearLeasePhrases,
   findUtilitiesSnippets,
 } from "@/lib/analysis/rules";
+import { computeDeterministicLeaseRisk } from "@/lib/analysis/scoring";
 import { getBysAiKey } from "@/lib/env/bys-ai-key";
 import { extractPdfTextPages } from "@/lib/pdf/extract-text";
 import { normalizeLeasePageText } from "@/lib/pdf/normalize";
@@ -75,6 +76,12 @@ export async function POST(request: Request) {
       utilities: utilitiesSnippets,
     });
     const unclearLeasePhrases = findUnclearLeasePhrases(extractedPages);
+    const fullLeaseText = extractedPages.map((p) => p.text).join("\n\n");
+    const deterministicRisk = computeDeterministicLeaseRisk({
+      fullText: fullLeaseText,
+      findings: ruleBasedFindings,
+      unclearPhrases: unclearLeasePhrases,
+    });
     const fileSizeBytes = Buffer.byteLength(normalizedText, "utf8");
 
     if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
@@ -113,6 +120,9 @@ export async function POST(request: Request) {
       utilitiesSnippets,
       ruleBasedFindings,
       unclearLeasePhrases,
+      deterministicRiskScore: deterministicRisk.score,
+      deterministicRiskBand: deterministicRisk.band,
+      deterministicRiskReasons: deterministicRisk.reasons,
     });
   }
 
@@ -150,6 +160,12 @@ export async function POST(request: Request) {
       utilities: utilitiesSnippets,
     });
     const unclearLeasePhrases = findUnclearLeasePhrases(extractedPages);
+    const fullLeaseText = extractedPages.map((p) => p.text).join("\n\n");
+    const deterministicRisk = computeDeterministicLeaseRisk({
+      fullText: fullLeaseText,
+      findings: ruleBasedFindings,
+      unclearPhrases: unclearLeasePhrases,
+    });
 
     if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
       console.log(
@@ -187,6 +203,9 @@ export async function POST(request: Request) {
       utilitiesSnippets,
       ruleBasedFindings,
       unclearLeasePhrases,
+      deterministicRiskScore: deterministicRisk.score,
+      deterministicRiskBand: deterministicRisk.band,
+      deterministicRiskReasons: deterministicRisk.reasons,
     });
   } catch {
     return NextResponse.json(
