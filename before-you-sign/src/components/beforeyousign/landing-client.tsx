@@ -218,7 +218,7 @@ export function LandingClient() {
   if (intake) {
     return (
       <div className="flex flex-col flex-1 items-center justify-center font-sans">
-        <main className="flex w-full max-w-3xl flex-col gap-4 rounded-3xl border border-slate-200/60 bg-white/60 px-5 py-10 backdrop-blur shadow-sm">
+        <main className="flex w-full min-w-0 max-w-3xl flex-col gap-4 rounded-3xl border border-slate-200/60 bg-white/60 px-4 py-8 backdrop-blur shadow-sm sm:px-6 sm:py-10">
           <h1 className="text-2xl font-semibold text-slate-900">Lease intake</h1>
           {intake.kind === "upload" ? (
             <p className="text-sm text-slate-700">
@@ -370,7 +370,7 @@ export function LandingClient() {
                 </div>
               ) : null}
               {uploadReceipt.report ? (
-                <div className="mt-3 space-y-3 rounded-lg border border-slate-200/80 bg-white/60 p-3 text-sm text-slate-800">
+                <div className="mt-3 min-w-0 space-y-3 rounded-lg border border-slate-200/80 bg-white/60 p-3 text-sm text-slate-800 sm:p-4">
                   <h2 className="text-base font-semibold text-slate-900">Structured lease report</h2>
                   <p className="text-slate-700">{uploadReceipt.report.summary}</p>
                   <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
@@ -431,7 +431,7 @@ export function LandingClient() {
                                   {f.evidence.map((ev, i) => (
                                     <li key={`${f.id}-ev-${i}`}>
                                       <span className="font-medium text-slate-800">p. {ev.page}: </span>
-                                      <q className="text-slate-700">{ev.quote}</q>
+                                      <q className="break-words text-slate-700">{ev.quote}</q>
                                     </li>
                                   ))}
                                 </ul>
@@ -460,7 +460,7 @@ export function LandingClient() {
                                 {row.evidence.map((ev, j) => (
                                   <li key={`${row.label}-ev-${j}`}>
                                     <span className="font-medium text-slate-800">p. {ev.page}: </span>
-                                    <q>{ev.quote}</q>
+                                    <q className="break-words">{ev.quote}</q>
                                   </li>
                                 ))}
                               </ul>
@@ -488,7 +488,7 @@ export function LandingClient() {
                                 {row.evidence.map((ev, j) => (
                                   <li key={`${row.label}-ev-${j}`}>
                                     <span className="font-medium text-slate-800">p. {ev.page}: </span>
-                                    <q>{ev.quote}</q>
+                                    <q className="break-words">{ev.quote}</q>
                                   </li>
                                 ))}
                               </ul>
