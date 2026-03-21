@@ -21,6 +21,7 @@ export function LandingClient() {
     extractedPages?: { page: number; text: string }[];
     rentSnippets?: { page: number; quote: string }[];
     depositSnippets?: { page: number; quote: string }[];
+    feeSnippets?: { page: number; quote: string }[];
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -113,6 +114,7 @@ export function LandingClient() {
                       extractedPages?: { page: number; text: string }[];
                       rentSnippets?: { page: number; quote: string }[];
                       depositSnippets?: { page: number; quote: string }[];
+                      feeSnippets?: { page: number; quote: string }[];
                     };
                     setUploadReceipt(data);
                   } catch (e) {
@@ -159,6 +161,13 @@ export function LandingClient() {
                   Deposit mentions found: {uploadReceipt.depositSnippets.length}. Example (page{" "}
                   {uploadReceipt.depositSnippets[0]?.page}):{" "}
                   <span className="font-medium">{uploadReceipt.depositSnippets[0]?.quote}</span>
+                </div>
+              ) : null}
+              {uploadReceipt.feeSnippets?.length ? (
+                <div className="mt-2 text-xs text-slate-700">
+                  Fee mentions found: {uploadReceipt.feeSnippets.length}. Example (page{" "}
+                  {uploadReceipt.feeSnippets[0]?.page}):{" "}
+                  <span className="font-medium">{uploadReceipt.feeSnippets[0]?.quote}</span>
                 </div>
               ) : null}
             </div>
