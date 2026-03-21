@@ -8,7 +8,19 @@ import { PasteTextDialog } from "@/components/beforeyousign/paste-text-dialog";
 import {
   parseBeforeYouSignReportJson,
   type BeforeYouSignReport,
+  type RiskLevel,
 } from "@/lib/analysis/schema";
+
+function riskBadgeClasses(level: RiskLevel): string {
+  switch (level) {
+    case "low":
+      return "border-emerald-200/80 bg-emerald-50 text-emerald-900";
+    case "medium":
+      return "border-amber-200/80 bg-amber-50 text-amber-950";
+    case "high":
+      return "border-red-200/80 bg-red-50 text-red-950";
+  }
+}
 
 type IntakeState =
   | { kind: "upload"; file: File }
@@ -280,6 +292,7 @@ export function LandingClient() {
               {uploadReceipt.report ? (
                 <div className="mt-3 space-y-3 rounded-lg border border-slate-200/80 bg-white/60 p-3 text-sm text-slate-800">
                   <h2 className="text-base font-semibold text-slate-900">Structured lease report</h2>
+                  <p className="text-slate-700">{uploadReceipt.report.summary}</p>
                   <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
                     <h3 className="text-sm font-semibold text-slate-900">What you&apos;re agreeing to</h3>
                     {uploadReceipt.report.whatYoureAgreeingTo.length ? (
@@ -292,12 +305,22 @@ export function LandingClient() {
                       <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
                     )}
                   </section>
-                  <p className="text-slate-700">{uploadReceipt.report.summary}</p>
-                  <p className="text-xs font-medium text-slate-700">
-                    Model risk level:{" "}
-                    <span className="uppercase">{uploadReceipt.report.riskLevel}</span>
-                    <span className="font-normal text-slate-600"> — {uploadReceipt.report.riskReason}</span>
-                  </p>
+                  <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
+                    <h3 className="text-sm font-semibold text-slate-900">Risk level</h3>
+                    <div className="mt-2 flex flex-col items-start gap-2">
+                      <span
+                        className={[
+                          "inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide",
+                          riskBadgeClasses(uploadReceipt.report.riskLevel),
+                        ].join(" ")}
+                      >
+                        {uploadReceipt.report.riskLevel}
+                      </span>
+                      <p className="text-sm leading-relaxed text-slate-700">
+                        {uploadReceipt.report.riskReason}
+                      </p>
+                    </div>
+                  </section>
                   {uploadReceipt.report.questionsToAsk.length ? (
                     <div>
                       <p className="font-medium text-slate-900">Questions to ask</p>
