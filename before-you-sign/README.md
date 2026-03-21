@@ -22,7 +22,17 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-4. Optional: enable PDF extraction debug logs (server-side only):
+### Demo sample leases
+
+Built-in **Try Sample Lease** loads plain-text fixtures from `public/sample-leases/`:
+
+- `standard.txt` — balanced rent, deposit, renewal, and notice language
+- `fee-heavy.txt` — multiple fees and late/NSF-style charges
+- `notice-heavy.txt` — renewal and notice-period–heavy language
+
+Use these for quick end-to-end checks without uploading a PDF.
+
+### Optional: PDF extraction debug logs (server-side only)
 
 ```bash
 set BEFOREYOUSIGN_PDF_DEBUG=1
