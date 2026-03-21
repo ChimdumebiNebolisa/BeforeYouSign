@@ -27,6 +27,7 @@ export function LandingClient() {
     maintenanceSnippets?: { page: number; quote: string }[];
     utilitiesSnippets?: { page: number; quote: string }[];
     ruleBasedFindings?: { category: string; page: number; quote: string }[];
+    unclearLeasePhrases?: { page: number; quote: string }[];
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -125,6 +126,7 @@ export function LandingClient() {
                       maintenanceSnippets?: { page: number; quote: string }[];
                       utilitiesSnippets?: { page: number; quote: string }[];
                       ruleBasedFindings?: { category: string; page: number; quote: string }[];
+                      unclearLeasePhrases?: { page: number; quote: string }[];
                     };
                     setUploadReceipt(data);
                   } catch (e) {
@@ -220,6 +222,13 @@ export function LandingClient() {
                       ? "…"
                       : ""}
                   </span>
+                </div>
+              ) : null}
+              {uploadReceipt.unclearLeasePhrases?.length ? (
+                <div className="mt-2 text-xs text-amber-900">
+                  Possibly unclear wording flagged: {uploadReceipt.unclearLeasePhrases.length}. Example
+                  (p. {uploadReceipt.unclearLeasePhrases[0]?.page}):{" "}
+                  <span className="font-medium">{uploadReceipt.unclearLeasePhrases[0]?.quote}</span>
                 </div>
               ) : null}
             </div>

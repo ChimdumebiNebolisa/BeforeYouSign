@@ -253,3 +253,35 @@ export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
 
   return dedupeSnippets(matches);
 }
+
+/**
+ * Phrases that suggest open-ended money or policy terms — surfaced for review, not interpreted as firm numbers.
+ */
+export function findUnclearLeasePhrases(pages: ExtractedTextPage[]): RentSnippet[] {
+  const patterns: RegExp[] = [
+    /\bTBD\b[^.\n]{0,120}/gi,
+    /\bto\s+be\s+determined\b[^.\n]{0,120}/gi,
+    /\bfees?\s+may\s+apply\b[^.\n]{0,120}/gi,
+    /\bat\s+(?:the\s+)?landlord'?s?\s+discretion\b[^.\n]{0,120}/gi,
+    /\bsubject\s+to\s+change\b[^.\n]{0,120}/gi,
+  ];
+
+  const matches: RentSnippet[] = [];
+
+  for (const page of pages) {
+    const text = page.text;
+    if (!text) continue;
+
+    for (const pattern of patterns) {
+      pattern.lastIndex = 0;
+      let match: RegExpExecArray | null;
+      while ((match = pattern.exec(text)) !== null) {
+        const quote = match[0].replace(/\s+/g, " ").trim();
+        if (quote.length < 8) continue;
+        matches.push({ page: page.page, quote });
+      }
+    }
+  }
+
+  return dedupeSnippets(matches);
+}

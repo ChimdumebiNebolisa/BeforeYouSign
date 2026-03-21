@@ -8,6 +8,7 @@ import {
   findNoticeSnippets,
   findRenewalSnippets,
   findRentSnippets,
+  findUnclearLeasePhrases,
   findUtilitiesSnippets,
 } from "@/lib/analysis/rules";
 import { getBysAiKey } from "@/lib/env/bys-ai-key";
@@ -73,6 +74,7 @@ export async function POST(request: Request) {
       maintenance: maintenanceSnippets,
       utilities: utilitiesSnippets,
     });
+    const unclearLeasePhrases = findUnclearLeasePhrases(extractedPages);
     const fileSizeBytes = Buffer.byteLength(normalizedText, "utf8");
 
     if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
@@ -90,6 +92,7 @@ export async function POST(request: Request) {
           maintenanceSnippets: maintenanceSnippets.length,
           utilitiesSnippets: utilitiesSnippets.length,
           ruleBasedFindings: ruleBasedFindings.length,
+          unclearLeasePhrases: unclearLeasePhrases.length,
           hasBysAiKey: Boolean(getBysAiKey()),
         }),
       );
@@ -109,6 +112,7 @@ export async function POST(request: Request) {
       maintenanceSnippets,
       utilitiesSnippets,
       ruleBasedFindings,
+      unclearLeasePhrases,
     });
   }
 
@@ -145,6 +149,7 @@ export async function POST(request: Request) {
       maintenance: maintenanceSnippets,
       utilities: utilitiesSnippets,
     });
+    const unclearLeasePhrases = findUnclearLeasePhrases(extractedPages);
 
     if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
       console.log(
@@ -161,6 +166,7 @@ export async function POST(request: Request) {
           maintenanceSnippets: maintenanceSnippets.length,
           utilitiesSnippets: utilitiesSnippets.length,
           ruleBasedFindings: ruleBasedFindings.length,
+          unclearLeasePhrases: unclearLeasePhrases.length,
           hasBysAiKey: Boolean(getBysAiKey()),
         }),
       );
@@ -180,6 +186,7 @@ export async function POST(request: Request) {
       maintenanceSnippets,
       utilitiesSnippets,
       ruleBasedFindings,
+      unclearLeasePhrases,
     });
   } catch {
     return NextResponse.json(
