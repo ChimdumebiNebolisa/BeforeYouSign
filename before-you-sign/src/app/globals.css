@@ -128,3 +128,19 @@
     @apply font-sans;
   }
 }
+
+@keyframes bys-quote-flash {
+  0%,
+  100% {
+    background-color: rgb(253 230 138 / 0.45);
+    box-shadow: 0 0 0 0 rgb(251 191 36 / 0.25);
+  }
+  45% {
+    background-color: rgb(251 191 36 / 0.75);
+    box-shadow: 0 0 0 2px rgb(251 191 36 / 0.3);
+  }
+}
+
+.bys-quote-highlight {
+  animation: bys-quote-flash 1.35s ease-in-out 2;
+}
