@@ -6,22 +6,8 @@ import { UploadLeaseCta } from "@/components/beforeyousign/upload-lease-cta";
 import { SampleLeaseCta } from "@/components/beforeyousign/sample-lease-cta";
 import { PasteTextDialog } from "@/components/beforeyousign/paste-text-dialog";
 import { LeaseTextViewer } from "@/components/beforeyousign/lease-text-viewer";
-import {
-  parseBeforeYouSignReportJson,
-  type BeforeYouSignReport,
-  type RiskLevel,
-} from "@/lib/analysis/schema";
-
-function riskBadgeClasses(level: RiskLevel): string {
-  switch (level) {
-    case "low":
-      return "border-emerald-200/80 bg-emerald-50 text-emerald-900";
-    case "medium":
-      return "border-amber-200/80 bg-amber-50 text-amber-950";
-    case "high":
-      return "border-red-200/80 bg-red-50 text-red-950";
-  }
-}
+import { LeaseReportView } from "@/components/beforeyousign/lease-report";
+import { parseBeforeYouSignReportJson, type BeforeYouSignReport } from "@/lib/analysis/schema";
 
 const ANALYSIS_STEP_LABELS_UPLOAD = [
   "Extracting lease text",
@@ -37,63 +23,64 @@ const ANALYSIS_STEP_LABELS_TEXT = [
   "Generating plain-English report",
 ] as const;
 
-function AnalysisProgressSteps({
-  active,
-  variant,
-}: {
-  active: boolean;
-  variant: "upload" | "text";
-}) {
+function AnalysisProgressSteps({ variant }: { variant: "upload" | "text" }) {
   const labels = variant === "upload" ? ANALYSIS_STEP_LABELS_UPLOAD : ANALYSIS_STEP_LABELS_TEXT;
   const [stepIndex, setStepIndex] = useState(0);
 
   useEffect(() => {
-    if (!active) {
-      setStepIndex(0);
-      return;
-    }
-    setStepIndex(0);
     const id = window.setInterval(() => {
       setStepIndex((i) => Math.min(i + 1, labels.length - 1));
     }, 1600);
     return () => window.clearInterval(id);
-  }, [active, labels.length]);
-
-  if (!active) return null;
+  }, [labels.length]);
 
   return (
-    <div
-      className="mt-4 rounded-xl border border-primary/15 bg-primary/[0.06] p-3 text-sm text-foreground shadow-sm shadow-slate-900/[0.03]"
-      aria-live="polite"
-      aria-busy="true"
-    >
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">Progress</p>
-      <ol className="mt-2 space-y-2">
+    <div className="mt-6 rounded-[2rem] bg-[#f2f4f6] p-6 sm:p-8" aria-live="polite" aria-busy="true">
+      <ol className="relative space-y-0">
         {labels.map((label, i) => {
           const done = i < stepIndex;
           const current = i === stepIndex;
+          const last = i === labels.length - 1;
           return (
-            <li key={label} className="flex items-start gap-2">
-              <span
-                className={[
-                  "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-semibold",
-                  done
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-800"
-                    :                   current
-                    ? "border-primary/50 bg-primary/10 text-primary"
-                    : "border-border bg-muted/40 text-muted-foreground",
-                ].join(" ")}
-                aria-hidden="true"
-              >
-                {done ? "✓" : i + 1}
-              </span>
-              <span
-                className={
-                  current ? "font-medium text-foreground" : done ? "text-foreground/90" : "text-muted-foreground"
-                }
-              >
-                {label}
-              </span>
+            <li key={label} className="relative flex gap-5">
+              {!last ? (
+                <span
+                  className={[
+                    "absolute left-4 top-8 bottom-0 w-0.5 -translate-x-1/2",
+                    done ? "bg-[#00246a]" : "bg-[#e0e3e5]",
+                  ].join(" ")}
+                  aria-hidden
+                />
+              ) : null}
+              <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold">
+                <span
+                  className={[
+                    "flex h-8 w-8 items-center justify-center rounded-full",
+                    done
+                      ? "bg-[#00246a] text-white"
+                      : current
+                        ? "bg-[#dbe1ff] text-[#00246a]"
+                        : "border-2 border-[#e0e3e5] bg-transparent text-[#757682]",
+                  ].join(" ")}
+                >
+                  {done ? "✓" : i + 1}
+                </span>
+              </div>
+              <div className={last ? "pb-0" : "pb-8"}>
+                <p
+                  className={[
+                    "font-[family-name:var(--font-headline)] text-sm font-bold",
+                    done || current ? "text-[#191c1e]" : "text-[#757682]",
+                  ].join(" ")}
+                >
+                  {label}
+                </p>
+                {current ? (
+                  <div className="mt-3 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-[#e0e3e5]">
+                    <div className="h-full w-2/3 animate-pulse rounded-full bg-[#00246a]/80" />
+                  </div>
+                ) : null}
+              </div>
             </li>
           );
         })}
@@ -224,37 +211,48 @@ export function LandingClient() {
 
   if (intake) {
     return (
-      <div className="flex flex-col flex-1 items-center justify-center font-sans">
+      <div className="mx-auto w-full max-w-6xl px-4 font-sans">
         <main
           className={[
-            "flex w-full min-w-0 flex-col gap-5 rounded-3xl border border-border/90 bg-card px-4 py-8 shadow-lg shadow-slate-900/[0.04] sm:px-6 sm:py-10",
-            uploadReceipt ? "max-w-6xl" : "max-w-3xl",
+            "bys-float-shadow flex min-w-0 flex-col gap-6 rounded-[2rem] bg-[#ffffff] p-5 sm:p-8",
+            uploadReceipt ? "" : "max-w-3xl mx-auto",
           ].join(" ")}
         >
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Lease review</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Lease intake</h1>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#757682]">Lease review</p>
+              <h1 className="mt-1 font-[family-name:var(--font-headline)] text-2xl font-extrabold tracking-tight text-[#191c1e]">
+                Lease intake
+              </h1>
+            </div>
+            {isSubmitting ? (
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#003ea8]">
+                Analysis in progress
+              </span>
+            ) : null}
           </div>
+
           {intake.kind === "upload" ? (
-            <p className="text-sm text-muted-foreground">
-              Upload received: <span className="font-medium">{intake.file.name}</span>
+            <p className="text-sm text-[#444651]">
+              Upload received: <span className="font-semibold text-[#191c1e]">{intake.file.name}</span>
             </p>
           ) : null}
           {intake.kind === "sample" ? (
-            <p className="text-sm text-muted-foreground">
-              Sample loaded: <span className="font-medium">{intake.text.length.toLocaleString()} chars</span>
+            <p className="text-sm text-[#444651]">
+              Sample loaded: <span className="font-semibold text-[#191c1e]">{intake.text.length.toLocaleString()} chars</span>
             </p>
           ) : null}
           {intake.kind === "paste" ? (
-            <p className="text-sm text-muted-foreground">
-              Pasted text loaded: <span className="font-medium">{intake.text.length.toLocaleString()} chars</span>
+            <p className="text-sm text-[#444651]">
+              Pasted text loaded:{" "}
+              <span className="font-semibold text-[#191c1e]">{intake.text.length.toLocaleString()} chars</span>
             </p>
           ) : null}
 
-          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <Button
               variant="outline"
-              className="rounded-full border-border bg-background/80 hover:bg-muted/80"
+              className="h-11 rounded-xl border-[#c5c5d3]/35 bg-[#f2f4f6] text-[#191c1e] hover:bg-[#eceef0]"
               onClick={() => {
                 resetIntakeUi();
                 setIntake(null);
@@ -263,7 +261,7 @@ export function LandingClient() {
               Back to landing
             </Button>
             <Button
-              className="rounded-full shadow-sm shadow-primary/20"
+              className="h-11 rounded-xl bys-gradient-cta px-6 text-white shadow-sm hover:opacity-95"
               onClick={() => void runLeaseAnalysis()}
               disabled={isSubmitting}
             >
@@ -275,19 +273,19 @@ export function LandingClient() {
             </Button>
           </div>
 
-          <AnalysisProgressSteps
-            active={isSubmitting}
-            variant={intake.kind === "upload" ? "upload" : "text"}
-          />
+          {isSubmitting ? (
+            <AnalysisProgressSteps key={intake.kind} variant={intake.kind === "upload" ? "upload" : "text"} />
+          ) : null}
 
           {uploadReceipt ? (
-            <div className="mt-2 flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start">
+            <div className="mt-2 flex min-w-0 flex-col gap-8 lg:flex-row lg:items-start">
               {uploadReceipt.extractedPages && uploadReceipt.extractedPages.length > 0 ? (
-                <div className="w-full min-w-0 lg:w-[55%] lg:max-w-[55%] lg:shrink-0">
+                <div className="w-full min-w-0 lg:sticky lg:top-32 lg:w-[46%] lg:max-w-[46%] lg:shrink-0">
                   <LeaseTextViewer
                     pages={uploadReceipt.extractedPages}
                     scrollToPage={viewerTargetPage}
                     highlight={viewerHighlight}
+                    fileLabel={uploadReceipt.fileName}
                     extractedFromPdf={
                       Boolean(uploadReceipt.contentType?.toLowerCase().includes("pdf")) ||
                       /\.pdf$/i.test(uploadReceipt.fileName)
@@ -295,324 +293,139 @@ export function LandingClient() {
                   />
                 </div>
               ) : null}
-              <div className="min-w-0 flex-1 space-y-1 rounded-xl border border-border/90 bg-muted/30 p-3 text-sm text-foreground sm:p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                Analysis output
-              </p>
-              Backend received: <span className="font-medium">{uploadReceipt.fileName}</span> (
-              {uploadReceipt.fileSizeBytes.toLocaleString()} bytes)
-              {uploadReceipt.contentType ? `, ${uploadReceipt.contentType}` : null}
-              {uploadReceipt.extractedPages?.length ? (
-                <div className="mt-2 text-xs text-muted-foreground">
-                  Extracted {uploadReceipt.extractedPages.length} page(s). First page snippet:{" "}
-                  {uploadReceipt.extractedPages[0]?.text.slice(0, 200) || "—"}
-                </div>
-              ) : null}
-              {uploadReceipt.rentSnippets?.length ? (
-                <div className="mt-2 text-xs text-muted-foreground">
-                  Rent mentions found: {uploadReceipt.rentSnippets.length}. Example (page{" "}
-                  {uploadReceipt.rentSnippets[0]?.page}):{" "}
-                  <span className="font-medium">{uploadReceipt.rentSnippets[0]?.quote}</span>
-                </div>
-              ) : null}
-              {uploadReceipt.depositSnippets?.length ? (
-                <div className="mt-2 text-xs text-muted-foreground">
-                  Deposit mentions found: {uploadReceipt.depositSnippets.length}. Example (page{" "}
-                  {uploadReceipt.depositSnippets[0]?.page}):{" "}
-                  <span className="font-medium">{uploadReceipt.depositSnippets[0]?.quote}</span>
-                </div>
-              ) : null}
-              {uploadReceipt.feeSnippets?.length ? (
-                <div className="mt-2 text-xs text-muted-foreground">
-                  Fee mentions found: {uploadReceipt.feeSnippets.length}. Example (page{" "}
-                  {uploadReceipt.feeSnippets[0]?.page}):{" "}
-                  <span className="font-medium">{uploadReceipt.feeSnippets[0]?.quote}</span>
-                </div>
-              ) : null}
-              {uploadReceipt.noticeSnippets?.length ? (
-                <div className="mt-2 text-xs text-muted-foreground">
-                  Notice language found: {uploadReceipt.noticeSnippets.length}. Example (page{" "}
-                  {uploadReceipt.noticeSnippets[0]?.page}):{" "}
-                  <span className="font-medium">{uploadReceipt.noticeSnippets[0]?.quote}</span>
-                </div>
-              ) : null}
-              {uploadReceipt.renewalSnippets?.length ? (
-                <div className="mt-2 text-xs text-muted-foreground">
-                  Renewal language found: {uploadReceipt.renewalSnippets.length}. Example (page{" "}
-                  {uploadReceipt.renewalSnippets[0]?.page}):{" "}
-                  <span className="font-medium">{uploadReceipt.renewalSnippets[0]?.quote}</span>
-                </div>
-              ) : null}
-              {uploadReceipt.maintenanceSnippets?.length ? (
-                <div className="mt-2 text-xs text-muted-foreground">
-                  Maintenance language found: {uploadReceipt.maintenanceSnippets.length}. Example (page{" "}
-                  {uploadReceipt.maintenanceSnippets[0]?.page}):{" "}
-                  <span className="font-medium">{uploadReceipt.maintenanceSnippets[0]?.quote}</span>
-                </div>
-              ) : null}
-              {uploadReceipt.utilitiesSnippets?.length ? (
-                <div className="mt-2 text-xs text-muted-foreground">
-                  Utilities language found: {uploadReceipt.utilitiesSnippets.length}. Example (page{" "}
-                  {uploadReceipt.utilitiesSnippets[0]?.page}):{" "}
-                  <span className="font-medium">{uploadReceipt.utilitiesSnippets[0]?.quote}</span>
-                </div>
-              ) : null}
-              {uploadReceipt.ruleBasedFindings?.length ? (
-                <div className="mt-2 text-xs text-muted-foreground">
-                  Rule-based findings: {uploadReceipt.ruleBasedFindings.length} (page + quote). First:{" "}
-                  <span className="font-medium">
-                    [{uploadReceipt.ruleBasedFindings[0]?.category}] p.
-                    {uploadReceipt.ruleBasedFindings[0]?.page}:{" "}
-                    {uploadReceipt.ruleBasedFindings[0]?.quote.slice(0, 120)}
-                    {uploadReceipt.ruleBasedFindings[0] &&
-                    uploadReceipt.ruleBasedFindings[0].quote.length > 120
-                      ? "…"
-                      : ""}
-                  </span>
-                </div>
-              ) : null}
-              {uploadReceipt.unclearLeasePhrases?.length ? (
-                <div className="mt-2 text-xs text-amber-900">
-                  Possibly unclear wording flagged: {uploadReceipt.unclearLeasePhrases.length}. Example
-                  (p. {uploadReceipt.unclearLeasePhrases[0]?.page}):{" "}
-                  <span className="font-medium">{uploadReceipt.unclearLeasePhrases[0]?.quote}</span>
-                </div>
-              ) : null}
-              {uploadReceipt.deterministicRiskBand !== undefined ? (
-                <div className="mt-3 rounded-lg border border-border/80 bg-card p-2 text-xs text-foreground shadow-sm">
-                  <div className="font-semibold text-foreground">
-                    Rule-based risk (not legal advice):{" "}
-                    <span className="uppercase">{uploadReceipt.deterministicRiskBand}</span> (score{" "}
-                    {uploadReceipt.deterministicRiskScore ?? "—"})
+              <div className="min-w-0 flex-1 space-y-6">
+                <details className="group rounded-xl bg-[#f2f4f6] p-4 text-sm text-[#444651]">
+                  <summary className="cursor-pointer font-[family-name:var(--font-headline)] text-xs font-bold uppercase tracking-[0.14em] text-[#757682]">
+                    Technical details
+                  </summary>
+                  <div className="mt-3 space-y-2 text-xs leading-relaxed">
+                    <p>
+                      Received <span className="font-medium text-[#191c1e]">{uploadReceipt.fileName}</span> (
+                      {uploadReceipt.fileSizeBytes.toLocaleString()} bytes)
+                      {uploadReceipt.contentType ? ` · ${uploadReceipt.contentType}` : null}
+                    </p>
+                    {uploadReceipt.extractedPages?.length ? (
+                      <p>
+                        Extracted {uploadReceipt.extractedPages.length} page(s). First page snippet:{" "}
+                        {uploadReceipt.extractedPages[0]?.text.slice(0, 200) || "—"}
+                      </p>
+                    ) : null}
+                    {uploadReceipt.rentSnippets?.length ? (
+                      <p>
+                        Rent mentions: {uploadReceipt.rentSnippets.length}. Example (p. {uploadReceipt.rentSnippets[0]?.page}
+                        ): <span className="font-medium">{uploadReceipt.rentSnippets[0]?.quote}</span>
+                      </p>
+                    ) : null}
+                    {uploadReceipt.depositSnippets?.length ? (
+                      <p>
+                        Deposit mentions: {uploadReceipt.depositSnippets.length}. Example (p.{" "}
+                        {uploadReceipt.depositSnippets[0]?.page}):{" "}
+                        <span className="font-medium">{uploadReceipt.depositSnippets[0]?.quote}</span>
+                      </p>
+                    ) : null}
+                    {uploadReceipt.feeSnippets?.length ? (
+                      <p>
+                        Fee mentions: {uploadReceipt.feeSnippets.length}. Example (p. {uploadReceipt.feeSnippets[0]?.page}):{" "}
+                        <span className="font-medium">{uploadReceipt.feeSnippets[0]?.quote}</span>
+                      </p>
+                    ) : null}
+                    {uploadReceipt.noticeSnippets?.length ? (
+                      <p>
+                        Notice language: {uploadReceipt.noticeSnippets.length}. Example (p.{" "}
+                        {uploadReceipt.noticeSnippets[0]?.page}):{" "}
+                        <span className="font-medium">{uploadReceipt.noticeSnippets[0]?.quote}</span>
+                      </p>
+                    ) : null}
+                    {uploadReceipt.renewalSnippets?.length ? (
+                      <p>
+                        Renewal language: {uploadReceipt.renewalSnippets.length}. Example (p.{" "}
+                        {uploadReceipt.renewalSnippets[0]?.page}):{" "}
+                        <span className="font-medium">{uploadReceipt.renewalSnippets[0]?.quote}</span>
+                      </p>
+                    ) : null}
+                    {uploadReceipt.maintenanceSnippets?.length ? (
+                      <p>
+                        Maintenance language: {uploadReceipt.maintenanceSnippets.length}. Example (p.{" "}
+                        {uploadReceipt.maintenanceSnippets[0]?.page}):{" "}
+                        <span className="font-medium">{uploadReceipt.maintenanceSnippets[0]?.quote}</span>
+                      </p>
+                    ) : null}
+                    {uploadReceipt.utilitiesSnippets?.length ? (
+                      <p>
+                        Utilities language: {uploadReceipt.utilitiesSnippets.length}. Example (p.{" "}
+                        {uploadReceipt.utilitiesSnippets[0]?.page}):{" "}
+                        <span className="font-medium">{uploadReceipt.utilitiesSnippets[0]?.quote}</span>
+                      </p>
+                    ) : null}
+                    {uploadReceipt.ruleBasedFindings?.length ? (
+                      <p>
+                        Rule-based findings: {uploadReceipt.ruleBasedFindings.length}. First:{" "}
+                        <span className="font-medium">
+                          [{uploadReceipt.ruleBasedFindings[0]?.category}] p.{uploadReceipt.ruleBasedFindings[0]?.page}:{" "}
+                          {uploadReceipt.ruleBasedFindings[0]?.quote.slice(0, 120)}
+                          {uploadReceipt.ruleBasedFindings[0] && uploadReceipt.ruleBasedFindings[0].quote.length > 120
+                            ? "…"
+                            : ""}
+                        </span>
+                      </p>
+                    ) : null}
+                    {uploadReceipt.unclearLeasePhrases?.length ? (
+                      <p className="text-[#9a3412]">
+                        Possibly unclear wording: {uploadReceipt.unclearLeasePhrases.length}. Example (p.{" "}
+                        {uploadReceipt.unclearLeasePhrases[0]?.page}):{" "}
+                        <span className="font-medium">{uploadReceipt.unclearLeasePhrases[0]?.quote}</span>
+                      </p>
+                    ) : null}
+                    {uploadReceipt.deterministicRiskBand !== undefined ? (
+                      <div className="rounded-lg bg-[#ffffff] p-3 text-[#191c1e]">
+                        <p className="font-semibold">
+                          Rule-based risk (not legal advice):{" "}
+                          <span className="uppercase">{uploadReceipt.deterministicRiskBand}</span> (score{" "}
+                          {uploadReceipt.deterministicRiskScore ?? "—"})
+                        </p>
+                        {uploadReceipt.deterministicRiskReasons?.length ? (
+                          <ul className="mt-1 list-inside list-disc text-[#444651]">
+                            {uploadReceipt.deterministicRiskReasons.map((r, i) => (
+                              <li key={`${i}-${r}`}>{r}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="mt-1 text-[#444651]">No strong risk signals from rule scan.</p>
+                        )}
+                      </div>
+                    ) : null}
                   </div>
-                  {uploadReceipt.deterministicRiskReasons?.length ? (
-                    <ul className="mt-1 list-inside list-disc text-muted-foreground">
-                      {uploadReceipt.deterministicRiskReasons.map((r, i) => (
-                        <li key={`${i}-${r}`}>{r}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="mt-1 text-muted-foreground">No strong risk signals from rule scan.</p>
-                  )}
-                </div>
-              ) : null}
-              {uploadReceipt.reportError ? (
-                <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs text-amber-950">
-                  {uploadReceipt.reportError}
-                </div>
-              ) : null}
-              {uploadReceipt.report ? (
-                <div className="mt-3 min-w-0 space-y-3 rounded-xl border border-border/90 bg-card p-3 text-sm text-foreground shadow-sm sm:p-4">
-                  <h2 className="text-base font-semibold text-foreground">Structured lease report</h2>
-                  <p className="text-muted-foreground">{uploadReceipt.report.summary}</p>
-                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
-                    <h3 className="text-sm font-semibold text-foreground">What you&apos;re agreeing to</h3>
-                    {uploadReceipt.report.whatYoureAgreeingTo.length ? (
-                      <ul className="mt-2 list-inside list-disc text-muted-foreground">
-                        {uploadReceipt.report.whatYoureAgreeingTo.map((line, i) => (
-                          <li key={`${i}-${line.slice(0, 40)}`}>{line}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-2 text-sm text-muted-foreground">Not clearly found in this lease text.</p>
-                    )}
-                  </section>
-                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
-                    <h3 className="text-sm font-semibold text-foreground">Risk level</h3>
-                    <div className="mt-2 flex flex-col items-start gap-2">
-                      <span
-                        className={[
-                          "inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide",
-                          riskBadgeClasses(uploadReceipt.report.riskLevel),
-                        ].join(" ")}
-                      >
-                        {uploadReceipt.report.riskLevel}
-                      </span>
-                      <p className="text-sm leading-relaxed text-muted-foreground">
-                        {uploadReceipt.report.riskReason}
-                      </p>
-                    </div>
-                  </section>
-                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
-                    <h3 className="text-sm font-semibold text-foreground">Potential red flags</h3>
-                    {uploadReceipt.report.potentialRedFlags.length ? (
-                      <ul className="mt-2 space-y-4">
-                        {uploadReceipt.report.potentialRedFlags.map((f) => (
-                          <li
-                            key={f.id}
-                            className="rounded-lg border border-border/70 bg-card/90 text-foreground"
-                          >
-                            <button
-                              type="button"
-                              className="w-full rounded-lg p-3 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
-                              onClick={() => {
-                                const ev = f.evidence[0];
-                                if (ev && typeof ev.page === "number" && ev.page >= 1) {
-                                  setViewerTargetPage(ev.page);
-                                  setViewerHighlight({ page: ev.page, quote: ev.quote });
-                                }
-                              }}
-                            >
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-sm font-semibold text-foreground">{f.title}</span>
-                              <span className="rounded-full border border-border/80 bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                                {f.severity}
-                              </span>
-                              <span className="text-xs text-muted-foreground">{f.category}</span>
-                            </div>
-                            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.explanation}</p>
-                            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                              <span className="font-medium text-foreground">Why it matters: </span>
-                              {f.whyItMatters}
-                            </p>
-                            {f.evidence.length ? (
-                              <div className="mt-2 border-t border-border/60 pt-2">
-                                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                                  From your lease
-                                </p>
-                                <ul className="mt-1 space-y-1 text-sm text-muted-foreground">
-                                  {f.evidence.map((ev, i) => (
-                                    <li key={`${f.id}-ev-${i}`}>
-                                      <span className="font-medium text-foreground">p. {ev.page}: </span>
-                                      <q className="break-words text-muted-foreground">{ev.quote}</q>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            ) : null}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-2 text-sm text-muted-foreground">Not clearly found in this lease text.</p>
-                    )}
-                  </section>
-                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
-                    <h3 className="text-sm font-semibold text-foreground">Money and fees</h3>
-                    {uploadReceipt.report.moneyAndFees.length ? (
-                      <ul className="mt-2 space-y-3">
-                        {uploadReceipt.report.moneyAndFees.map((row, i) => (
-                          <li
-                            key={`${row.label}-${i}`}
-                            className="rounded-lg border border-border/70 bg-card/90 p-3"
-                          >
-                            <p className="text-sm font-medium text-foreground">{row.label}</p>
-                            <p className="mt-1 text-sm text-muted-foreground">{row.value}</p>
-                            {row.evidence?.length ? (
-                              <ul className="mt-2 space-y-1 border-t border-border/60 pt-2 text-sm text-muted-foreground">
-                                {row.evidence.map((ev, j) => (
-                                  <li key={`${row.label}-ev-${j}`}>
-                                    <span className="font-medium text-foreground">p. {ev.page}: </span>
-                                    <q className="break-words">{ev.quote}</q>
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : null}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-2 text-sm text-muted-foreground">Not clearly found in this lease text.</p>
-                    )}
-                  </section>
-                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
-                    <h3 className="text-sm font-semibold text-foreground">Deadlines and notice rules</h3>
-                    {uploadReceipt.report.deadlinesAndNotice.length ? (
-                      <ul className="mt-2 space-y-3">
-                        {uploadReceipt.report.deadlinesAndNotice.map((row, i) => (
-                          <li
-                            key={`${row.label}-${i}`}
-                            className="rounded-lg border border-border/70 bg-card/90 p-3"
-                          >
-                            <p className="text-sm font-medium text-foreground">{row.label}</p>
-                            <p className="mt-1 text-sm text-muted-foreground">{row.value}</p>
-                            {row.evidence?.length ? (
-                              <ul className="mt-2 space-y-1 border-t border-border/60 pt-2 text-sm text-muted-foreground">
-                                {row.evidence.map((ev, j) => (
-                                  <li key={`${row.label}-ev-${j}`}>
-                                    <span className="font-medium text-foreground">p. {ev.page}: </span>
-                                    <q className="break-words">{ev.quote}</q>
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : null}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-2 text-sm text-muted-foreground">Not clearly found in this lease text.</p>
-                    )}
-                  </section>
-                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
-                    <h3 className="text-sm font-semibold text-foreground">Responsibilities</h3>
-                    {uploadReceipt.report.responsibilities.length ? (
-                      <ul className="mt-2 list-inside list-disc text-muted-foreground">
-                        {uploadReceipt.report.responsibilities.map((line, i) => (
-                          <li key={`${i}-${line.slice(0, 40)}`}>{line}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-2 text-sm text-muted-foreground">Not clearly found in this lease text.</p>
-                    )}
-                  </section>
-                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
-                    <h3 className="text-sm font-semibold text-foreground">
-                      Questions to ask before signing
-                    </h3>
-                    {uploadReceipt.report.questionsToAsk.length ? (
-                      <ul className="mt-2 list-inside list-disc text-muted-foreground">
-                        {uploadReceipt.report.questionsToAsk.map((q, i) => (
-                          <li key={`${i}-${q.slice(0, 40)}`}>{q}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-2 text-sm text-muted-foreground">Not clearly found in this lease text.</p>
-                    )}
-                  </section>
-                  <section className="rounded-xl border border-border/80 bg-muted/25 p-3">
-                    <h3 className="text-sm font-semibold text-foreground">Next steps</h3>
-                    {uploadReceipt.report.nextSteps.length ? (
-                      <ul className="mt-2 list-inside list-disc text-muted-foreground">
-                        {uploadReceipt.report.nextSteps.map((s, i) => (
-                          <li key={`${i}-${s.slice(0, 40)}`}>{s}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-2 text-sm text-muted-foreground">Not clearly found in this lease text.</p>
-                    )}
-                  </section>
-                  {uploadReceipt.report.missingOrUnclear.length ? (
-                    <section className="rounded-xl border border-amber-200/70 bg-amber-50/40 p-3">
-                      <h3 className="text-sm font-semibold text-amber-950">Not clearly found</h3>
-                      <p className="mt-1 text-xs text-amber-900/90">
-                        Could not determine from the uploaded lease with confidence:
-                      </p>
-                      <ul className="mt-2 list-inside list-disc text-sm text-amber-950">
-                        {uploadReceipt.report.missingOrUnclear.map((line, i) => (
-                          <li key={`${i}-${line.slice(0, 40)}`}>{line}</li>
-                        ))}
-                      </ul>
-                    </section>
-                  ) : null}
-                  <p className="text-xs text-muted-foreground">{uploadReceipt.report.disclaimer}</p>
-                </div>
-              ) : null}
+                </details>
+
+                {uploadReceipt.reportError ? (
+                  <div className="rounded-xl bg-[#fff7ed] p-4 text-sm text-[#9a3412]">{uploadReceipt.reportError}</div>
+                ) : null}
+                {uploadReceipt.report ? (
+                  <LeaseReportView
+                    report={uploadReceipt.report}
+                    onFlagEvidenceClick={(page, quote) => {
+                      setViewerTargetPage(page);
+                      setViewerHighlight({ page, quote });
+                    }}
+                  />
+                ) : null}
               </div>
             </div>
           ) : null}
 
           {errorMessage ? (
-            <div className="mt-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
-              <h2 className="text-base font-semibold text-red-950">We couldn&apos;t finish analysis</h2>
-              <p className="mt-2 leading-relaxed text-red-800">{errorMessage}</p>
-              <p className="mt-2 text-xs text-red-800/90">
-                Your lease text was not changed. You can retry, go back to pick a different file, or paste the
-                text instead.
+            <div className="mt-2 rounded-xl border border-[#fecaca] bg-[#fff1f2] p-4 text-sm text-[#991b1b]">
+              <h2 className="font-[family-name:var(--font-headline)] text-base font-bold text-[#7f1d1d]">
+                We couldn&apos;t finish analysis
+              </h2>
+              <p className="mt-2 leading-relaxed">{errorMessage}</p>
+              <p className="mt-2 text-xs text-[#b91c1c]">
+                Your lease text was not changed. You can retry, go back to pick a different file, or paste the text
+                instead.
               </p>
               <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 <Button
-                  className="rounded-full"
+                  className="h-11 rounded-xl bys-gradient-cta text-white"
                   disabled={isSubmitting}
                   onClick={() => void runLeaseAnalysis()}
                 >
@@ -621,7 +434,7 @@ export function LandingClient() {
                 {intake.kind === "upload" ? (
                   <Button
                     variant="outline"
-                    className="rounded-full border-red-200 bg-white/70 hover:bg-white"
+                    className="h-11 rounded-xl border-[#fecaca] bg-white hover:bg-[#fff7f7]"
                     disabled={isSubmitting}
                     onClick={() => {
                       resetIntakeUi();
@@ -641,41 +454,78 @@ export function LandingClient() {
   }
 
   return (
-    <div className="flex flex-col flex-1 items-center justify-center font-sans">
-      <main className="flex w-full max-w-3xl flex-col items-center gap-8 rounded-3xl border border-border/90 bg-card px-5 py-10 shadow-lg shadow-slate-900/[0.04] sm:px-8 sm:py-12 sm:items-start">
-        <div className="flex w-full flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Lease clarity</p>
-            <h1 className="max-w-lg text-balance text-3xl font-semibold leading-[1.15] tracking-tight text-foreground sm:text-4xl">
-              Understand your lease before you sign
+    <div className="mx-auto w-full max-w-7xl px-4 font-sans">
+      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-16">
+        <div className="space-y-10 lg:col-span-7">
+          <div className="space-y-6">
+            <h1 className="font-[family-name:var(--font-headline)] text-4xl font-extrabold leading-[1.1] tracking-tight text-[#191c1e] sm:text-5xl lg:text-6xl">
+              Understand your lease{" "}
+              <span className="text-[#00246a]">before you sign</span>
             </h1>
-            <p className="max-w-md text-lg leading-relaxed text-muted-foreground">
-              Upload or paste your lease text to see key terms and risks in plain English.
+            <p className="max-w-xl text-lg leading-relaxed text-[#444651]">
+              Upload or paste your residential lease to see key terms, fees, and risks in plain English.
             </p>
           </div>
 
-          <UploadLeaseCta
-            onStartUpload={(file) => {
-              resetIntakeUi();
-              setIntake({ kind: "upload", file });
-            }}
-          />
-          <SampleLeaseCta
-            onStartSample={(text) => {
-              resetIntakeUi();
-              setIntake({ kind: "sample", text });
-            }}
-          />
-          <PasteTextDialog
-            openRequestVersion={pasteOpenNonce}
-            onStartPaste={(text) => {
-              resetIntakeUi();
-              setIntake({ kind: "paste", text });
-            }}
-          />
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { t: "Rent & Fees", d: "Rent, deposits, and recurring charges called out clearly." },
+              { t: "Red Flags", d: "Clauses that look unusually tenant-unfriendly or vague." },
+              { t: "Renewal & Notice", d: "End dates, renewal windows, and notice requirements." },
+              { t: "Questions", d: "Negotiation prompts you can bring to the landlord or agent." },
+            ].map((c) => (
+              <div
+                key={c.t}
+                className="flex flex-col gap-2 rounded-2xl bg-[#f2f4f6] p-5 shadow-sm transition-colors hover:bg-[#ffffff]"
+              >
+                <div className="font-[family-name:var(--font-headline)] text-base font-bold text-[#191c1e]">{c.t}</div>
+                <p className="text-xs leading-snug text-[#505f76]">{c.d}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 text-[11px] font-medium tracking-wide text-[#757682]">
+            <span aria-hidden>
+              ⓘ
+            </span>
+            For informational purposes only. Not legal advice.
+          </div>
         </div>
-      </main>
+
+        <div className="lg:col-span-5">
+          <div className="bys-glass-panel space-y-8 rounded-[2rem] border border-white/50 p-6 shadow-[0px_32px_64px_rgba(0,36,106,0.08)] sm:p-8 lg:sticky lg:top-32">
+            <div className="space-y-1 text-center lg:text-left">
+              <h2 className="font-[family-name:var(--font-headline)] text-2xl font-bold text-[#191c1e]">
+                Start your analysis
+              </h2>
+              <p className="text-sm text-[#444651]">Upload a PDF lease or use a sample / pasted text</p>
+            </div>
+
+            <UploadLeaseCta
+              onStartUpload={(file) => {
+                resetIntakeUi();
+                setIntake({ kind: "upload", file });
+              }}
+            />
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <SampleLeaseCta
+                onStartSample={(text) => {
+                  resetIntakeUi();
+                  setIntake({ kind: "sample", text });
+                }}
+              />
+              <PasteTextDialog
+                openRequestVersion={pasteOpenNonce}
+                onStartPaste={(text) => {
+                  resetIntakeUi();
+                  setIntake({ kind: "paste", text });
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
-

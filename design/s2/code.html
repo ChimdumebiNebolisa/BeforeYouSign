@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BeforeYouSign | Editorial Lease Intelligence</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary-fixed": "#0b1c30",
+              "on-secondary-fixed-variant": "#38485d",
+              "error-container": "#ffdad6",
+              "on-tertiary-fixed-variant": "#3f465c",
+              "background": "#f7f9fb",
+              "outline": "#757682",
+              "on-primary-fixed": "#00174b",
+              "inverse-on-surface": "#eff1f3",
+              "on-surface-variant": "#444651",
+              "on-background": "#191c1e",
+              "on-error-container": "#93000a",
+              "on-error": "#ffffff",
+              "surface-container-highest": "#e0e3e5",
+              "secondary-container": "#d0e1fb",
+              "tertiary-fixed-dim": "#bec6e0",
+              "surface": "#f7f9fb",
+              "inverse-primary": "#b4c5ff",
+              "on-tertiary-fixed": "#131b2e",
+              "secondary-fixed-dim": "#b7c8e1",
+              "on-primary-fixed-variant": "#003ea8",
+              "surface-container-low": "#f2f4f6",
+              "secondary": "#505f76",
+              "on-secondary-container": "#54647a",
+              "outline-variant": "#c5c5d3",
+              "primary-container": "#00389a",
+              "on-primary": "#ffffff",
+              "error": "#ba1a1a",
+              "on-tertiary": "#ffffff",
+              "inverse-surface": "#2d3133",
+              "tertiary-container": "#384055",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-high": "#e6e8ea",
+              "on-primary-container": "#8da9ff",
+              "surface-bright": "#f7f9fb",
+              "on-secondary": "#ffffff",
+              "primary-fixed-dim": "#b4c5ff",
+              "surface-dim": "#d8dadc",
+              "secondary-fixed": "#d3e4fe",
+              "on-surface": "#191c1e",
+              "primary": "#00246a",
+              "surface-container": "#eceef0",
+              "primary-fixed": "#dbe1ff",
+              "tertiary": "#222a3e",
+              "surface-variant": "#e0e3e5",
+              "tertiary-fixed": "#dae2fd",
+              "on-tertiary-container": "#a4acc5",
+              "surface-tint": "#0053db"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .hero-gradient {
+            background: radial-gradient(circle at top right, #dbe1ff 0%, transparent 40%),
+                        radial-gradient(circle at bottom left, #f2f4f6 0%, transparent 50%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-background antialiased selection:bg-primary-fixed">
+<!-- TopNavBar Shell -->
+<nav class="fixed top-4 inset-x-4 rounded-2xl mx-auto max-w-7xl z-50 flex justify-between items-center px-8 h-16 w-full bg-white/70 backdrop-blur-xl dark:bg-slate-900/70 shadow-[0px_20px_40px_rgba(25,28,30,0.06)]">
+<div class="text-xl font-extrabold tracking-tighter text-blue-900 dark:text-slate-100 font-headline">BeforeYouSign</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="font-['Manrope'] tracking-tight font-medium text-sm text-blue-900 dark:text-blue-400 font-bold border-b-2 border-blue-900" href="#">How it Works</a>
+<a class="font-['Manrope'] tracking-tight font-medium text-sm text-slate-500 dark:text-slate-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors" href="#">Pricing</a>
+<a class="font-['Manrope'] tracking-tight font-medium text-sm text-slate-500 dark:text-slate-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors" href="#">Enterprise</a>
+<a class="font-['Manrope'] tracking-tight font-medium text-sm text-slate-500 dark:text-slate-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors" href="#">Log In</a>
+</div>
+<button class="bg-primary text-on-primary px-6 py-2.5 rounded-full text-sm font-semibold hover:opacity-90 active:scale-95 transition-all shadow-sm">
+            Upload PDF
+        </button>
+</nav>
+<main class="relative min-h-screen pt-32 pb-20 overflow-hidden hero-gradient">
+<!-- Background decorative elements -->
+<div class="absolute top-40 -left-20 w-96 h-96 bg-primary-fixed/30 blur-[120px] rounded-full -z-10"></div>
+<div class="absolute bottom-40 -right-20 w-96 h-96 bg-secondary-fixed/20 blur-[100px] rounded-full -z-10"></div>
+<div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+<!-- Hero Content -->
+<div class="lg:col-span-7 space-y-10">
+<div class="space-y-6">
+<h1 class="text-5xl lg:text-7xl font-extrabold font-headline text-on-background leading-[1.1] tracking-tight">
+                        Understand your lease <span class="text-primary">before you sign</span>
+</h1>
+<p class="text-xl text-on-surface-variant max-w-xl leading-relaxed">
+                        Our AI-powered analysis translates complex legal jargon into a clear, plain-English report in seconds.
+                    </p>
+</div>
+<!-- Analysis Preview Grid (The Editorial Bento) -->
+<div class="grid grid-cols-2 gap-4">
+<div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/10 shadow-sm flex flex-col gap-3 group hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-primary-fixed-variant" data-icon="payments">payments</span>
+<div class="font-headline font-bold text-lg">Rent &amp; Fees</div>
+<p class="text-xs text-secondary leading-normal">Hidden utility charges and late payment penalties extracted.</p>
+</div>
+<div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/10 shadow-sm flex flex-col gap-3 group hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-error" data-icon="report">report</span>
+<div class="font-headline font-bold text-lg">Red Flags</div>
+<p class="text-xs text-secondary leading-normal">Identification of unusual clauses that favor the landlord excessively.</p>
+</div>
+<div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/10 shadow-sm flex flex-col gap-3 group hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-on-tertiary-fixed-variant" data-icon="event_repeat">event_repeat</span>
+<div class="font-headline font-bold text-lg">Renewal</div>
+<p class="text-xs text-secondary leading-normal">Auto-renewal windows and notice period requirements simplified.</p>
+</div>
+<div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/10 shadow-sm flex flex-col gap-3 group hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-secondary" data-icon="psychology_alt">psychology_alt</span>
+<div class="font-headline font-bold text-lg">Questions</div>
+<p class="text-xs text-secondary leading-normal">Suggested talking points for your final negotiation phase.</p>
+</div>
+</div>
+<div class="flex items-center gap-2 text-xs text-slate-400 font-label tracking-wide">
+<span class="material-symbols-outlined text-sm" data-icon="info">info</span>
+                    FOR INFORMATIONAL PURPOSES ONLY. NOT LEGAL ADVICE.
+                </div>
+</div>
+<!-- Upload Interaction Area -->
+<div class="lg:col-span-5">
+<div class="glass-panel p-8 rounded-[2rem] border border-white/40 shadow-[0px_32px_64px_rgba(0,36,106,0.08)] space-y-8 sticky top-32">
+<div class="text-center space-y-2">
+<h3 class="font-headline font-bold text-2xl">Start your analysis</h3>
+<p class="text-on-surface-variant text-sm">Upload your residential or commercial lease</p>
+</div>
+<!-- Drag & Drop Zone -->
+<div class="relative group cursor-pointer">
+<div class="absolute -inset-1 bg-gradient-to-br from-primary/10 to-transparent rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
+<div class="relative bg-surface-container-lowest border-2 border-dashed border-outline-variant/30 rounded-3xl p-12 flex flex-col items-center justify-center text-center gap-4 group-hover:border-primary/40 transition-all">
+<div class="w-16 h-16 rounded-full bg-primary-fixed flex items-center justify-center text-primary transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-3xl" data-icon="upload_file">upload_file</span>
+</div>
+<div>
+<p class="font-semibold text-on-background">Click to upload or drag &amp; drop</p>
+<p class="text-xs text-on-surface-variant mt-1">PDF, DOCX up to 15MB</p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 gap-3">
+<button class="w-full bg-primary py-4 rounded-xl font-bold text-on-primary hover:opacity-95 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                            Analyze Lease
+                            <span class="material-symbols-outlined text-lg" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<div class="flex items-center gap-3 pt-2">
+<button class="flex-1 bg-surface-container-highest py-3 rounded-xl text-sm font-semibold text-on-surface hover:bg-surface-dim transition-colors">
+                                Try Sample Lease
+                            </button>
+<button class="flex-1 border border-outline-variant/30 py-3 rounded-xl text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors">
+                                Paste Text
+                            </button>
+</div>
+</div>
+<!-- Trust Indicators -->
+<div class="pt-4 flex flex-col items-center gap-4">
+<div class="flex -space-x-3">
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="User profile portrait 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFktz-tS87VNJH63Al6oOzAXJ8onXQn68JdVL5pFbciQ62iv2YBLH1I9org2xwYvgFygZ-6JMYspkvCjKhZEDMmmhj7yCWKkbv1Ju_FoowGRbF3ePt6gk3MT0tI6D8KfL6iTjB-CfrOGh1dW1c20iZMtLBYpf69YOXs4-lHRl83UoMtsGLoafsUP5PXCBVPs7VEbZnJQKSXqvMh3Vjn1ADhiEq1RJrHPYgSHb0DbSMY7LPFOKmsBh7R9nPcrbqmr7YtQeVtFE6NWY"/>
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="User profile portrait 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBA_qwHyhJwTuokiDPt7PKlddHVx4NoTvVXkwz2RREnbHXETUwVvMJANACtC9_smrsIUfDVXHu9cdUmgRJnjj5-HqX6nnbUfRXP4EwuBO1G_bIA5O_PlqLBM95UFViq5ZMbRR0nvrcvFr38_HgJN1F0ouEgJriVChu3RV7s8R2tCua9Tuy3yiBOUNC1UCE236xCh-FPi3-GWYn4f8I3dm9EKlHLvNzRAOppXPj3Sp0121NC--9Ame0FckHg8_8vBFODSjevKbvy77c"/>
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="User profile portrait 3" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB89ZSGYBkYZ4-i9bl6twnQR3x2Z7B_ws7M0vFd__EuSmzjqStYEhqjjt91Iv6FUJJA28qWP2ru2OcXSkwtCiig0roqB_BZ791et-1TbF_-v298V8pCy2Uhlc2bPhHqMxG59jQFPwKlenb6pk7B6GtBx9uVEWRp5bErPQtPSp8HJwjRwag74S1Hw5T5rLMmsjlC8gCLvTcfG4sJh-ii2ebU6tEg54asWM7Tz8fSTEXV8Sf0PMOylr-OOKhc7Cptc3yAQuLaxDhJAiA"/>
+<div class="w-8 h-8 rounded-full bg-secondary-fixed border-2 border-white flex items-center justify-center text-[10px] font-bold text-on-secondary-fixed">+12k</div>
+</div>
+<p class="text-xs text-on-surface-variant font-medium">Join 12,000+ tenants signing with confidence</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Visual Dashboard Preview Section -->
+<section class="py-24 bg-surface-container-low/50 relative">
+<div class="max-w-7xl mx-auto px-6">
+<div class="mb-16 text-center max-w-2xl mx-auto space-y-4">
+<h2 class="text-3xl font-headline font-extrabold tracking-tight">The Analysis Report</h2>
+<p class="text-on-surface-variant">We don't just find clauses; we evaluate them against local laws and standard market rates to give you leverage.</p>
+</div>
+<div class="relative">
+<!-- Abstract Dashboard Visual -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Card 1: Risk Assessment -->
+<div class="bg-surface-container-lowest p-8 rounded-[2rem] shadow-sm border border-outline-variant/5 space-y-6">
+<div class="flex justify-between items-center">
+<span class="px-4 py-1.5 bg-error-container text-on-error-container rounded-full text-xs font-bold uppercase tracking-widest">High Risk</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_horiz">more_horiz</span>
+</div>
+<div class="space-y-4">
+<div class="h-24 bg-surface-container-highest rounded-xl flex items-center px-6">
+<p class="text-sm italic text-secondary leading-relaxed">"Tenant shall be responsible for all HVAC repairs regardless of cause..."</p>
+</div>
+<div class="space-y-2">
+<h4 class="font-headline font-bold text-lg">HVAC Responsibility</h4>
+<p class="text-sm text-on-surface-variant">This clause is highly unusual for residential leases. Typically, landlords are responsible for major mechanical systems.</p>
+</div>
+</div>
+</div>
+<!-- Card 2: Financial Summary -->
+<div class="bg-surface-container-lowest p-8 rounded-[2rem] shadow-sm border border-outline-variant/5 space-y-6 md:scale-105 md:-translate-y-4 z-10 border-primary/10 ring-1 ring-primary/5">
+<div class="flex justify-between items-center">
+<span class="px-4 py-1.5 bg-secondary-fixed text-on-secondary-fixed rounded-full text-xs font-bold uppercase tracking-widest">Financials</span>
+<span class="material-symbols-outlined text-primary" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div class="space-y-6">
+<div class="flex justify-between items-end border-b border-outline-variant/10 pb-4">
+<div>
+<p class="text-xs text-on-surface-variant uppercase font-bold tracking-wider">Monthly Base Rent</p>
+<h4 class="text-3xl font-headline font-extrabold">$2,450.00</h4>
+</div>
+<div class="text-right">
+<p class="text-xs text-error font-bold">+ $120 Fees</p>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant">Security Deposit</span>
+<span class="font-bold">$4,900.00</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant">Late Fee (after 5th)</span>
+<span class="font-bold text-error">$150.00</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3: Key Deadlines -->
+<div class="bg-surface-container-lowest p-8 rounded-[2rem] shadow-sm border border-outline-variant/5 space-y-6">
+<div class="flex justify-between items-center">
+<span class="px-4 py-1.5 bg-tertiary-fixed text-on-tertiary-fixed rounded-full text-xs font-bold uppercase tracking-widest">Deadlines</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="calendar_today">calendar_today</span>
+</div>
+<div class="space-y-6">
+<div class="flex gap-4 items-start">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex flex-col items-center justify-center flex-shrink-0">
+<span class="text-[10px] font-bold">SEP</span>
+<span class="text-sm font-bold">12</span>
+</div>
+<div>
+<h5 class="text-sm font-bold">Move-in Date</h5>
+<p class="text-xs text-on-surface-variant">Property must be vacant and cleaned.</p>
+</div>
+</div>
+<div class="flex gap-4 items-start">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed flex flex-col items-center justify-center flex-shrink-0">
+<span class="text-[10px] font-bold">JUL</span>
+<span class="text-sm font-bold">15</span>
+</div>
+<div>
+<h5 class="text-sm font-bold">Renewal Notice</h5>
+<p class="text-xs text-on-surface-variant">60-day window required for move-out notice.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer Shell -->
+<footer class="bg-slate-50 dark:bg-slate-950 w-full py-12 px-8 border-t border-slate-200/15">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="font-['Manrope'] text-xs uppercase tracking-widest text-slate-400">
+                © 2024 BeforeYouSign. Editorial Lease Intelligence.
+            </div>
+<div class="flex flex-wrap justify-center gap-8">
+<a class="font-['Manrope'] text-xs uppercase tracking-widest text-slate-400 hover:text-blue-900 transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="font-['Manrope'] text-xs uppercase tracking-widest text-slate-400 hover:text-blue-900 transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="font-['Manrope'] text-xs uppercase tracking-widest text-slate-400 hover:text-blue-900 transition-colors opacity-80 hover:opacity-100" href="#">Security</a>
+<a class="font-['Manrope'] text-xs uppercase tracking-widest text-slate-400 hover:text-blue-900 transition-colors opacity-80 hover:opacity-100" href="#">Contact Support</a>
+</div>
+</div>
+</footer>
+</body></html>

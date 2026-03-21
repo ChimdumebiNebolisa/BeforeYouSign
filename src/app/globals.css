@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-headline);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,25 +49,25 @@
 }
 
 :root {
-  /* Calm fintech: cool canvas, teal primary, crisp cards */
-  --background: oklch(0.965 0.012 252);
-  --foreground: oklch(0.22 0.035 255);
-  --card: oklch(1 0.002 252);
-  --card-foreground: oklch(0.22 0.035 255);
-  --popover: oklch(1 0.002 252);
-  --popover-foreground: oklch(0.22 0.035 255);
-  --primary: oklch(0.44 0.11 198);
-  --primary-foreground: oklch(0.99 0.004 252);
-  --secondary: oklch(0.96 0.012 252);
-  --secondary-foreground: oklch(0.28 0.04 255);
-  --muted: oklch(0.955 0.012 252);
-  --muted-foreground: oklch(0.48 0.03 255);
-  --accent: oklch(0.94 0.025 198);
-  --accent-foreground: oklch(0.32 0.08 198);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.9 0.02 252);
-  --input: oklch(0.9 0.02 252);
-  --ring: oklch(0.55 0.09 198);
+  /* Stitch: editorial lease intelligence (blue-gray canvas, navy primary) */
+  --background: #f7f9fb;
+  --foreground: #191c1e;
+  --card: #ffffff;
+  --card-foreground: #191c1e;
+  --popover: #ffffff;
+  --popover-foreground: #191c1e;
+  --primary: #00246a;
+  --primary-foreground: #ffffff;
+  --secondary: #f2f4f6;
+  --secondary-foreground: #191c1e;
+  --muted: #f2f4f6;
+  --muted-foreground: #444651;
+  --accent: #dbe1ff;
+  --accent-foreground: #00174b;
+  --destructive: #ba1a1a;
+  --border: rgb(197 197 211 / 0.22);
+  --input: #f2f4f6;
+  --ring: #00246a;
   --chart-1: oklch(0.62 0.12 198);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -130,15 +130,37 @@
   }
 }
 
+@layer utilities {
+  .bys-hero-gradient {
+    background-image:
+      radial-gradient(circle at top right, rgb(219 225 255 / 0.85) 0%, transparent 42%),
+      radial-gradient(circle at bottom left, rgb(242 244 246 / 0.9) 0%, transparent 52%);
+  }
+  .bys-gradient-cta {
+    background-image: linear-gradient(135deg, #00246a 0%, #00389a 100%);
+  }
+  .bys-glass-panel {
+    background-color: rgb(255 255 255 / 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .bys-float-shadow {
+    box-shadow: 0px 20px 40px rgba(25, 28, 30, 0.06);
+  }
+  .bys-modal-shadow {
+    box-shadow: 0px 20px 40px rgba(25, 28, 30, 0.06);
+  }
+}
+
 @keyframes bys-quote-flash {
   0%,
   100% {
-    background-color: rgb(253 230 138 / 0.45);
-    box-shadow: 0 0 0 0 rgb(251 191 36 / 0.25);
+    background-color: rgb(219 225 255 / 0.55);
+    box-shadow: 0 0 0 0 rgb(0 36 106 / 0.12);
   }
   45% {
-    background-color: rgb(251 191 36 / 0.75);
-    box-shadow: 0 0 0 2px rgb(251 191 36 / 0.3);
+    background-color: rgb(179 198 255 / 0.75);
+    box-shadow: 0 0 0 2px rgb(0 36 106 / 0.18);
   }
 }
 

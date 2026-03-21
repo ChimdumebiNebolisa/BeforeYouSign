@@ -46,14 +46,14 @@ function LeasePageBlock({
 
   return (
     <article ref={rootRef} id={`bys-page-${pageNumber}`} className="mb-6 last:mb-0">
-      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Page {pageNumber}</h4>
-      <div className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground/90">
+      <h4 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#757682]">Page {pageNumber}</h4>
+      <div className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-[#444651]">
         {match ? (
           <>
             {match.before}
             <mark
               data-bys-quote-highlight
-              className="bys-quote-highlight rounded-sm px-0.5 text-foreground"
+              className="bys-quote-highlight rounded-sm px-0.5 text-[#191c1e]"
             >
               {match.match}
             </mark>
@@ -72,28 +72,34 @@ export function LeaseTextViewer({
   scrollToPage,
   highlight,
   extractedFromPdf,
+  fileLabel,
 }: {
   pages: LeaseTextPage[];
   scrollToPage?: number | null;
   highlight?: { page: number; quote: string } | null;
   extractedFromPdf?: boolean;
+  fileLabel?: string;
 }) {
   const sorted = [...pages].sort((a, b) => a.page - b.page);
 
   return (
-    <div className="flex max-h-[min(70vh,720px)] min-h-[200px] flex-col overflow-hidden rounded-xl border border-border/90 bg-card shadow-sm shadow-slate-900/[0.04]">
-      <div className="border-b border-border/80 bg-muted/20 px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        <div className="normal-case tracking-normal text-foreground">
-          Lease text ({sorted.length} page{sorted.length === 1 ? "" : "s"})
-        </div>
-        {extractedFromPdf ? (
-          <p className="mt-1 text-[11px] font-normal normal-case leading-snug text-muted-foreground">
-            Extracted from your PDF. This text view is the fallback when precise PDF highlighting is not
-            available.
+    <div className="flex max-h-[min(70vh,calc(100vh-140px))] min-h-[200px] flex-col overflow-hidden rounded-xl bg-[#f2f4f6] shadow-sm">
+      <div className="flex items-start justify-between gap-3 px-3 py-3 sm:px-4">
+        <div className="min-w-0">
+          <p className="font-[family-name:var(--font-headline)] text-sm font-bold tracking-tight text-[#191c1e] truncate">
+            {fileLabel ?? "Lease text"}
           </p>
-        ) : null}
+          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.12em] text-[#757682]">
+            {sorted.length} page{sorted.length === 1 ? "" : "s"}
+          </p>
+          {extractedFromPdf ? (
+            <p className="mt-2 text-[11px] font-normal normal-case leading-snug text-[#444651]">
+              Extracted from your PDF. This view is the fallback when precise PDF highlighting is not available.
+            </p>
+          ) : null}
+        </div>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto p-3">
+      <div className="min-h-0 flex-1 overflow-y-auto rounded-xl bg-[#ffffff] p-4 shadow-inner">
         {sorted.map((p) => (
           <LeasePageBlock
             key={p.page}

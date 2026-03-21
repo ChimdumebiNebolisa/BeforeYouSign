@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 
 type SampleKey = "standard" | "fee-heavy" | "notice-heavy";
 
@@ -27,10 +26,10 @@ export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string
 
   return (
     <>
-      <label className="mt-3 block w-full text-left text-xs font-medium text-muted-foreground">
-        Sample type
+      <label className="block w-full text-left">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#757682]">Sample lease</span>
         <select
-          className="mt-1 w-full rounded-xl border border-border/90 bg-card px-3 py-2 text-sm text-foreground shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/35"
+          className="mt-2 w-full rounded-xl bg-[#e0e3e5] px-3 py-3 text-sm font-medium text-[#191c1e] outline-none transition focus:bg-[#ffffff] focus:ring-2 focus:ring-[#00246a]/20"
           value={sampleKey}
           onChange={(e) => {
             setSampleKey(e.target.value as SampleKey);
@@ -46,9 +45,9 @@ export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string
         </select>
       </label>
 
-      <Button
-        variant="outline"
-        className="mt-3 w-full rounded-full border-border/90 bg-background/60 text-foreground hover:bg-muted/80"
+      <button
+        type="button"
+        className="mt-3 w-full rounded-xl bg-[#e0e3e5] py-3 text-sm font-semibold text-[#191c1e] transition hover:bg-[#d8dadc] active:scale-[0.99] disabled:opacity-60"
         disabled={isLoading}
         onClick={() => {
           const run = async () => {
@@ -78,27 +77,29 @@ export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string
         }}
       >
         {isLoading ? "Loading sample…" : "Try Sample Lease"}
-      </Button>
+      </button>
 
-      {loadError ? <p className="mt-2 text-sm font-medium text-red-600">{loadError}</p> : null}
+      {loadError ? <p className="mt-2 text-sm font-medium text-[#ba1a1a]">{loadError}</p> : null}
 
       {hasLoaded ? (
-        <p className="mt-3 text-sm text-muted-foreground">
-          Sample lease text loaded ({SAMPLE_LABEL[sampleKey]}).
-        </p>
+        <p className="mt-2 text-xs text-[#444651]">Loaded: {SAMPLE_LABEL[sampleKey]}</p>
       ) : null}
 
       {isOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-4 backdrop-blur-[2px]">
-          <div className="w-full max-w-2xl rounded-2xl border border-border/90 bg-card p-4 shadow-xl shadow-slate-900/15">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#191c1e]/45 p-4 backdrop-blur-[2px]">
+          <div className="bys-modal-shadow w-full max-w-2xl rounded-[1.75rem] bg-[#ffffff] p-5 sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-base font-semibold text-foreground">Sample Lease Text</h2>
-                <p className="mt-1 text-sm text-muted-foreground">{SAMPLE_LABEL[sampleKey]} — you can use this text for analysis.</p>
+                <h2 className="font-[family-name:var(--font-headline)] text-lg font-bold text-[#191c1e]">
+                  Sample lease text
+                </h2>
+                <p className="mt-1 text-sm text-[#444651]">
+                  {SAMPLE_LABEL[sampleKey]} — you can use this text for analysis.
+                </p>
               </div>
               <button
                 type="button"
-                className="rounded-full px-3 py-1 text-sm font-medium text-muted-foreground hover:bg-muted"
+                className="rounded-full px-3 py-1 text-sm font-medium text-[#757682] hover:bg-[#f2f4f6]"
                 onClick={() => setIsOpen(false)}
               >
                 Close
@@ -108,25 +109,26 @@ export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string
             <textarea
               readOnly
               value={previewText}
-              className="mt-4 h-56 w-full resize-none rounded-xl border border-border/90 bg-muted/30 p-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+              className="mt-4 h-56 w-full resize-none rounded-xl bg-[#f2f4f6] p-3 text-sm text-[#191c1e] outline-none ring-1 ring-[#c5c5d3]/25 focus:ring-2 focus:ring-[#00246a]/25"
             />
 
             <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <Button
-                className="w-full rounded-full shadow-sm shadow-primary/15 sm:w-auto"
+              <button
+                type="button"
+                className="h-11 w-full rounded-xl bys-gradient-cta text-sm font-bold text-white shadow-sm sm:w-auto sm:px-6"
                 onClick={() => {
                   setIsOpen(false);
                 }}
               >
                 Continue
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full rounded-full border-border/90 bg-background/80 hover:bg-muted/80 sm:w-auto"
+              </button>
+              <button
+                type="button"
+                className="h-11 w-full rounded-xl bg-[#e0e3e5] text-sm font-semibold text-[#191c1e] sm:w-auto sm:px-6"
                 onClick={() => setIsOpen(false)}
               >
                 Cancel
-              </Button>
+              </button>
             </div>
           </div>
         </div>
