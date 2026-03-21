@@ -392,6 +392,34 @@ export function LandingClient() {
                       <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
                     )}
                   </section>
+                  <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
+                    <h3 className="text-sm font-semibold text-slate-900">Deadlines and notice rules</h3>
+                    {uploadReceipt.report.deadlinesAndNotice.length ? (
+                      <ul className="mt-2 space-y-3">
+                        {uploadReceipt.report.deadlinesAndNotice.map((row, i) => (
+                          <li
+                            key={`${row.label}-${i}`}
+                            className="rounded-lg border border-slate-200/60 bg-white/40 p-3"
+                          >
+                            <p className="text-sm font-medium text-slate-900">{row.label}</p>
+                            <p className="mt-1 text-sm text-slate-700">{row.value}</p>
+                            {row.evidence?.length ? (
+                              <ul className="mt-2 space-y-1 border-t border-slate-200/50 pt-2 text-sm text-slate-600">
+                                {row.evidence.map((ev, j) => (
+                                  <li key={`${row.label}-ev-${j}`}>
+                                    <span className="font-medium text-slate-800">p. {ev.page}: </span>
+                                    <q>{ev.quote}</q>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : null}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
+                    )}
+                  </section>
                   {uploadReceipt.report.questionsToAsk.length ? (
                     <div>
                       <p className="font-medium text-slate-900">Questions to ask</p>
