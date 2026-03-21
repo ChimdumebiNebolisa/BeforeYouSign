@@ -446,16 +446,18 @@ export function LandingClient() {
                       <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
                     )}
                   </section>
-                  {uploadReceipt.report.nextSteps.length ? (
-                    <div>
-                      <p className="font-medium text-slate-900">Next steps</p>
-                      <ul className="mt-1 list-inside list-disc text-slate-700">
+                  <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
+                    <h3 className="text-sm font-semibold text-slate-900">Next steps</h3>
+                    {uploadReceipt.report.nextSteps.length ? (
+                      <ul className="mt-2 list-inside list-disc text-slate-700">
                         {uploadReceipt.report.nextSteps.map((s, i) => (
                           <li key={`${i}-${s.slice(0, 40)}`}>{s}</li>
                         ))}
                       </ul>
-                    </div>
-                  ) : null}
+                    ) : (
+                      <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
+                    )}
+                  </section>
                   <p className="text-xs text-slate-500">{uploadReceipt.report.disclaimer}</p>
                 </div>
               ) : null}
