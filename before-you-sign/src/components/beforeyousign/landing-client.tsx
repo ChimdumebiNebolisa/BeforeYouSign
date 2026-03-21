@@ -132,11 +132,13 @@ export function LandingClient() {
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [viewerTargetPage, setViewerTargetPage] = useState<number | null>(null);
 
   const resetIntakeUi = () => {
     setUploadReceipt(null);
     setIsSubmitting(false);
     setErrorMessage(null);
+    setViewerTargetPage(null);
   };
 
   const runLeaseAnalysis = useCallback(async () => {
@@ -145,6 +147,7 @@ export function LandingClient() {
       setIsSubmitting(true);
       setErrorMessage(null);
       setUploadReceipt(null);
+      setViewerTargetPage(null);
 
       let res: Response;
       if (intake.kind === "upload") {
@@ -275,7 +278,7 @@ export function LandingClient() {
             <div className="mt-2 flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start">
               {uploadReceipt.extractedPages && uploadReceipt.extractedPages.length > 0 ? (
                 <div className="w-full min-w-0 lg:w-[55%] lg:max-w-[55%] lg:shrink-0">
-                  <LeaseTextViewer pages={uploadReceipt.extractedPages} />
+                  <LeaseTextViewer pages={uploadReceipt.extractedPages} scrollToPage={viewerTargetPage} />
                 </div>
               ) : null}
               <div className="min-w-0 flex-1 rounded-xl border border-slate-200/70 bg-white/60 p-3 text-sm text-slate-800 sm:p-4">
@@ -420,8 +423,18 @@ export function LandingClient() {
                         {uploadReceipt.report.potentialRedFlags.map((f) => (
                           <li
                             key={f.id}
-                            className="rounded-lg border border-slate-200/60 bg-white/40 p-3 text-slate-800"
+                            className="rounded-lg border border-slate-200/60 bg-white/40 text-slate-800"
                           >
+                            <button
+                              type="button"
+                              className="w-full rounded-lg p-3 text-left transition-colors hover:bg-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+                              onClick={() => {
+                                const page = f.evidence[0]?.page;
+                                if (typeof page === "number" && page >= 1) {
+                                  setViewerTargetPage(page);
+                                }
+                              }}
+                            >
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="text-sm font-semibold text-slate-900">{f.title}</span>
                               <span className="rounded-full border border-slate-200/80 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-700">
@@ -449,6 +462,7 @@ export function LandingClient() {
                                 </ul>
                               </div>
                             ) : null}
+                            </button>
                           </li>
                         ))}
                       </ul>
