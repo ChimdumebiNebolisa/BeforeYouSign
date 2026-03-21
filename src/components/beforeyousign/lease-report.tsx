@@ -2,6 +2,36 @@
 
 import type { BeforeYouSignReport, RiskLevel } from "@/lib/analysis/schema";
 
+const MAX_SUMMARY_SENTENCES = 4;
+
+/** Display-only: cap intro summary to at most four sentences. */
+function displaySummaryIntro(text: string): string {
+  const t = text.trim();
+  if (!t) return "";
+  const parts = t
+    .split(/(?<=[.!?])\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (parts.length === 0) {
+    return t.length > 360 ? `${t.slice(0, 360).trim()}…` : t;
+  }
+  return parts.slice(0, MAX_SUMMARY_SENTENCES).join(" ");
+}
+
+/** Display-only: at most two short sentences for risk context. */
+function displayRiskContext(text: string): string {
+  const t = text.trim();
+  if (!t) return "";
+  const parts = t
+    .split(/(?<=[.!?])\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (parts.length <= 2) return t;
+  return parts.slice(0, 2).join(" ");
+}
+
+const MAX_AGREE_BULLETS = 6;
+
 function riskSurfaceClasses(level: RiskLevel): string {
   switch (level) {
     case "low":
@@ -20,36 +50,44 @@ export function LeaseReportView({
   report: BeforeYouSignReport;
   onFlagEvidenceClick: (page: number, quote: string) => void;
 }) {
+  const summaryIntro = displaySummaryIntro(report.summary);
+  const agreeBullets = report.whatYoureAgreeingTo.slice(0, MAX_AGREE_BULLETS);
+  const riskNote = displayRiskContext(report.riskReason);
+
   return (
     <div className="space-y-6">
-      <section className="rounded-xl bg-[#ffffff] p-6 shadow-[0px_20px_40px_rgba(25,28,30,0.06)] sm:p-8">
-        <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-          <div className="min-w-0 space-y-2">
-            <p className="font-[family-name:var(--font-headline)] text-[11px] font-semibold uppercase tracking-[0.2em] text-[#757682]">
+      <section className="rounded-xl bg-[#ffffff] p-5 shadow-[0px_16px_36px_rgba(25,28,30,0.05)] sm:p-6">
+        <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between md:gap-6">
+          <div className="min-w-0 space-y-1.5">
+            <p className="font-[family-name:var(--font-headline)] text-[10px] font-semibold uppercase tracking-[0.18em] text-[#757682]">
               Summary
             </p>
-            <h2 className="font-[family-name:var(--font-headline)] text-2xl font-extrabold tracking-tight text-[#191c1e] sm:text-3xl">
+            <h2 className="font-[family-name:var(--font-headline)] text-xl font-extrabold tracking-tight text-[#191c1e] sm:text-2xl">
               What You&apos;re Agreeing To
             </h2>
-            <p className="mt-4 max-w-lg text-sm leading-relaxed text-[#444651]">{report.summary}</p>
-            {report.whatYoureAgreeingTo.length ? (
-              <ul className="mt-6 max-w-lg list-disc space-y-2 pl-5 text-sm leading-relaxed text-[#444651]">
-                {report.whatYoureAgreeingTo.map((line, i) => (
+            {summaryIntro ? (
+              <p className="mt-3 max-w-xl text-sm leading-snug text-[#444651]">{summaryIntro}</p>
+            ) : null}
+            {agreeBullets.length ? (
+              <ul className="mt-4 max-w-xl list-disc space-y-1.5 pl-4 text-[13px] leading-snug text-[#444651]">
+                {agreeBullets.map((line, i) => (
                   <li key={`${i}-${line.slice(0, 24)}`}>{line}</li>
                 ))}
               </ul>
             ) : null}
           </div>
           <div
-            className={`flex min-w-[140px] flex-col items-center justify-center rounded-xl p-6 text-center ${riskSurfaceClasses(
+            className={`shrink-0 rounded-lg px-4 py-3 text-center md:max-w-[11.5rem] ${riskSurfaceClasses(
               report.riskLevel,
             )}`}
           >
-            <span className="text-[10px] font-bold uppercase tracking-tight text-[#38485d]">Risk Level</span>
-            <span className="font-[family-name:var(--font-headline)] text-2xl font-black uppercase tracking-tight">
+            <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#38485d]/90">Risk Level</span>
+            <span className="mt-1 block font-[family-name:var(--font-headline)] text-lg font-extrabold uppercase leading-none tracking-tight">
               {report.riskLevel}
             </span>
-            <p className="mt-2 max-w-[200px] text-[11px] leading-snug text-[#38485d]">{report.riskReason}</p>
+            {riskNote ? (
+              <p className="mt-2 text-left text-[11px] leading-snug text-[#38485d]">{riskNote}</p>
+            ) : null}
           </div>
         </div>
       </section>
