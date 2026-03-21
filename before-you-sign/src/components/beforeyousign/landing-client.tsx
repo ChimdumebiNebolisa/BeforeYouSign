@@ -285,6 +285,10 @@ export function LandingClient() {
                     pages={uploadReceipt.extractedPages}
                     scrollToPage={viewerTargetPage}
                     highlight={viewerHighlight}
+                    extractedFromPdf={
+                      Boolean(uploadReceipt.contentType?.toLowerCase().includes("pdf")) ||
+                      /\.pdf$/i.test(uploadReceipt.fileName)
+                    }
                   />
                 </div>
               ) : null}
