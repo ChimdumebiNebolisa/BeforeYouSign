@@ -5,21 +5,15 @@ import { Button } from "@/components/ui/button";
 import { UploadLeaseCta } from "@/components/beforeyousign/upload-lease-cta";
 import { SampleLeaseCta } from "@/components/beforeyousign/sample-lease-cta";
 import { PasteTextDialog } from "@/components/beforeyousign/paste-text-dialog";
+import {
+  parseBeforeYouSignReportJson,
+  type BeforeYouSignReport,
+} from "@/lib/analysis/schema";
 
 type IntakeState =
   | { kind: "upload"; file: File }
   | { kind: "sample"; text: string }
   | { kind: "paste"; text: string };
-
-type LeaseReportSnapshot = {
-  summary: string;
-  whatYoureAgreeingTo: string[];
-  riskLevel: string;
-  riskReason: string;
-  questionsToAsk: string[];
-  nextSteps: string[];
-  disclaimer: string;
-};
 
 export function LandingClient() {
   const [intake, setIntake] = useState<IntakeState | null>(null);
@@ -41,7 +35,7 @@ export function LandingClient() {
     deterministicRiskScore?: number;
     deterministicRiskBand?: "low" | "medium" | "high";
     deterministicRiskReasons?: string[];
-    report?: LeaseReportSnapshot | null;
+    report?: BeforeYouSignReport | null;
     reportError?: string | null;
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -149,38 +143,10 @@ export function LandingClient() {
                       reportError?: string | null;
                     };
 
-                    const reportRaw = data.report;
-                    const report: LeaseReportSnapshot | null =
-                      reportRaw &&
-                      typeof reportRaw === "object" &&
-                      reportRaw !== null &&
-                      typeof (reportRaw as { summary?: unknown }).summary === "string"
-                        ? {
-                            summary: (reportRaw as { summary: string }).summary,
-                            whatYoureAgreeingTo: Array.isArray(
-                              (reportRaw as { whatYoureAgreeingTo?: unknown }).whatYoureAgreeingTo,
-                            )
-                              ? (reportRaw as { whatYoureAgreeingTo: string[] }).whatYoureAgreeingTo.filter(
-                                  (x) => typeof x === "string",
-                                )
-                              : [],
-                            riskLevel: String((reportRaw as { riskLevel?: unknown }).riskLevel ?? ""),
-                            riskReason: String((reportRaw as { riskReason?: unknown }).riskReason ?? ""),
-                            questionsToAsk: Array.isArray(
-                              (reportRaw as { questionsToAsk?: unknown }).questionsToAsk,
-                            )
-                              ? (reportRaw as { questionsToAsk: string[] }).questionsToAsk.filter(
-                                  (x) => typeof x === "string",
-                                )
-                              : [],
-                            nextSteps: Array.isArray((reportRaw as { nextSteps?: unknown }).nextSteps)
-                              ? (reportRaw as { nextSteps: string[] }).nextSteps.filter(
-                                  (x) => typeof x === "string",
-                                )
-                              : [],
-                            disclaimer: String((reportRaw as { disclaimer?: unknown }).disclaimer ?? ""),
-                          }
-                        : null;
+                    const report =
+                      data.report === undefined || data.report === null
+                        ? null
+                        : parseBeforeYouSignReportJson(data.report);
                     setUploadReceipt({
                       ...data,
                       report,
@@ -314,22 +280,24 @@ export function LandingClient() {
               {uploadReceipt.report ? (
                 <div className="mt-3 space-y-3 rounded-lg border border-slate-200/80 bg-white/60 p-3 text-sm text-slate-800">
                   <h2 className="text-base font-semibold text-slate-900">Structured lease report</h2>
+                  <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
+                    <h3 className="text-sm font-semibold text-slate-900">What you&apos;re agreeing to</h3>
+                    {uploadReceipt.report.whatYoureAgreeingTo.length ? (
+                      <ul className="mt-2 list-inside list-disc text-slate-700">
+                        {uploadReceipt.report.whatYoureAgreeingTo.map((line, i) => (
+                          <li key={`${i}-${line.slice(0, 40)}`}>{line}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
+                    )}
+                  </section>
                   <p className="text-slate-700">{uploadReceipt.report.summary}</p>
                   <p className="text-xs font-medium text-slate-700">
                     Model risk level:{" "}
                     <span className="uppercase">{uploadReceipt.report.riskLevel}</span>
                     <span className="font-normal text-slate-600"> — {uploadReceipt.report.riskReason}</span>
                   </p>
-                  {uploadReceipt.report.whatYoureAgreeingTo.length ? (
-                    <div>
-                      <p className="font-medium text-slate-900">What you&apos;re agreeing to</p>
-                      <ul className="mt-1 list-inside list-disc text-slate-700">
-                        {uploadReceipt.report.whatYoureAgreeingTo.map((line, i) => (
-                          <li key={`${i}-${line.slice(0, 40)}`}>{line}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
                   {uploadReceipt.report.questionsToAsk.length ? (
                     <div>
                       <p className="font-medium text-slate-900">Questions to ask</p>
