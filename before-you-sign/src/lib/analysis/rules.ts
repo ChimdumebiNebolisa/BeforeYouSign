@@ -158,6 +158,33 @@ export function findMaintenanceSnippets(pages: ExtractedTextPage[]): RentSnippet
   return dedupeSnippets(matches);
 }
 
+export function findUtilitiesSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
+  const patterns: RegExp[] = [
+    /\butilities\b[^.\n]{0,200}/gi,
+    /\b(?:tenant|landlord)\b[^.\n]{0,120}\b(?:responsible|pays?|payment)\b[^.\n]{0,120}\b(?:electric|gas|water|sewer|trash|internet|cable|heat)\b/gi,
+    /\b(?:electric|gas|water|sewer|trash)\b[^.\n]{0,120}\b(?:tenant|landlord)\b/gi,
+  ];
+
+  const matches: RentSnippet[] = [];
+
+  for (const page of pages) {
+    const text = page.text;
+    if (!text) continue;
+
+    for (const pattern of patterns) {
+      pattern.lastIndex = 0;
+      let match: RegExpExecArray | null;
+      while ((match = pattern.exec(text)) !== null) {
+        const quote = match[0].replace(/\s+/g, " ").trim();
+        if (quote.length < 15) continue;
+        matches.push({ page: page.page, quote });
+      }
+    }
+  }
+
+  return dedupeSnippets(matches);
+}
+
 export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\brent\b[^.\n]{0,200}\$[\d,]+(?:\.\d{2})?\b/gi,

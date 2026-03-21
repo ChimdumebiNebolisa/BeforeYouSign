@@ -25,6 +25,7 @@ export function LandingClient() {
     noticeSnippets?: { page: number; quote: string }[];
     renewalSnippets?: { page: number; quote: string }[];
     maintenanceSnippets?: { page: number; quote: string }[];
+    utilitiesSnippets?: { page: number; quote: string }[];
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -121,6 +122,7 @@ export function LandingClient() {
                       noticeSnippets?: { page: number; quote: string }[];
                       renewalSnippets?: { page: number; quote: string }[];
                       maintenanceSnippets?: { page: number; quote: string }[];
+                      utilitiesSnippets?: { page: number; quote: string }[];
                     };
                     setUploadReceipt(data);
                   } catch (e) {
@@ -195,6 +197,13 @@ export function LandingClient() {
                   Maintenance language found: {uploadReceipt.maintenanceSnippets.length}. Example (page{" "}
                   {uploadReceipt.maintenanceSnippets[0]?.page}):{" "}
                   <span className="font-medium">{uploadReceipt.maintenanceSnippets[0]?.quote}</span>
+                </div>
+              ) : null}
+              {uploadReceipt.utilitiesSnippets?.length ? (
+                <div className="mt-2 text-xs text-slate-700">
+                  Utilities language found: {uploadReceipt.utilitiesSnippets.length}. Example (page{" "}
+                  {uploadReceipt.utilitiesSnippets[0]?.page}):{" "}
+                  <span className="font-medium">{uploadReceipt.utilitiesSnippets[0]?.quote}</span>
                 </div>
               ) : null}
             </div>
