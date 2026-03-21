@@ -121,6 +121,7 @@ export function LandingClient() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [viewerTargetPage, setViewerTargetPage] = useState<number | null>(null);
   const [viewerHighlight, setViewerHighlight] = useState<{ page: number; quote: string } | null>(null);
+  const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
 
   const resetIntakeUi = () => {
     setUploadReceipt(null);
@@ -128,6 +129,7 @@ export function LandingClient() {
     setErrorMessage(null);
     setViewerTargetPage(null);
     setViewerHighlight(null);
+    setSelectedFindingId(null);
   };
 
   const runLeaseAnalysis = useCallback(async () => {
@@ -138,6 +140,7 @@ export function LandingClient() {
       setUploadReceipt(null);
       setViewerTargetPage(null);
       setViewerHighlight(null);
+      setSelectedFindingId(null);
 
       let res: Response;
       if (intake.kind === "upload") {
@@ -285,6 +288,7 @@ export function LandingClient() {
                     pages={uploadReceipt.extractedPages}
                     scrollToPage={viewerTargetPage}
                     highlight={viewerHighlight}
+                    evidenceLinked={Boolean(viewerHighlight)}
                     fileLabel={uploadReceipt.fileName}
                     extractedFromPdf={
                       Boolean(uploadReceipt.contentType?.toLowerCase().includes("pdf")) ||
@@ -403,7 +407,9 @@ export function LandingClient() {
                 {uploadReceipt.report ? (
                   <LeaseReportView
                     report={uploadReceipt.report}
-                    onFlagEvidenceClick={(page, quote) => {
+                    selectedFindingId={selectedFindingId}
+                    onFlagEvidenceClick={({ page, quote, findingId }) => {
+                      setSelectedFindingId(findingId);
                       setViewerTargetPage(page);
                       setViewerHighlight({ page, quote });
                     }}
