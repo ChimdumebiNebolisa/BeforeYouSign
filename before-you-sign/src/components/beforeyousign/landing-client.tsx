@@ -420,6 +420,18 @@ export function LandingClient() {
                       <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
                     )}
                   </section>
+                  <section className="rounded-xl border border-slate-200/70 bg-white/50 p-3">
+                    <h3 className="text-sm font-semibold text-slate-900">Responsibilities</h3>
+                    {uploadReceipt.report.responsibilities.length ? (
+                      <ul className="mt-2 list-inside list-disc text-slate-700">
+                        {uploadReceipt.report.responsibilities.map((line, i) => (
+                          <li key={`${i}-${line.slice(0, 40)}`}>{line}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-2 text-sm text-slate-600">Not clearly found in this lease text.</p>
+                    )}
+                  </section>
                   {uploadReceipt.report.questionsToAsk.length ? (
                     <div>
                       <p className="font-medium text-slate-900">Questions to ask</p>
