@@ -9,6 +9,7 @@ import { LeaseTextViewer } from "@/components/beforeyousign/lease-text-viewer";
 import { LeaseReportView } from "@/components/beforeyousign/lease-report";
 import { parseBeforeYouSignReportJson, type BeforeYouSignReport } from "@/lib/analysis/schema";
 import { AnalysisInProgressView } from "@/components/beforeyousign/analysis-in-progress";
+import { IntakeDocumentPreview } from "@/components/beforeyousign/intake-document-preview";
 
 type IntakeState =
   | { kind: "upload"; file: File }
@@ -162,22 +163,7 @@ export function LandingClient() {
             </div>
           </div>
 
-          {intake.kind === "upload" ? (
-            <p className="text-sm text-[#444651]">
-              Upload received: <span className="font-semibold text-[#191c1e]">{intake.file.name}</span>
-            </p>
-          ) : null}
-          {intake.kind === "sample" ? (
-            <p className="text-sm text-[#444651]">
-              Sample loaded: <span className="font-semibold text-[#191c1e]">{intake.text.length.toLocaleString()} chars</span>
-            </p>
-          ) : null}
-          {intake.kind === "paste" ? (
-            <p className="text-sm text-[#444651]">
-              Pasted text loaded:{" "}
-              <span className="font-semibold text-[#191c1e]">{intake.text.length.toLocaleString()} chars</span>
-            </p>
-          ) : null}
+          <IntakeDocumentPreview intake={intake} />
 
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <Button
