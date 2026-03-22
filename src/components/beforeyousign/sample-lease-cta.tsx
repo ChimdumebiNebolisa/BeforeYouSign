@@ -29,7 +29,7 @@ export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string
       <label className="block w-full text-left">
         <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#757682]">Sample lease</span>
         <select
-          className="mt-2 w-full rounded-xl bg-[#e0e3e5] px-3 py-3 text-sm font-medium text-[#191c1e] outline-none transition focus:bg-[#ffffff] focus:ring-2 focus:ring-[#00246a]/20"
+          className="mt-2 w-full rounded-xl bg-[#e0e3e5] px-3 py-3 text-center text-sm font-medium text-[#191c1e] [text-align-last:center] outline-none transition focus:bg-[#ffffff] focus:ring-2 focus:ring-[#00246a]/20"
           value={sampleKey}
           onChange={(e) => {
             setSampleKey(e.target.value as SampleKey);
