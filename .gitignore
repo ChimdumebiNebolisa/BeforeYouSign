@@ -1,5 +1,6 @@
 # Design/spec docs (local source of truth; do not commit)
 docs/
+design/
 
 # Local environment — never commit secrets
 .env
