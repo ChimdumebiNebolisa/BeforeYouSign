@@ -14,8 +14,8 @@ export function LandingShell({ children }: { children: ReactNode }) {
       />
 
       <header className="fixed top-4 left-1/2 z-50 w-full max-w-7xl -translate-x-1/2 px-4">
-        <nav className="bys-glass-panel bys-float-shadow flex h-16 items-center justify-between rounded-2xl px-6">
-          <span className="font-[family-name:var(--font-headline)] text-xl font-extrabold tracking-tight text-[#00246a]">
+        <nav className="bys-glass-panel bys-float-shadow flex h-16 items-center justify-between rounded-2xl px-5 sm:px-6">
+          <span className="font-[family-name:var(--font-headline)] text-lg font-extrabold tracking-tight text-[#00246a] sm:text-xl">
             BeforeYouSign
           </span>
           <p className="hidden text-xs text-[#757682] sm:block">Lease analysis</p>

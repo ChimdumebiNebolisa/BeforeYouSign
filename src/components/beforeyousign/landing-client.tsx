@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { UploadLeaseCta } from "@/components/beforeyousign/upload-lease-cta";
 import { SampleLeaseCta } from "@/components/beforeyousign/sample-lease-cta";
@@ -8,86 +8,7 @@ import { PasteTextDialog } from "@/components/beforeyousign/paste-text-dialog";
 import { LeaseTextViewer } from "@/components/beforeyousign/lease-text-viewer";
 import { LeaseReportView } from "@/components/beforeyousign/lease-report";
 import { parseBeforeYouSignReportJson, type BeforeYouSignReport } from "@/lib/analysis/schema";
-
-const ANALYSIS_STEP_LABELS_UPLOAD = [
-  "Extracting lease text",
-  "Checking key terms",
-  "Identifying potential risks",
-  "Generating plain-English report",
-] as const;
-
-const ANALYSIS_STEP_LABELS_TEXT = [
-  "Reading lease text",
-  "Checking key terms",
-  "Identifying potential risks",
-  "Generating plain-English report",
-] as const;
-
-function AnalysisProgressSteps({ variant }: { variant: "upload" | "text" }) {
-  const labels = variant === "upload" ? ANALYSIS_STEP_LABELS_UPLOAD : ANALYSIS_STEP_LABELS_TEXT;
-  const [stepIndex, setStepIndex] = useState(0);
-
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setStepIndex((i) => Math.min(i + 1, labels.length - 1));
-    }, 1600);
-    return () => window.clearInterval(id);
-  }, [labels.length]);
-
-  return (
-    <div className="mt-6 rounded-[2rem] bg-[#f2f4f6] p-6 sm:p-8" aria-live="polite" aria-busy="true">
-      <ol className="relative space-y-0">
-        {labels.map((label, i) => {
-          const done = i < stepIndex;
-          const current = i === stepIndex;
-          const last = i === labels.length - 1;
-          return (
-            <li key={label} className="relative flex gap-5">
-              {!last ? (
-                <span
-                  className={[
-                    "absolute left-4 top-8 bottom-0 w-0.5 -translate-x-1/2",
-                    done ? "bg-[#00246a]" : "bg-[#e0e3e5]",
-                  ].join(" ")}
-                  aria-hidden
-                />
-              ) : null}
-              <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold">
-                <span
-                  className={[
-                    "flex h-8 w-8 items-center justify-center rounded-full",
-                    done
-                      ? "bg-[#00246a] text-white"
-                      : current
-                        ? "bg-[#dbe1ff] text-[#00246a]"
-                        : "border-2 border-[#e0e3e5] bg-transparent text-[#757682]",
-                  ].join(" ")}
-                >
-                  {done ? "✓" : i + 1}
-                </span>
-              </div>
-              <div className={last ? "pb-0" : "pb-8"}>
-                <p
-                  className={[
-                    "font-[family-name:var(--font-headline)] text-sm font-bold",
-                    done || current ? "text-[#191c1e]" : "text-[#757682]",
-                  ].join(" ")}
-                >
-                  {label}
-                </p>
-                {current ? (
-                  <div className="mt-3 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-[#e0e3e5]">
-                    <div className="h-full w-2/3 animate-pulse rounded-full bg-[#00246a]/80" />
-                  </div>
-                ) : null}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-    </div>
-  );
-}
+import { AnalysisInProgressView } from "@/components/beforeyousign/analysis-in-progress";
 
 type IntakeState =
   | { kind: "upload"; file: File }
@@ -122,6 +43,7 @@ export function LandingClient() {
   const [viewerTargetPage, setViewerTargetPage] = useState<number | null>(null);
   const [viewerHighlight, setViewerHighlight] = useState<{ page: number; quote: string } | null>(null);
   const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
+  const [leaseTextPanelExpanded, setLeaseTextPanelExpanded] = useState(true);
 
   const resetIntakeUi = () => {
     setUploadReceipt(null);
@@ -130,6 +52,7 @@ export function LandingClient() {
     setViewerTargetPage(null);
     setViewerHighlight(null);
     setSelectedFindingId(null);
+    setLeaseTextPanelExpanded(true);
   };
 
   const runLeaseAnalysis = useCallback(async () => {
@@ -141,6 +64,7 @@ export function LandingClient() {
       setViewerTargetPage(null);
       setViewerHighlight(null);
       setSelectedFindingId(null);
+      setLeaseTextPanelExpanded(true);
 
       let res: Response;
       if (intake.kind === "upload") {
@@ -212,6 +136,10 @@ export function LandingClient() {
     }
   }, [intake]);
 
+  if (intake && isSubmitting) {
+    return <AnalysisInProgressView intake={intake} />;
+  }
+
   if (intake) {
     return (
       <div className="mx-auto w-full max-w-6xl px-4 font-sans">
@@ -228,11 +156,6 @@ export function LandingClient() {
                 Lease intake
               </h1>
             </div>
-            {isSubmitting ? (
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#003ea8]">
-                Analysis in progress
-              </span>
-            ) : null}
           </div>
 
           {intake.kind === "upload" ? (
@@ -276,10 +199,6 @@ export function LandingClient() {
             </Button>
           </div>
 
-          {isSubmitting ? (
-            <AnalysisProgressSteps key={intake.kind} variant={intake.kind === "upload" ? "upload" : "text"} />
-          ) : null}
-
           {uploadReceipt ? (
             <div className="mt-2 flex min-w-0 flex-col gap-8 lg:flex-row lg:items-start">
               {uploadReceipt.extractedPages && uploadReceipt.extractedPages.length > 0 ? (
@@ -290,6 +209,8 @@ export function LandingClient() {
                     highlight={viewerHighlight}
                     evidenceLinked={Boolean(viewerHighlight)}
                     fileLabel={uploadReceipt.fileName}
+                    textPanelExpanded={leaseTextPanelExpanded}
+                    onTextPanelExpandedChange={setLeaseTextPanelExpanded}
                     extractedFromPdf={
                       Boolean(uploadReceipt.contentType?.toLowerCase().includes("pdf")) ||
                       /\.pdf$/i.test(uploadReceipt.fileName)
@@ -412,6 +333,7 @@ export function LandingClient() {
                       setSelectedFindingId(findingId);
                       setViewerTargetPage(page);
                       setViewerHighlight({ page, quote });
+                      setLeaseTextPanelExpanded(true);
                     }}
                   />
                 ) : null}

@@ -25,7 +25,7 @@ export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <>
+    <div className="flex w-full min-w-0 flex-col">
       <label className="block w-full text-left">
         <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#757682]">Sample lease</span>
         <select
@@ -47,7 +47,7 @@ export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string
 
       <button
         type="button"
-        className="mt-3 w-full rounded-xl bg-[#e0e3e5] py-3 text-sm font-semibold text-[#191c1e] transition hover:bg-[#d8dadc] active:scale-[0.99] disabled:opacity-60"
+        className="mt-3 inline-flex h-[42px] w-full items-center justify-center rounded-xl bg-[#e0e3e5] px-3 text-sm font-medium text-[#191c1e] transition hover:bg-[#d8dadc] active:scale-[0.99] disabled:opacity-60"
         disabled={isLoading}
         onClick={() => {
           const run = async () => {
@@ -133,6 +133,6 @@ export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string
           </div>
         </div>
       ) : null}
-    </>
+    </div>
   );
 }
