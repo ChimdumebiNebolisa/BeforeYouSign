@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Check,
-  FileText,
-  Gavel,
-  Loader2,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
+import { Check, Clock, FileText, Gavel, Loader2, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 type Intake =
@@ -30,9 +23,9 @@ const STEPS_UPLOAD = [
   },
   {
     title: "Identifying potential risks",
-    subDone: "Risk signals reviewed against your lease language.",
-    subActive: "Scoring clauses that may need a closer look…",
-    subPending: "Waiting to begin legal risk assessment.",
+    subDone: "Notable clauses compared against your lease wording.",
+    subActive: "Flagging wording that may need a closer look…",
+    subPending: "Waiting to review risk signals.",
   },
   {
     title: "Generating plain-English report",
@@ -117,10 +110,10 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
           <div className="space-y-8">
             <div className="space-y-3">
               <h1 className="font-[family-name:var(--font-headline)] text-2xl font-extrabold leading-tight tracking-tight text-[#00246a] sm:text-3xl lg:text-[2rem]">
-                Securing your future, one clause at a time.
+                Reviewing your lease
               </h1>
               <p className="max-w-md text-sm leading-relaxed text-[#505f76] sm:text-base">
-                Our AI curator is meticulously reviewing every line of your agreement.
+                We&apos;re extracting key terms, checking notable clauses, and generating a plain-English report.
               </p>
             </div>
 
@@ -141,8 +134,8 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
             </div>
 
             <div className="flex items-start gap-3 text-sm text-[#505f76]">
-              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#00246a]" strokeWidth={1.75} aria-hidden />
-              <p className="leading-snug">Your data remains encrypted and private.</p>
+              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-[#00246a]" strokeWidth={1.75} aria-hidden />
+              <p className="leading-snug">This usually finishes in under a minute.</p>
             </div>
           </div>
 
@@ -243,7 +236,7 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#22c55e]/50 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-[#22c55e]" />
                 </span>
-                Live analysis engine
+                In progress
               </div>
             </div>
           </div>
