@@ -37,6 +37,7 @@ export function LandingClient() {
     deterministicRiskReasons?: string[];
     report?: BeforeYouSignReport | null;
     reportError?: string | null;
+    reportDebug?: { rawModelResponse?: string; failureStage?: string } | null;
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -118,6 +119,7 @@ export function LandingClient() {
         deterministicRiskReasons?: string[];
         report?: unknown;
         reportError?: string | null;
+        reportDebug?: { rawModelResponse?: string; failureStage?: string };
       };
 
       const report =
@@ -128,6 +130,8 @@ export function LandingClient() {
         ...data,
         report,
         reportError: typeof data.reportError === "string" ? data.reportError : null,
+        reportDebug:
+          data.reportDebug && typeof data.reportDebug === "object" ? data.reportDebug : null,
       });
     } catch (e) {
       setErrorMessage(e instanceof Error ? e.message : "Failed to run analysis on the server.");
@@ -324,6 +328,22 @@ export function LandingClient() {
 
                 {uploadReceipt.reportError ? (
                   <div className="rounded-xl bg-[#fff7ed] p-4 text-sm text-[#9a3412]">{uploadReceipt.reportError}</div>
+                ) : null}
+                {uploadReceipt.reportDebug &&
+                (uploadReceipt.reportDebug.rawModelResponse || uploadReceipt.reportDebug.failureStage) ? (
+                  <details className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-3 text-xs text-[#334155]">
+                    <summary className="cursor-pointer font-medium text-[#0f172a]">
+                      Developer: AI response debug
+                    </summary>
+                    {uploadReceipt.reportDebug.failureStage ? (
+                      <p className="mt-2 font-mono">stage: {uploadReceipt.reportDebug.failureStage}</p>
+                    ) : null}
+                    {uploadReceipt.reportDebug.rawModelResponse ? (
+                      <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed">
+                        {uploadReceipt.reportDebug.rawModelResponse}
+                      </pre>
+                    ) : null}
+                  </details>
                 ) : null}
                 {uploadReceipt.report ? (
                   <LeaseReportView

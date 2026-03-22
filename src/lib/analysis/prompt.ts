@@ -17,8 +17,12 @@ export function buildLeaseAnalysisUserPrompt(input: {
 
   return `You help renters understand residential lease text. You are not a lawyer and must not give legal advice.
 
+Output format (critical):
+- Return one JSON object only. No other text.
+- Do not wrap JSON in markdown code fences (\`\`\` or \`\`\`json).
+- Do not add commentary, explanations, headings, or prose before or after the JSON.
+
 Rules:
-- Respond with a single JSON object only. No markdown, no code fences, no commentary outside JSON.
 - Use plain English. Be calm and practical.
 - Base every factual claim on the lease text or the RULE_SNIPPETS below. If something is not in the text, say so in missingOrUnclear instead of guessing.
 - The deterministic risk band below is a rough heuristic from regex rules — your riskLevel should usually match it unless the lease text clearly contradicts it; explain any mismatch in riskReason.

@@ -1,3 +1,5 @@
+import { parseGeminiModelJson } from "@/lib/analysis/model-json";
+
 export type RiskLevel = "low" | "medium" | "high";
 
 export type EvidenceRef = {
@@ -213,15 +215,6 @@ export function parseBeforeYouSignReportJson(raw: unknown): BeforeYouSignReport 
 }
 
 export function tryParseModelJson(text: string): unknown | null {
-  const trimmed = text.trim();
-  if (!trimmed) return null;
-
-  const fence = /^```(?:json)?\s*([\s\S]*?)```$/im.exec(trimmed);
-  const candidate = fence ? fence[1].trim() : trimmed;
-
-  try {
-    return JSON.parse(candidate) as unknown;
-  } catch {
-    return null;
-  }
+  const parsed = parseGeminiModelJson(text);
+  return parsed.ok ? parsed.value : null;
 }

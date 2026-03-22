@@ -21,17 +21,24 @@ import { normalizeLeasePageText } from "@/lib/pdf/normalize";
 
 export const runtime = "nodejs";
 
+const isDev = process.env.NODE_ENV === "development";
+
 async function buildLeaseAiFields(input: {
   fullLeaseText: string;
   ruleBasedFindings: RuleBasedFinding[];
   deterministicRisk: DeterministicLeaseRisk;
-}): Promise<{ report: BeforeYouSignReport | null; reportError: string | null }> {
+}): Promise<{
+  report: BeforeYouSignReport | null;
+  reportError: string | null;
+  reportDebug: { rawModelResponse?: string; failureStage?: string } | null;
+}> {
   const apiKey = getBysAiKey();
   if (!apiKey?.trim()) {
     return {
       report: null,
       reportError:
         "Structured AI report skipped: add BYS_AI_KEY to .env.local on the server (never use NEXT_PUBLIC_).",
+      reportDebug: null,
     };
   }
 
@@ -43,10 +50,20 @@ async function buildLeaseAiFields(input: {
   });
 
   if (ai.ok) {
-    return { report: ai.report, reportError: null };
+    return { report: ai.report, reportError: null, reportDebug: null };
   }
 
-  return { report: null, reportError: ai.error };
+  const reportDebug =
+    isDev && ai.rawText !== undefined
+      ? {
+          rawModelResponse: ai.rawText.length > 48_000 ? ai.rawText.slice(0, 48_000) + "…" : ai.rawText,
+          failureStage: ai.failureStage,
+        }
+      : isDev
+        ? { failureStage: ai.failureStage }
+        : null;
+
+  return { report: null, reportError: ai.userMessage, reportDebug };
 }
 
 export async function POST(request: Request) {
@@ -162,6 +179,7 @@ export async function POST(request: Request) {
       deterministicRiskReasons: deterministicRisk.reasons,
       report: aiFields.report,
       reportError: aiFields.reportError,
+      ...(isDev && aiFields.reportDebug ? { reportDebug: aiFields.reportDebug } : {}),
     });
   }
 
@@ -253,6 +271,7 @@ export async function POST(request: Request) {
       deterministicRiskReasons: deterministicRisk.reasons,
       report: aiFields.report,
       reportError: aiFields.reportError,
+      ...(isDev && aiFields.reportDebug ? { reportDebug: aiFields.reportDebug } : {}),
     });
   } catch {
     return NextResponse.json(
