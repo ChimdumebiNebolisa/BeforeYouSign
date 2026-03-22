@@ -90,7 +90,20 @@ export function SummarySection({
 }) {
   return (
     <section className={cardBase}>
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:gap-5">
+      <div className="flex flex-col gap-4">
+        <div
+          className={`max-w-md self-start rounded-lg px-3.5 py-2.5 text-center ${riskSurfaceClasses(
+            report.riskLevel,
+          )}`}
+        >
+          <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#38485d]/90">Risk Level</span>
+          <span className="mt-0.5 block font-[family-name:var(--font-headline)] text-lg font-extrabold uppercase leading-none tracking-tight">
+            {report.riskLevel}
+          </span>
+          {riskNote ? (
+            <p className="mt-1.5 text-left text-[11px] leading-snug text-[#38485d]">{riskNote}</p>
+          ) : null}
+        </div>
         <div className="min-w-0 space-y-1.5">
           <p className={sectionLabel}>Summary</p>
           <h2 className="font-[family-name:var(--font-headline)] text-xl font-extrabold tracking-tight text-[#191c1e] sm:text-2xl">
@@ -105,19 +118,6 @@ export function SummarySection({
                 <li key={`${i}-${line.slice(0, 24)}`}>{line}</li>
               ))}
             </ul>
-          ) : null}
-        </div>
-        <div
-          className={`shrink-0 rounded-lg px-3.5 py-2.5 text-center md:max-w-[11rem] ${riskSurfaceClasses(
-            report.riskLevel,
-          )}`}
-        >
-          <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#38485d]/90">Risk Level</span>
-          <span className="mt-0.5 block font-[family-name:var(--font-headline)] text-lg font-extrabold uppercase leading-none tracking-tight">
-            {report.riskLevel}
-          </span>
-          {riskNote ? (
-            <p className="mt-1.5 text-left text-[11px] leading-snug text-[#38485d]">{riskNote}</p>
           ) : null}
         </div>
       </div>
@@ -260,10 +260,10 @@ export function MoneySection({
 
             return (
               <div key={key} className="border-b border-[#c5c5d3]/18 py-2 last:border-0 last:pb-0">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="min-w-0 text-[12px] font-medium text-[#444651]">{row.label}</p>
-                  <p className="shrink-0 text-right text-sm font-bold tabular-nums text-[#191c1e]">{row.value}</p>
-                </div>
+                <p className="text-[12px] font-medium leading-snug text-[#444651]">{row.label}</p>
+                <p className="mt-1 min-w-0 break-words text-sm font-bold leading-snug text-[#191c1e] [overflow-wrap:anywhere]">
+                  {row.value}
+                </p>
                 {primaryEv ? (
                   <p className="mt-1 text-[11px] leading-snug text-[#505f76]">
                     <span className="font-medium text-[#191c1e]">p. {primaryEv.page}: </span>
