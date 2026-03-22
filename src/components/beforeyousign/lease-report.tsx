@@ -6,6 +6,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import {
+  clampForScan,
   DeadlinesSection,
   displayRiskContext,
   displaySummaryIntro,
@@ -17,6 +18,7 @@ import {
   QuestionsSection,
   RedFlagsSection,
   ResponsibilitiesSection,
+  SCAN_LINE_CHARS,
   SummarySection,
 } from "@/components/beforeyousign/lease-report-slides";
 
@@ -259,7 +261,9 @@ export function LeaseReportView({
   selectedFindingId?: string | null;
 }) {
   const summaryIntro = displaySummaryIntro(report.summary);
-  const agreeBullets = report.whatYoureAgreeingTo.slice(0, MAX_AGREE_BULLETS);
+  const agreeBullets = report.whatYoureAgreeingTo
+    .slice(0, MAX_AGREE_BULLETS)
+    .map((line) => clampForScan(line, SCAN_LINE_CHARS));
   const riskNote = displayRiskContext(report.riskReason);
 
   const [expandedFlagEvidence, setExpandedFlagEvidence] = useState<Record<string, boolean>>({});

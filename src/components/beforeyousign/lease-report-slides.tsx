@@ -1,7 +1,18 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { BeforeYouSignReport, EvidenceRef, RiskLevel } from "@/lib/analysis/schema";
 
-const MAX_SUMMARY_SENTENCES = 4;
+const MAX_SUMMARY_SENTENCES = 2;
+const MAX_SUMMARY_CHARS = 320;
+
+/** Shorten running text for a quick scan (word-aware ellipsis). */
+export function clampForScan(text: string, maxChars: number): string {
+  const t = text.trim().replace(/\s+/g, " ");
+  if (!t || t.length <= maxChars) return t;
+  const slice = t.slice(0, maxChars);
+  const lastSpace = slice.lastIndexOf(" ");
+  const base = lastSpace > maxChars * 0.55 ? slice.slice(0, lastSpace).trimEnd() : slice.trimEnd();
+  return `${base}…`;
+}
 
 export function displaySummaryIntro(text: string): string {
   const t = text.trim();
@@ -10,10 +21,13 @@ export function displaySummaryIntro(text: string): string {
     .split(/(?<=[.!?])\s+/)
     .map((s) => s.trim())
     .filter(Boolean);
+  let out: string;
   if (parts.length === 0) {
-    return t.length > 360 ? `${t.slice(0, 360).trim()}…` : t;
+    out = t.length > MAX_SUMMARY_CHARS ? `${t.slice(0, MAX_SUMMARY_CHARS).trim()}…` : t;
+  } else {
+    out = parts.slice(0, MAX_SUMMARY_SENTENCES).join(" ");
   }
-  return parts.slice(0, MAX_SUMMARY_SENTENCES).join(" ");
+  return clampForScan(out, MAX_SUMMARY_CHARS);
 }
 
 export function displayRiskContext(text: string): string {
@@ -23,8 +37,8 @@ export function displayRiskContext(text: string): string {
     .split(/(?<=[.!?])\s+/)
     .map((s) => s.trim())
     .filter(Boolean);
-  if (parts.length <= 2) return t;
-  return parts.slice(0, 2).join(" ");
+  const one = parts.length <= 1 ? t : (parts[0] ?? t);
+  return clampForScan(one, 220);
 }
 
 export function displaySentences(text: string, max: number): string {
@@ -34,9 +48,16 @@ export function displaySentences(text: string, max: number): string {
     .split(/(?<=[.!?])\s+/)
     .map((s) => s.trim())
     .filter(Boolean);
-  if (parts.length === 0) return t.length > 220 ? `${t.slice(0, 220).trim()}…` : t;
-  if (parts.length <= max) return t;
-  return parts.slice(0, max).join(" ");
+  let out: string;
+  if (parts.length === 0) {
+    out = t.length > 180 ? `${t.slice(0, 180).trim()}…` : t;
+  } else if (parts.length <= max) {
+    out = parts.join(" ");
+  } else {
+    out = parts.slice(0, max).join(" ");
+  }
+  const cap = max <= 1 ? 200 : max === 2 ? 320 : 420;
+  return clampForScan(out, cap);
 }
 
 export function trimQuote(quote: string, maxChars: number): string {
@@ -57,8 +78,10 @@ export function dedupeEvidence(evidence: EvidenceRef[]): EvidenceRef[] {
   return out;
 }
 
-export const MAX_AGREE_BULLETS = 6;
-export const INITIAL_QUESTIONS = 5;
+export const MAX_AGREE_BULLETS = 5;
+export const INITIAL_QUESTIONS = 4;
+/** Max characters per “at a glance” list line (bullets, responsibilities, questions). */
+export const SCAN_LINE_CHARS = 160;
 
 export const sectionTitle =
   "font-[family-name:var(--font-headline)] text-base font-bold text-[#191c1e]";
@@ -144,8 +167,8 @@ export function RedFlagsSection({
       {report.potentialRedFlags.length ? (
         <ul className="mt-3 space-y-2.5">
           {report.potentialRedFlags.map((f) => {
-            const explanation = displaySentences(f.explanation, 3);
-            const why = displaySentences(f.whyItMatters, 2);
+            const explanation = displaySentences(f.explanation, 1);
+            const why = displaySentences(f.whyItMatters, 1);
             const deduped = dedupeEvidence(f.evidence);
             const primary = deduped[0];
             const rest = deduped.slice(1);
@@ -177,7 +200,7 @@ export function RedFlagsSection({
                 >
                   <div className="flex flex-wrap items-center gap-1.5 gap-y-1">
                     <span className="font-[family-name:var(--font-headline)] text-[13px] font-bold text-[#191c1e]">
-                      {f.title}
+                      {clampForScan(f.title, 100)}
                     </span>
                     <span className="rounded bg-[#e0e3e5] px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-[#444651]">
                       {f.severity}
@@ -198,7 +221,7 @@ export function RedFlagsSection({
                   {primary ? (
                     <p className="mt-2 text-[11px] leading-snug text-[#505f76]">
                       <span className="font-medium text-[#191c1e]">p. {primary.page}: </span>
-                      <q className="text-[#444651]">{trimQuote(primary.quote, 200)}</q>
+                      <q className="text-[#444651]">{trimQuote(primary.quote, 140)}</q>
                     </p>
                   ) : null}
                   {rest.length > 0 ? (
@@ -262,7 +285,7 @@ export function MoneySection({
               <div key={key} className="border-b border-[#c5c5d3]/18 py-2 last:border-0 last:pb-0">
                 <p className="text-[12px] font-medium leading-snug text-[#444651]">{row.label}</p>
                 <p className="mt-1 min-w-0 break-words text-sm font-bold leading-snug text-[#191c1e] [overflow-wrap:anywhere]">
-                  {row.value}
+                  {clampForScan(row.value, 220)}
                 </p>
                 {primaryEv ? (
                   <p className="mt-1 text-[11px] leading-snug text-[#505f76]">
@@ -313,7 +336,9 @@ export function DeadlinesSection({ report }: { report: BeforeYouSignReport }) {
           {report.deadlinesAndNotice.map((row, i) => (
             <div key={`${row.label}-${i}`} className="rounded-md bg-[#ffffff] p-3 shadow-sm">
               <p className="text-[13px] font-semibold text-[#191c1e]">{row.label}</p>
-              <p className="mt-0.5 text-[13px] leading-snug text-[#444651]">{row.value}</p>
+              <p className="mt-0.5 text-[13px] leading-snug text-[#444651]">
+                {clampForScan(row.value, 200)}
+              </p>
               {row.evidence?.[0] ? (
                 <p className="mt-1.5 text-[11px] text-[#757682]">
                   <span className="font-medium text-[#191c1e]">p. {row.evidence[0].page}: </span>
@@ -337,7 +362,7 @@ export function ResponsibilitiesSection({ report }: { report: BeforeYouSignRepor
       {report.responsibilities.length ? (
         <ul className="mt-3 list-disc space-y-1 pl-4 text-[13px] leading-snug text-[#444651]">
           {report.responsibilities.map((line, i) => (
-            <li key={`${i}-${line.slice(0, 24)}`}>{line}</li>
+            <li key={`${i}-${line.slice(0, 24)}`}>{clampForScan(line, SCAN_LINE_CHARS)}</li>
           ))}
         </ul>
       ) : (
@@ -374,7 +399,7 @@ export function QuestionsSection({
                 <span className="shrink-0 pt-0.5 font-mono text-[10px] font-bold text-[#00246a]/70">
                   {i + 1}.
                 </span>
-                <span>{q}</span>
+                <span>{clampForScan(q, SCAN_LINE_CHARS)}</span>
               </li>
             ))}
           </ol>
@@ -402,7 +427,7 @@ export function NextStepsSection({ report }: { report: BeforeYouSignReport }) {
       {report.nextSteps.length ? (
         <ul className="mt-2 list-disc space-y-1 pl-4 text-[13px] leading-snug text-[#444651]">
           {report.nextSteps.map((s, i) => (
-            <li key={`${i}-${s.slice(0, 24)}`}>{displaySentences(s, 3)}</li>
+            <li key={`${i}-${s.slice(0, 24)}`}>{displaySentences(s, 2)}</li>
           ))}
         </ul>
       ) : (
@@ -424,7 +449,7 @@ export function MissingSection({ report }: { report: BeforeYouSignReport }) {
       </p>
       <ul className="mt-2 list-disc space-y-0.5 pl-4 text-[13px] leading-snug text-[#44403c]">
         {report.missingOrUnclear.map((line, i) => (
-          <li key={`${i}-${line.slice(0, 24)}`}>{line}</li>
+          <li key={`${i}-${line.slice(0, 24)}`}>{clampForScan(line, SCAN_LINE_CHARS)}</li>
         ))}
       </ul>
     </section>
