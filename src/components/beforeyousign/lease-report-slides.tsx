@@ -37,8 +37,11 @@ export function displayRiskContext(text: string): string {
     .split(/(?<=[.!?])\s+/)
     .map((s) => s.trim())
     .filter(Boolean);
-  const one = parts.length <= 1 ? t : (parts[0] ?? t);
-  return clampForScan(one, 220);
+  if (parts.length === 0) {
+    return clampForScan(t, 300);
+  }
+  const joined = parts.length <= 2 ? parts.join(" ") : `${parts[0]} ${parts[1]}`;
+  return clampForScan(joined, 300);
 }
 
 export function displaySentences(text: string, max: number): string {

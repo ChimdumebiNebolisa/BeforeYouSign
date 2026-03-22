@@ -14,6 +14,37 @@ import { getBysGeminiModel } from "@/lib/env/bys-gemini-model";
 
 const isDev = process.env.NODE_ENV === "development";
 
+/**
+ * Cap "high" risk when the heuristic scan does not support it, so the badge matches defensible signals.
+ */
+function reconcileReportRisk(
+  report: BeforeYouSignReport,
+  deterministic: DeterministicLeaseRisk,
+): BeforeYouSignReport {
+  if (report.riskLevel !== "high") {
+    return report;
+  }
+
+  const highJustified =
+    deterministic.band === "high" ||
+    (deterministic.band === "medium" && deterministic.score >= 4);
+
+  if (highJustified) {
+    return report;
+  }
+
+  const signalHint =
+    deterministic.reasons.length > 0
+      ? `Strongest scan signals: ${deterministic.reasons.slice(0, 2).join("; ")}. `
+      : "";
+
+  return {
+    ...report,
+    riskLevel: "medium",
+    riskReason: `${signalHint}${report.riskReason.trim()}`.trim(),
+  };
+}
+
 function collectModelText(response: EnhancedGenerateContentResponse): string {
   try {
     return response.text();
@@ -143,5 +174,5 @@ export async function runStructuredLeaseAnalysis(input: {
     };
   }
 
-  return { ok: true, rawText, report };
+  return { ok: true, rawText, report: reconcileReportRisk(report, input.deterministicRisk) };
 }

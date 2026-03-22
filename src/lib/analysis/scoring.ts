@@ -46,7 +46,7 @@ export function computeDeterministicLeaseRisk(input: {
   const feeCount = input.findings.filter((f) => f.category === "fees").length;
   if (feeCount >= 3) {
     score += 2;
-    reasons.push("Several distinct fee lines detected (+2)");
+    reasons.push(`${feeCount} fee-related snippets in scan (+2)`);
   }
 
   const earlyTerminatePenalty =
