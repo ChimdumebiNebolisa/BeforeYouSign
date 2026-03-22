@@ -115,7 +115,7 @@ export function SummarySection({
     <section className={cardBase}>
       <div className="flex flex-col gap-4">
         <div
-          className={`max-w-md self-start rounded-lg px-3.5 py-2.5 text-center ${riskSurfaceClasses(
+          className={`max-w-md self-center rounded-lg px-3.5 py-2.5 text-center ${riskSurfaceClasses(
             report.riskLevel,
           )}`}
         >
@@ -124,10 +124,10 @@ export function SummarySection({
             {report.riskLevel}
           </span>
           {riskNote ? (
-            <p className="mt-1.5 text-left text-[11px] leading-snug text-[#38485d]">{riskNote}</p>
+            <p className="mt-1.5 text-center text-[11px] leading-snug text-[#38485d]">{riskNote}</p>
           ) : null}
         </div>
-        <div className="min-w-0 space-y-1.5">
+        <div className="flex w-full min-w-0 flex-col items-center space-y-1.5 text-center">
           <p className={sectionLabel}>Summary</p>
           <h2 className="font-[family-name:var(--font-headline)] text-xl font-extrabold tracking-tight text-[#191c1e] sm:text-2xl">
             What You&apos;re Agreeing To
@@ -136,7 +136,7 @@ export function SummarySection({
             <p className="mt-2 max-w-xl text-sm leading-snug text-[#444651]">{summaryIntro}</p>
           ) : null}
           {agreeBullets.length ? (
-            <ul className="mt-3 max-w-xl list-disc space-y-1 pl-4 text-[13px] leading-snug text-[#444651]">
+            <ul className="mt-3 w-full max-w-xl list-inside list-disc space-y-1.5 text-center text-[13px] leading-snug text-[#444651]">
               {agreeBullets.map((line, i) => (
                 <li key={`${i}-${line.slice(0, 24)}`}>{line}</li>
               ))}
