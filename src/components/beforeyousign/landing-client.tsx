@@ -10,6 +10,7 @@ import { LeaseReportView } from "@/components/beforeyousign/lease-report";
 import { parseBeforeYouSignReportJson, type BeforeYouSignReport } from "@/lib/analysis/schema";
 import { AnalysisInProgressView } from "@/components/beforeyousign/analysis-in-progress";
 import { IntakeDocumentPreview } from "@/components/beforeyousign/intake-document-preview";
+import { TechnicalDetailsPanel } from "@/components/beforeyousign/technical-details-panel";
 
 type IntakeState =
   | { kind: "upload"; file: File }
@@ -209,108 +210,7 @@ export function LandingClient() {
                 </div>
               ) : null}
               <div className="min-w-0 flex-1 space-y-6">
-                <details className="group rounded-xl bg-[#f2f4f6] p-4 text-sm text-[#444651]">
-                  <summary className="cursor-pointer font-[family-name:var(--font-headline)] text-xs font-bold uppercase tracking-[0.14em] text-[#757682]">
-                    Technical details
-                  </summary>
-                  <div className="mt-3 space-y-2 text-xs leading-relaxed">
-                    <p>
-                      Received <span className="font-medium text-[#191c1e]">{uploadReceipt.fileName}</span> (
-                      {uploadReceipt.fileSizeBytes.toLocaleString()} bytes)
-                      {uploadReceipt.contentType ? ` · ${uploadReceipt.contentType}` : null}
-                    </p>
-                    {uploadReceipt.extractedPages?.length ? (
-                      <p>
-                        Extracted {uploadReceipt.extractedPages.length} page(s). First page snippet:{" "}
-                        {uploadReceipt.extractedPages[0]?.text.slice(0, 200) || "—"}
-                      </p>
-                    ) : null}
-                    {uploadReceipt.rentSnippets?.length ? (
-                      <p>
-                        Rent mentions: {uploadReceipt.rentSnippets.length}. Example (p. {uploadReceipt.rentSnippets[0]?.page}
-                        ): <span className="font-medium">{uploadReceipt.rentSnippets[0]?.quote}</span>
-                      </p>
-                    ) : null}
-                    {uploadReceipt.depositSnippets?.length ? (
-                      <p>
-                        Deposit mentions: {uploadReceipt.depositSnippets.length}. Example (p.{" "}
-                        {uploadReceipt.depositSnippets[0]?.page}):{" "}
-                        <span className="font-medium">{uploadReceipt.depositSnippets[0]?.quote}</span>
-                      </p>
-                    ) : null}
-                    {uploadReceipt.feeSnippets?.length ? (
-                      <p>
-                        Fee mentions: {uploadReceipt.feeSnippets.length}. Example (p. {uploadReceipt.feeSnippets[0]?.page}):{" "}
-                        <span className="font-medium">{uploadReceipt.feeSnippets[0]?.quote}</span>
-                      </p>
-                    ) : null}
-                    {uploadReceipt.noticeSnippets?.length ? (
-                      <p>
-                        Notice language: {uploadReceipt.noticeSnippets.length}. Example (p.{" "}
-                        {uploadReceipt.noticeSnippets[0]?.page}):{" "}
-                        <span className="font-medium">{uploadReceipt.noticeSnippets[0]?.quote}</span>
-                      </p>
-                    ) : null}
-                    {uploadReceipt.renewalSnippets?.length ? (
-                      <p>
-                        Renewal language: {uploadReceipt.renewalSnippets.length}. Example (p.{" "}
-                        {uploadReceipt.renewalSnippets[0]?.page}):{" "}
-                        <span className="font-medium">{uploadReceipt.renewalSnippets[0]?.quote}</span>
-                      </p>
-                    ) : null}
-                    {uploadReceipt.maintenanceSnippets?.length ? (
-                      <p>
-                        Maintenance language: {uploadReceipt.maintenanceSnippets.length}. Example (p.{" "}
-                        {uploadReceipt.maintenanceSnippets[0]?.page}):{" "}
-                        <span className="font-medium">{uploadReceipt.maintenanceSnippets[0]?.quote}</span>
-                      </p>
-                    ) : null}
-                    {uploadReceipt.utilitiesSnippets?.length ? (
-                      <p>
-                        Utilities language: {uploadReceipt.utilitiesSnippets.length}. Example (p.{" "}
-                        {uploadReceipt.utilitiesSnippets[0]?.page}):{" "}
-                        <span className="font-medium">{uploadReceipt.utilitiesSnippets[0]?.quote}</span>
-                      </p>
-                    ) : null}
-                    {uploadReceipt.ruleBasedFindings?.length ? (
-                      <p>
-                        Rule-based findings: {uploadReceipt.ruleBasedFindings.length}. First:{" "}
-                        <span className="font-medium">
-                          [{uploadReceipt.ruleBasedFindings[0]?.category}] p.{uploadReceipt.ruleBasedFindings[0]?.page}:{" "}
-                          {uploadReceipt.ruleBasedFindings[0]?.quote.slice(0, 120)}
-                          {uploadReceipt.ruleBasedFindings[0] && uploadReceipt.ruleBasedFindings[0].quote.length > 120
-                            ? "…"
-                            : ""}
-                        </span>
-                      </p>
-                    ) : null}
-                    {uploadReceipt.unclearLeasePhrases?.length ? (
-                      <p className="text-[#9a3412]">
-                        Possibly unclear wording: {uploadReceipt.unclearLeasePhrases.length}. Example (p.{" "}
-                        {uploadReceipt.unclearLeasePhrases[0]?.page}):{" "}
-                        <span className="font-medium">{uploadReceipt.unclearLeasePhrases[0]?.quote}</span>
-                      </p>
-                    ) : null}
-                    {uploadReceipt.deterministicRiskBand !== undefined ? (
-                      <div className="rounded-lg bg-[#ffffff] p-3 text-[#191c1e]">
-                        <p className="font-semibold">
-                          Rule-based risk (not legal advice):{" "}
-                          <span className="uppercase">{uploadReceipt.deterministicRiskBand}</span> (score{" "}
-                          {uploadReceipt.deterministicRiskScore ?? "—"})
-                        </p>
-                        {uploadReceipt.deterministicRiskReasons?.length ? (
-                          <ul className="mt-1 list-inside list-disc text-[#444651]">
-                            {uploadReceipt.deterministicRiskReasons.map((r, i) => (
-                              <li key={`${i}-${r}`}>{r}</li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="mt-1 text-[#444651]">No strong risk signals from rule scan.</p>
-                        )}
-                      </div>
-                    ) : null}
-                  </div>
-                </details>
+                <TechnicalDetailsPanel receipt={uploadReceipt} />
 
                 {uploadReceipt.reportError ? (
                   <div className="rounded-xl bg-[#fff7ed] p-4 text-sm text-[#9a3412]">{uploadReceipt.reportError}</div>

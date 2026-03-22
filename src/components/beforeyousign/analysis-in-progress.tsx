@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Clock, FileText, Gavel, Loader2, Sparkles } from "lucide-react";
+import { Clock, FileText } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 type Intake =
@@ -170,22 +170,26 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
                         ) : null}
                         <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center sm:h-10 sm:w-10">
                           {done ? (
-                            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#00246a] text-white shadow-sm sm:h-10 sm:w-10">
-                              <Check className="h-4 w-4 sm:h-[18px] sm:w-[18px]" strokeWidth={2.5} aria-hidden />
+                            <span
+                              className="flex h-9 w-9 items-center justify-center rounded-full bg-[#00246a] text-sm font-bold text-white shadow-sm tabular-nums sm:h-10 sm:w-10 sm:text-base"
+                              aria-label={`Step ${i + 1} complete`}
+                            >
+                              {i + 1}
                             </span>
                           ) : current ? (
-                            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#dbe1ff] shadow-sm ring-2 ring-[#00246a]/15 sm:h-10 sm:w-10">
-                              <Loader2 className="h-4 w-4 animate-spin text-[#00246a] sm:h-[18px] sm:w-[18px]" aria-hidden />
+                            <span
+                              className="flex h-9 w-9 items-center justify-center rounded-full bg-[#dbe1ff] text-sm font-bold text-[#00246a] shadow-sm ring-2 ring-[#00246a]/25 tabular-nums sm:h-10 sm:w-10 sm:text-base"
+                              aria-current="step"
+                              aria-label={`Step ${i + 1} in progress`}
+                            >
+                              {i + 1}
                             </span>
                           ) : (
-                            <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#d8dce2] bg-[#ffffff] text-[#9ca3af] sm:h-10 sm:w-10">
-                              {i === 2 ? (
-                                <Gavel className="h-4 w-4 sm:h-[18px] sm:w-[18px]" strokeWidth={1.75} aria-hidden />
-                              ) : i === 3 ? (
-                                <Sparkles className="h-4 w-4 sm:h-[18px] sm:w-[18px]" strokeWidth={1.75} aria-hidden />
-                              ) : (
-                                <span className="text-xs font-bold">{i + 1}</span>
-                              )}
+                            <span
+                              className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#d8dce2] bg-[#ffffff] text-sm font-bold text-[#9ca3af] tabular-nums sm:h-10 sm:w-10 sm:text-base"
+                              aria-label={`Step ${i + 1} pending`}
+                            >
+                              {i + 1}
                             </span>
                           )}
                         </div>
