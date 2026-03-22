@@ -3,7 +3,7 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import {
   DeadlinesSection,
@@ -19,18 +19,6 @@ import {
   ResponsibilitiesSection,
   SummarySection,
 } from "@/components/beforeyousign/lease-report-slides";
-
-function useMinWidthLg(): boolean {
-  return useSyncExternalStore(
-    (onStoreChange) => {
-      const mq = window.matchMedia("(min-width: 1024px)");
-      mq.addEventListener("change", onStoreChange);
-      return () => mq.removeEventListener("change", onStoreChange);
-    },
-    () => window.matchMedia("(min-width: 1024px)").matches,
-    () => false,
-  );
-}
 
 const RED_FLAGS_SLIDE_INDEX = 1;
 
@@ -49,82 +37,7 @@ function prefersReducedMotion(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-function LeaseReportDesktop({
-  report,
-  summaryIntro,
-  agreeBullets,
-  riskNote,
-  expandedFlagEvidence,
-  setExpandedFlagEvidence,
-  expandedMoneyQuotes,
-  setExpandedMoneyQuotes,
-  questionsShown,
-  showAllQuestions,
-  setShowAllQuestions,
-  extraQuestionCount,
-  selectedFindingId,
-  onFlagEvidenceClick,
-}: {
-  report: BeforeYouSignReport;
-  summaryIntro: string;
-  agreeBullets: string[];
-  riskNote: string;
-  expandedFlagEvidence: Record<string, boolean>;
-  setExpandedFlagEvidence: Dispatch<SetStateAction<Record<string, boolean>>>;
-  expandedMoneyQuotes: Record<string, boolean>;
-  setExpandedMoneyQuotes: Dispatch<SetStateAction<Record<string, boolean>>>;
-  questionsShown: string[];
-  showAllQuestions: boolean;
-  setShowAllQuestions: Dispatch<SetStateAction<boolean>>;
-  extraQuestionCount: number;
-  selectedFindingId?: string | null;
-  onFlagEvidenceClick: (args: { page: number; quote: string; findingId: string }) => void;
-}) {
-  return (
-    <div className="space-y-5">
-      <SummarySection
-        report={report}
-        summaryIntro={summaryIntro}
-        agreeBullets={agreeBullets}
-        riskNote={riskNote}
-      />
-
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        <RedFlagsSection
-          report={report}
-          expandedFlagEvidence={expandedFlagEvidence}
-          setExpandedFlagEvidence={setExpandedFlagEvidence}
-          selectedFindingId={selectedFindingId}
-          onFlagEvidenceClick={onFlagEvidenceClick}
-        />
-        <MoneySection
-          report={report}
-          expandedMoneyQuotes={expandedMoneyQuotes}
-          setExpandedMoneyQuotes={setExpandedMoneyQuotes}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        <DeadlinesSection report={report} />
-        <ResponsibilitiesSection report={report} />
-      </div>
-
-      <QuestionsSection
-        report={report}
-        questionsShown={questionsShown}
-        showAllQuestions={showAllQuestions}
-        setShowAllQuestions={setShowAllQuestions}
-        extraQuestionCount={extraQuestionCount}
-      />
-
-      <NextStepsSection report={report} />
-
-      {report.missingOrUnclear.length ? <MissingSection report={report} /> : null}
-    </div>
-  );
-}
-
-function LeaseReportMobileCarousel({
+function LeaseReportCarousel({
   report,
   summaryIntro,
   agreeBullets,
@@ -361,8 +274,6 @@ export function LeaseReportView({
 
   const extraQuestionCount = Math.max(0, report.questionsToAsk.length - INITIAL_QUESTIONS);
 
-  const isLg = useMinWidthLg();
-
   const shared = {
     report,
     summaryIntro,
@@ -380,5 +291,5 @@ export function LeaseReportView({
     onFlagEvidenceClick,
   };
 
-  return isLg ? <LeaseReportDesktop {...shared} /> : <LeaseReportMobileCarousel {...shared} />;
+  return <LeaseReportCarousel {...shared} />;
 }

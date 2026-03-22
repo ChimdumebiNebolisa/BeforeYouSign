@@ -99,9 +99,9 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
   }, [stepIndex]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 font-sans">
+    <div className="mx-auto w-full max-w-6xl px-3 font-sans sm:px-4">
       <main className="bys-float-shadow overflow-hidden rounded-[2rem] bg-[#ffffff] shadow-[0px_24px_64px_rgba(25,28,30,0.06)]">
-        <div className="border-b border-[#e8eaef] px-6 py-4 sm:px-10 sm:py-5">
+        <div className="border-b border-[#e8eaef] px-4 py-4 sm:px-6 sm:py-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="font-[family-name:var(--font-headline)] text-xs font-bold uppercase tracking-[0.22em] text-[#00246a]">
               Analysis in progress
@@ -113,7 +113,7 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
           </div>
         </div>
 
-        <div className="grid gap-10 px-6 py-8 sm:gap-12 sm:px-10 sm:py-10 lg:grid-cols-2 lg:items-start lg:gap-14">
+        <div className="grid gap-10 px-4 py-8 sm:gap-12 sm:px-6 sm:py-10 lg:grid-cols-2 lg:items-start lg:gap-14">
           <div className="space-y-8">
             <div className="space-y-3">
               <h1 className="font-[family-name:var(--font-headline)] text-2xl font-extrabold leading-tight tracking-tight text-[#00246a] sm:text-3xl lg:text-[2rem]">
@@ -146,17 +146,13 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
             </div>
           </div>
 
-          <div className="relative rounded-[1.75rem] bg-[#f2f4f6] p-6 sm:p-8">
+          <div className="relative rounded-[1.75rem] bg-[#f2f4f6] p-4 sm:p-5">
             <div
               className="pointer-events-none absolute inset-0 rounded-[1.75rem] ring-1 ring-[#e0e3e8]/80"
               aria-hidden
             />
 
-            <div
-              className="relative pb-14 pr-44 sm:pb-16 sm:pr-52"
-              aria-live="polite"
-              aria-busy="true"
-            >
+            <div aria-live="polite" aria-busy="true">
               <ol className="relative space-y-0">
                 {steps.map((step, i) => {
                   const done = i < stepIndex;
@@ -167,9 +163,9 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
                   const sub = done ? step.subDone : current ? step.subActive : step.subPending;
 
                   return (
-                    <li key={step.title} className="flex gap-4 sm:gap-5">
+                    <li key={step.title} className="flex gap-3 sm:gap-4">
                       {/* Fixed-width track: line centered on column; icons centered in column */}
-                      <div className="relative flex w-10 shrink-0 flex-col items-center self-stretch sm:w-11">
+                      <div className="relative flex w-9 shrink-0 flex-col items-center self-stretch sm:w-10">
                         {!last ? (
                           <span
                             className={[
@@ -241,7 +237,7 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
               </ol>
             </div>
 
-            <div className="pointer-events-none absolute bottom-5 right-5 sm:bottom-6 sm:right-6">
+            <div className="mt-5 flex justify-end sm:mt-6">
               <div className="flex items-center gap-2 rounded-full border border-[#e8eaef] bg-[#ffffff] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#505f76] shadow-sm">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#22c55e]/50 opacity-75" />
