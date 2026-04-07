@@ -86,8 +86,8 @@ export function IntakeDocumentPreview({ intake }: { intake: IntakeDocumentPrevie
   const previewBody =
     intake.kind === "upload"
       ? isPdfFile(intake.file)
-        ? "We’ll extract text from your PDF and scan for rent, deposits, renewal, notice, and utilities when you continue."
-        : "We’ll read this file and pull out lease language when you continue."
+        ? "We’ll read your PDF and highlight key terms like rent, fees, renewal rules, notice periods, and utilities."
+        : "We’ll read this file and highlight key lease terms when you continue."
       : textSnippet(intake.text, 220) || "No text to preview.";
 
   return (

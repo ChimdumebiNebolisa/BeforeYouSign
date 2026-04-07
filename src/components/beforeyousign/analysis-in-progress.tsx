@@ -18,19 +18,19 @@ const STEPS_UPLOAD = [
   {
     title: "Checking key terms",
     subDone: "Rent, deposits, and notice windows identified.",
-    subActive: "Identifying rent escalations, maintenance duties, and renewal options.",
+    subActive: "Checking fees, notice windows, and renewal terms.",
     subPending: "Waiting to scan key terms.",
   },
   {
     title: "Identifying potential risks",
     subDone: "Notable clauses compared against your lease wording.",
-    subActive: "Flagging wording that may need a closer look…",
+    subActive: "Spotting unclear or potentially costly clauses...",
     subPending: "Waiting to review risk signals.",
   },
   {
-    title: "Generating plain-English report",
+    title: "Preparing your summary",
     subDone: "Report ready with summaries and questions to ask.",
-    subActive: "Summarizing complex jargon into actionable insights.",
+    subActive: "Turning lease language into clear next steps.",
     subPending: "Waiting to generate your report.",
   },
 ] as const;
@@ -39,7 +39,7 @@ const STEPS_TEXT = [
   {
     title: "Reading lease text",
     subDone: "Full text received and indexed for analysis.",
-    subActive: "Indexing paragraphs and numbering pages…",
+    subActive: "Reading through the text and organizing key sections...",
     subPending: "Waiting to read lease text.",
   },
   ...STEPS_UPLOAD.slice(1),

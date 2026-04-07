@@ -14,7 +14,7 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
     if (!file) return;
     const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
     if (!isPdf) {
-      setErrorMessage("Please upload a PDF lease file.");
+      setErrorMessage("We only accept PDF files. Please upload a PDF version of your lease.");
       return;
     }
 

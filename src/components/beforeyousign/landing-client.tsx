@@ -51,14 +51,15 @@ export function LandingClient() {
   const formatAnalysisError = (raw: string, status: number): string => {
     const trimmed = raw.trim();
     if (!trimmed) {
-      return `Request failed with ${status}.`;
+      return `Something went wrong (code ${status}). Try again or paste the lease text instead.`;
     }
 
     if (/<!doctype html|<html[\s>]/i.test(trimmed)) {
       return "A server error occurred while analyzing this lease. Please retry.";
     }
 
-    return trimmed.length > 600 ? `${trimmed.slice(0, 600)}...` : trimmed;
+    const display = trimmed.length > 600 ? `${trimmed.slice(0, 600)}...` : trimmed;
+    return `Unable to analyze this lease: ${display}`;
   };
 
   const resetIntakeUi = () => {

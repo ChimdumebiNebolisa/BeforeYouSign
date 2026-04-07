@@ -11,9 +11,9 @@ const SAMPLE_PATH: Record<SampleKey, string> = {
 };
 
 const SAMPLE_LABEL: Record<SampleKey, string> = {
-  standard: "Standard lease",
-  "fee-heavy": "Fee-heavy lease",
-  "notice-heavy": "Notice / renewal–heavy lease",
+  standard: "Standard residential lease",
+  "fee-heavy": "Lease with extra charges",
+  "notice-heavy": "Lease with strict renewal terms",
 };
 
 export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string) => void }) {
@@ -56,7 +56,7 @@ export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string
             try {
               const res = await fetch(SAMPLE_PATH[sampleKey]);
               if (!res.ok) {
-                throw new Error(`Sample failed to load (${res.status}).`);
+                throw new Error("The sample lease could not be loaded. Try again or paste your own text.");
               }
               const text = await res.text();
               const trimmed = text.trim();
