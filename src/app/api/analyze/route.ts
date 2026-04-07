@@ -20,6 +20,7 @@ import { extractPdfTextPages } from "@/lib/pdf/extract-text";
 import { normalizeLeasePageText } from "@/lib/pdf/normalize";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 const isDev = process.env.NODE_ENV === "development";
 

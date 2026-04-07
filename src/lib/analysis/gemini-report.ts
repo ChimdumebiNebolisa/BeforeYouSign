@@ -14,6 +14,40 @@ import { getBysGeminiModel } from "@/lib/env/bys-gemini-model";
 
 const isDev = process.env.NODE_ENV === "development";
 
+const DEFAULT_AI_TIMEOUT_MS = process.env.VERCEL ? 8_500 : 20_000;
+
+function getAiTimeoutMs(): number {
+  const raw = process.env.BYS_AI_TIMEOUT_MS;
+  if (!raw) return DEFAULT_AI_TIMEOUT_MS;
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return DEFAULT_AI_TIMEOUT_MS;
+  }
+  return Math.floor(parsed);
+}
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  if (timeoutMs <= 0) {
+    return promise;
+  }
+
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timeoutHandle = setTimeout(() => {
+          reject(new Error(`Gemini request timed out after ${timeoutMs}ms.`));
+        }, timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeoutHandle) {
+      clearTimeout(timeoutHandle);
+    }
+  }
+}
+
 /**
  * Cap "high" risk when the heuristic scan does not support it, so the badge matches defensible signals.
  */
@@ -85,6 +119,7 @@ export async function runStructuredLeaseAnalysis(input: {
 > {
   const genAI = new GoogleGenerativeAI(input.apiKey);
   const modelName = getBysGeminiModel();
+  const aiTimeoutMs = getAiTimeoutMs();
 
   const prompt = buildLeaseAnalysisUserPrompt({
     leaseText: input.leaseText,
@@ -95,7 +130,7 @@ export async function runStructuredLeaseAnalysis(input: {
   /** Long leases need a high ceiling; truncated JSON fails parsing. Gemini 2.5 Flash supports large outputs. */
   const baseConfig = {
     temperature: 0.2,
-    maxOutputTokens: 65_536,
+    maxOutputTokens: 8_192,
     responseMimeType: "application/json" as const,
   };
 
@@ -113,7 +148,7 @@ export async function runStructuredLeaseAnalysis(input: {
 
   let rawText = "";
   try {
-    const result = await modelWithSchema.generateContent(prompt);
+    const result = await withTimeout(modelWithSchema.generateContent(prompt), aiTimeoutMs);
     rawText = collectModelText(result.response);
   } catch (e) {
     if (shouldRetryGenerationWithoutSchema(e)) {
@@ -123,7 +158,7 @@ export async function runStructuredLeaseAnalysis(input: {
         generationConfig: baseConfig,
       });
       try {
-        const result = await modelPlain.generateContent(prompt);
+        const result = await withTimeout(modelPlain.generateContent(prompt), aiTimeoutMs);
         rawText = collectModelText(result.response);
       } catch (e2) {
         const message = e2 instanceof Error ? e2.message : "Gemini request failed.";
