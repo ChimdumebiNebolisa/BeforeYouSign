@@ -48,6 +48,19 @@ export function LandingClient() {
   const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
   const [leaseTextPanelExpanded, setLeaseTextPanelExpanded] = useState(true);
 
+  const formatAnalysisError = (raw: string, status: number): string => {
+    const trimmed = raw.trim();
+    if (!trimmed) {
+      return `Request failed with ${status}.`;
+    }
+
+    if (/<!doctype html|<html[\s>]/i.test(trimmed)) {
+      return "A server error occurred while analyzing this lease. Please retry.";
+    }
+
+    return trimmed.length > 600 ? `${trimmed.slice(0, 600)}...` : trimmed;
+  };
+
   const resetIntakeUi = () => {
     setUploadReceipt(null);
     setIsSubmitting(false);
@@ -90,7 +103,7 @@ export function LandingClient() {
 
       if (!res.ok) {
         const text = await res.text();
-        let message = text || `Request failed with ${res.status}`;
+        let message = formatAnalysisError(text, res.status);
         try {
           const errJson = JSON.parse(text) as { error?: unknown };
           if (typeof errJson.error === "string" && errJson.error) {
