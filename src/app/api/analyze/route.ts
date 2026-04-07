@@ -16,13 +16,27 @@ import {
 import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import { computeDeterministicLeaseRisk, type DeterministicLeaseRisk } from "@/lib/analysis/scoring";
 import { getBysAiKey } from "@/lib/env/bys-ai-key";
-import { extractPdfTextPages } from "@/lib/pdf/extract-text";
 import { normalizeLeasePageText } from "@/lib/pdf/normalize";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const isDev = process.env.NODE_ENV === "development";
+
+type ExtractPdfTextPagesFn = (arrayBuffer: ArrayBuffer) => Promise<{ page: number; text: string }[]>;
+
+let cachedExtractPdfTextPages: ExtractPdfTextPagesFn | null = null;
+
+async function getExtractPdfTextPages(): Promise<ExtractPdfTextPagesFn> {
+  if (cachedExtractPdfTextPages) {
+    return cachedExtractPdfTextPages;
+  }
+
+  // Load PDF parser lazily so text-only analysis requests don't evaluate pdf-parse on server boot.
+  const mod = await import("@/lib/pdf/extract-text");
+  cachedExtractPdfTextPages = mod.extractPdfTextPages;
+  return cachedExtractPdfTextPages;
+}
 
 async function buildLeaseAiFields(input: {
   fullLeaseText: string;
@@ -223,6 +237,7 @@ export async function POST(request: Request) {
     const contentType = file.type || null;
 
     try {
+      const extractPdfTextPages = await getExtractPdfTextPages();
       const bytes = await file.arrayBuffer();
       const extractedPages = await extractPdfTextPages(bytes);
       const rentSnippets = findRentSnippets(extractedPages);
