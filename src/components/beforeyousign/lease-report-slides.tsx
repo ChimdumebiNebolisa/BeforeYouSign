@@ -165,7 +165,7 @@ export function RedFlagsSection({
   onFlagEvidenceClick: (args: { page: number; quote: string; findingId: string }) => void;
 }) {
   return (
-    <section className={`${cardBase} border-l-[3px] border-[#ba1a1a]/35 pl-4`}>
+    <section className={cardBase}>
       <h3 className={sectionTitle}>Potential Red Flags</h3>
       {report.potentialRedFlags.length ? (
         <ul className="mt-3 space-y-2.5">
@@ -257,7 +257,7 @@ export function RedFlagsSection({
           })}
         </ul>
       ) : (
-        <p className="mt-2 text-sm text-[#444651]">Not clearly found in this lease text.</p>
+        <p className="mt-2 text-sm text-[#444651]">No major red flags were clearly identified in this lease text.</p>
       )}
     </section>
   );
@@ -273,7 +273,7 @@ export function MoneySection({
   setExpandedMoneyQuotes: Dispatch<SetStateAction<Record<string, boolean>>>;
 }) {
   return (
-    <section className={`${cardBase} border-l-[3px] border-[#00246a]/35 pl-4`}>
+    <section className={cardBase}>
       <h3 className={sectionTitle}>Money and Fees</h3>
       {report.moneyAndFees.length ? (
         <div className="mt-3 space-y-2">
@@ -324,7 +324,7 @@ export function MoneySection({
           })}
         </div>
       ) : (
-        <p className="mt-2 text-sm text-[#444651]">Not clearly found in this lease text.</p>
+        <p className="mt-2 text-sm text-[#444651]">No specific charges were clearly identified in this section of the lease.</p>
       )}
     </section>
   );
@@ -352,7 +352,7 @@ export function DeadlinesSection({ report }: { report: BeforeYouSignReport }) {
           ))}
         </div>
       ) : (
-        <p className="mt-2 text-sm text-[#444651]">Not clearly found in this lease text.</p>
+        <p className="mt-2 text-sm text-[#444651]">Notice periods and deadlines were not clearly stated here.</p>
       )}
     </section>
   );
@@ -369,7 +369,7 @@ export function ResponsibilitiesSection({ report }: { report: BeforeYouSignRepor
           ))}
         </ul>
       ) : (
-        <p className="mt-2 text-sm text-[#444651]">Not clearly found in this lease text.</p>
+        <p className="mt-2 text-sm text-[#444651]">Responsibilities were not clearly split between tenant and landlord.</p>
       )}
     </section>
   );
@@ -417,7 +417,7 @@ export function QuestionsSection({
           ) : null}
         </>
       ) : (
-        <p className="mt-2 text-sm text-[#444651]">Not clearly found in this lease text.</p>
+        <p className="mt-2 text-sm text-[#444651]">No specific follow-up questions were generated for this lease.</p>
       )}
     </section>
   );
@@ -434,7 +434,7 @@ export function NextStepsSection({ report }: { report: BeforeYouSignReport }) {
           ))}
         </ul>
       ) : (
-        <p className="mt-2 text-sm text-[#444651]">Not clearly found in this lease text.</p>
+        <p className="mt-2 text-sm text-[#444651]">No next-step recommendations were generated for this lease.</p>
       )}
       <p className="mt-4 border-t border-[#e6e8ea] pt-3 text-[10px] leading-relaxed text-[#9ca3af]">
         {report.disclaimer}
@@ -446,7 +446,7 @@ export function NextStepsSection({ report }: { report: BeforeYouSignReport }) {
 export function MissingSection({ report }: { report: BeforeYouSignReport }) {
   return (
     <section className="rounded-lg border border-[#c5c5d3]/25 bg-[#f4f6f8] p-4">
-      <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#57534e]">Not clearly found</h3>
+      <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#57534e]">Not clearly stated</h3>
       <p className="mt-1 text-[13px] text-[#57534e]">
         We could not determine these confidently from the uploaded lease.
       </p>

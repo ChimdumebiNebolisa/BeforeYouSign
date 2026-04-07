@@ -72,7 +72,7 @@ function LeaseReportCarousel({
 }) {
   const hasMissing = report.missingOrUnclear.length > 0;
   const slideLabels = useMemo(
-    () => (hasMissing ? [...SLIDE_LABELS_BASE, "Not clearly found"] : [...SLIDE_LABELS_BASE]),
+    () => (hasMissing ? [...SLIDE_LABELS_BASE, "Not clearly stated"] : [...SLIDE_LABELS_BASE]),
     [hasMissing],
   );
   const slideCount = slideLabels.length;

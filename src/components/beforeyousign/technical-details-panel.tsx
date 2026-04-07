@@ -54,7 +54,7 @@ export function TechnicalDetailsPanel({ receipt }: { receipt: TechnicalDetailsRe
     <details className="group rounded-xl border border-[#e0e3e8]/80 bg-[#f2f4f6] p-4 text-[#444651]">
       <summary className="cursor-pointer list-none font-[family-name:var(--font-headline)] text-xs font-bold uppercase tracking-[0.14em] text-[#757682] [&::-webkit-details-marker]:hidden">
         <span className="mr-2 inline-block text-[#00246a] transition group-open:rotate-90">›</span>
-        Technical details
+        How this was analyzed
       </summary>
 
       <div className="mt-4 space-y-5 text-xs leading-relaxed">
@@ -90,7 +90,7 @@ export function TechnicalDetailsPanel({ receipt }: { receipt: TechnicalDetailsRe
 
         {scanRows.length > 0 ? (
           <section>
-            <p className={detailLabel}>Automated snippet scan</p>
+            <p className={detailLabel}>Clause matches detected</p>
             <div className="mt-2 overflow-x-auto rounded-lg border border-[#e0e3e8] bg-[#ffffff]">
               <table className="w-full min-w-[280px] border-collapse text-left text-[11px]">
                 <thead>
@@ -119,7 +119,7 @@ export function TechnicalDetailsPanel({ receipt }: { receipt: TechnicalDetailsRe
 
         {receipt.ruleBasedFindings && receipt.ruleBasedFindings.length > 0 ? (
           <section>
-            <p className={detailLabel}>Rule-based findings</p>
+            <p className={detailLabel}>Matched lease clauses</p>
             <p className="mt-2 text-xs text-[#444651]">
               <span className="font-medium text-[#191c1e]">{receipt.ruleBasedFindings.length}</span> pattern match
               {receipt.ruleBasedFindings.length === 1 ? "" : "es"}
@@ -143,7 +143,7 @@ export function TechnicalDetailsPanel({ receipt }: { receipt: TechnicalDetailsRe
 
         {receipt.unclearLeasePhrases && receipt.unclearLeasePhrases.length > 0 ? (
           <section className="rounded-lg border border-[#fed7aa] bg-[#fffbeb] p-3 text-[#9a3412]">
-            <p className="text-[10px] font-bold uppercase tracking-[0.1em]">Possibly unclear wording</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.1em]">Wording to review</p>
             <p className="mt-1 text-xs">
               {receipt.unclearLeasePhrases.length} instance{receipt.unclearLeasePhrases.length === 1 ? "" : "s"} · Example
               (p. {receipt.unclearLeasePhrases[0]?.page}):{" "}
@@ -154,7 +154,7 @@ export function TechnicalDetailsPanel({ receipt }: { receipt: TechnicalDetailsRe
 
         {receipt.deterministicRiskBand !== undefined ? (
           <section className="rounded-lg border border-[#e0e3e8] bg-[#ffffff] p-4 text-[#191c1e] shadow-sm">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#757682]">Rule-based risk scan</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#757682]">Estimated risk from text patterns</p>
             <p className="mt-2 font-[family-name:var(--font-headline)] text-sm font-semibold leading-snug">
               Band <span className="uppercase">{receipt.deterministicRiskBand}</span>
               <span className="ml-2 font-normal text-[#505f76]">
