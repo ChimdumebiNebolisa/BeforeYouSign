@@ -67,47 +67,163 @@ async function buildLeaseAiFields(input: {
 }
 
 export async function POST(request: Request) {
-  const headerContentType = request.headers.get("content-type") ?? "";
+  const headerContentType = (request.headers.get("content-type") ?? "").toLowerCase();
 
-  if (headerContentType.includes("application/json")) {
-    try {
-      let parsed: unknown;
+  try {
+    if (headerContentType.includes("application/json")) {
       try {
-        parsed = await request.json();
-      } catch {
-        return NextResponse.json({ ok: false, error: "Invalid JSON body." }, { status: 400 });
-      }
+        let parsed: unknown;
+        try {
+          parsed = await request.json();
+        } catch {
+          return NextResponse.json({ ok: false, error: "Invalid JSON body." }, { status: 400 });
+        }
 
-      if (!parsed || typeof parsed !== "object" || !("leaseText" in parsed)) {
+        if (!parsed || typeof parsed !== "object" || !("leaseText" in parsed)) {
+          return NextResponse.json(
+            { ok: false, error: "Missing leaseText in JSON body." },
+            { status: 400 },
+          );
+        }
+
+        const rawText = (parsed as { leaseText: unknown }).leaseText;
+        if (typeof rawText !== "string") {
+          return NextResponse.json(
+            { ok: false, error: "leaseText must be a string." },
+            { status: 400 },
+          );
+        }
+
+        const normalizedText = normalizeLeasePageText(rawText);
+        if (!normalizedText) {
+          return NextResponse.json(
+            { ok: false, error: "leaseText is empty after normalization." },
+            { status: 400 },
+          );
+        }
+
+        const fileNameField = (parsed as { fileName?: unknown }).fileName;
+        const fileName =
+          typeof fileNameField === "string" && fileNameField.trim().length > 0
+            ? fileNameField.trim()
+            : "pasted-lease.txt";
+
+        const extractedPages = [{ page: 1, text: normalizedText }];
+        const rentSnippets = findRentSnippets(extractedPages);
+        const depositSnippets = findDepositSnippets(extractedPages);
+        const feeSnippets = findFeeSnippets(extractedPages);
+        const noticeSnippets = findNoticeSnippets(extractedPages);
+        const renewalSnippets = findRenewalSnippets(extractedPages);
+        const maintenanceSnippets = findMaintenanceSnippets(extractedPages);
+        const utilitiesSnippets = findUtilitiesSnippets(extractedPages);
+        const ruleBasedFindings = buildRuleBasedFindings({
+          rent: rentSnippets,
+          deposit: depositSnippets,
+          fees: feeSnippets,
+          notice: noticeSnippets,
+          renewal: renewalSnippets,
+          maintenance: maintenanceSnippets,
+          utilities: utilitiesSnippets,
+        });
+        const unclearLeasePhrases = findUnclearLeasePhrases(extractedPages);
+        const fullLeaseText = extractedPages.map((p) => p.text).join("\n\n");
+        const deterministicRisk = computeDeterministicLeaseRisk({
+          fullText: fullLeaseText,
+          findings: ruleBasedFindings,
+          unclearPhrases: unclearLeasePhrases,
+        });
+        const fileSizeBytes = Buffer.byteLength(normalizedText, "utf8");
+
+        if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
+          console.log(
+            "[beforeyousign][text] normalized",
+            JSON.stringify({
+              fileName,
+              pages: extractedPages.length,
+              charsPerPage: extractedPages.map((p) => p.text.length),
+              rentSnippets: rentSnippets.length,
+              depositSnippets: depositSnippets.length,
+              feeSnippets: feeSnippets.length,
+              noticeSnippets: noticeSnippets.length,
+              renewalSnippets: renewalSnippets.length,
+              maintenanceSnippets: maintenanceSnippets.length,
+              utilitiesSnippets: utilitiesSnippets.length,
+              ruleBasedFindings: ruleBasedFindings.length,
+              unclearLeasePhrases: unclearLeasePhrases.length,
+              hasBysAiKey: Boolean(getBysAiKey()),
+            }),
+          );
+        }
+
+        const aiFields = await buildLeaseAiFields({
+          fullLeaseText,
+          ruleBasedFindings,
+          deterministicRisk,
+        });
+
+        return NextResponse.json({
+          ok: true,
+          fileName,
+          fileSizeBytes,
+          contentType: "text/plain",
+          extractedPages,
+          rentSnippets,
+          depositSnippets,
+          feeSnippets,
+          noticeSnippets,
+          renewalSnippets,
+          maintenanceSnippets,
+          utilitiesSnippets,
+          ruleBasedFindings,
+          unclearLeasePhrases,
+          deterministicRiskScore: deterministicRisk.score,
+          deterministicRiskBand: deterministicRisk.band,
+          deterministicRiskReasons: deterministicRisk.reasons,
+          report: aiFields.report,
+          reportError: aiFields.reportError,
+          ...(isDev && aiFields.reportDebug ? { reportDebug: aiFields.reportDebug } : {}),
+        });
+      } catch (error) {
+        if (isDev) {
+          console.error("[beforeyousign][analyze][json] unexpected error", error);
+        }
         return NextResponse.json(
-          { ok: false, error: "Missing leaseText in JSON body." },
-          { status: 400 },
+          {
+            ok: false,
+            error: "We hit an unexpected server error while analyzing this text. Please retry.",
+          },
+          { status: 500 },
         );
       }
+    }
 
-      const rawText = (parsed as { leaseText: unknown }).leaseText;
-      if (typeof rawText !== "string") {
-        return NextResponse.json(
-          { ok: false, error: "leaseText must be a string." },
-          { status: 400 },
-        );
-      }
+    if (!headerContentType.includes("multipart/form-data")) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Unsupported content type. Use application/json for pasted text or multipart/form-data for PDF upload.",
+        },
+        { status: 415 },
+      );
+    }
 
-      const normalizedText = normalizeLeasePageText(rawText);
-      if (!normalizedText) {
-        return NextResponse.json(
-          { ok: false, error: "leaseText is empty after normalization." },
-          { status: 400 },
-        );
-      }
+    const formData = await request.formData();
+    const file = formData.get("file");
 
-      const fileNameField = (parsed as { fileName?: unknown }).fileName;
-      const fileName =
-        typeof fileNameField === "string" && fileNameField.trim().length > 0
-          ? fileNameField.trim()
-          : "pasted-lease.txt";
+    if (!file || !(file instanceof Blob)) {
+      return NextResponse.json(
+        { ok: false, error: "Missing file. Expected multipart form field 'file'." },
+        { status: 400 },
+      );
+    }
 
-      const extractedPages = [{ page: 1, text: normalizedText }];
+    const fileName = (file as unknown as { name?: string }).name ?? "uploaded.pdf";
+    const fileSizeBytes = file.size;
+    const contentType = file.type || null;
+
+    try {
+      const bytes = await file.arrayBuffer();
+      const extractedPages = await extractPdfTextPages(bytes);
       const rentSnippets = findRentSnippets(extractedPages);
       const depositSnippets = findDepositSnippets(extractedPages);
       const feeSnippets = findFeeSnippets(extractedPages);
@@ -131,11 +247,10 @@ export async function POST(request: Request) {
         findings: ruleBasedFindings,
         unclearPhrases: unclearLeasePhrases,
       });
-      const fileSizeBytes = Buffer.byteLength(normalizedText, "utf8");
 
       if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
         console.log(
-          "[beforeyousign][text] normalized",
+          "[beforeyousign][pdf] extracted",
           JSON.stringify({
             fileName,
             pages: extractedPages.length,
@@ -164,7 +279,7 @@ export async function POST(request: Request) {
         ok: true,
         fileName,
         fileSizeBytes,
-        contentType: "text/plain",
+        contentType,
         extractedPages,
         rentSnippets,
         depositSnippets,
@@ -182,117 +297,28 @@ export async function POST(request: Request) {
         reportError: aiFields.reportError,
         ...(isDev && aiFields.reportDebug ? { reportDebug: aiFields.reportDebug } : {}),
       });
-    } catch (error) {
-      if (isDev) {
-        console.error("[beforeyousign][analyze][json] unexpected error", error);
-      }
+    } catch {
       return NextResponse.json(
         {
           ok: false,
-          error: "We hit an unexpected server error while analyzing this text. Please retry.",
+          error: "Failed to extract text from this PDF.",
         },
-        { status: 500 },
+        { status: 400 },
       );
     }
-  }
-
-  const formData = await request.formData();
-  const file = formData.get("file");
-
-  if (!file || !(file instanceof Blob)) {
-    return NextResponse.json(
-      { ok: false, error: "Missing file. Expected multipart form field 'file'." },
-      { status: 400 },
-    );
-  }
-
-  const fileName = (file as unknown as { name?: string }).name ?? "uploaded.pdf";
-  const fileSizeBytes = file.size;
-  const contentType = file.type || null;
-
-  try {
-    const bytes = await file.arrayBuffer();
-    const extractedPages = await extractPdfTextPages(bytes);
-    const rentSnippets = findRentSnippets(extractedPages);
-    const depositSnippets = findDepositSnippets(extractedPages);
-    const feeSnippets = findFeeSnippets(extractedPages);
-    const noticeSnippets = findNoticeSnippets(extractedPages);
-    const renewalSnippets = findRenewalSnippets(extractedPages);
-    const maintenanceSnippets = findMaintenanceSnippets(extractedPages);
-    const utilitiesSnippets = findUtilitiesSnippets(extractedPages);
-    const ruleBasedFindings = buildRuleBasedFindings({
-      rent: rentSnippets,
-      deposit: depositSnippets,
-      fees: feeSnippets,
-      notice: noticeSnippets,
-      renewal: renewalSnippets,
-      maintenance: maintenanceSnippets,
-      utilities: utilitiesSnippets,
-    });
-    const unclearLeasePhrases = findUnclearLeasePhrases(extractedPages);
-    const fullLeaseText = extractedPages.map((p) => p.text).join("\n\n");
-    const deterministicRisk = computeDeterministicLeaseRisk({
-      fullText: fullLeaseText,
-      findings: ruleBasedFindings,
-      unclearPhrases: unclearLeasePhrases,
-    });
-
-    if (process.env.BEFOREYOUSIGN_PDF_DEBUG === "1") {
-      console.log(
-        "[beforeyousign][pdf] extracted",
-        JSON.stringify({
-          fileName,
-          pages: extractedPages.length,
-          charsPerPage: extractedPages.map((p) => p.text.length),
-          rentSnippets: rentSnippets.length,
-          depositSnippets: depositSnippets.length,
-          feeSnippets: feeSnippets.length,
-          noticeSnippets: noticeSnippets.length,
-          renewalSnippets: renewalSnippets.length,
-          maintenanceSnippets: maintenanceSnippets.length,
-          utilitiesSnippets: utilitiesSnippets.length,
-          ruleBasedFindings: ruleBasedFindings.length,
-          unclearLeasePhrases: unclearLeasePhrases.length,
-          hasBysAiKey: Boolean(getBysAiKey()),
-        }),
-      );
+  } catch (error) {
+    if (isDev) {
+      console.error("[beforeyousign][analyze] unhandled route error", {
+        contentType: headerContentType || "(empty)",
+        error,
+      });
     }
-
-    const aiFields = await buildLeaseAiFields({
-      fullLeaseText,
-      ruleBasedFindings,
-      deterministicRisk,
-    });
-
-    return NextResponse.json({
-      ok: true,
-      fileName,
-      fileSizeBytes,
-      contentType,
-      extractedPages,
-      rentSnippets,
-      depositSnippets,
-      feeSnippets,
-      noticeSnippets,
-      renewalSnippets,
-      maintenanceSnippets,
-      utilitiesSnippets,
-      ruleBasedFindings,
-      unclearLeasePhrases,
-      deterministicRiskScore: deterministicRisk.score,
-      deterministicRiskBand: deterministicRisk.band,
-      deterministicRiskReasons: deterministicRisk.reasons,
-      report: aiFields.report,
-      reportError: aiFields.reportError,
-      ...(isDev && aiFields.reportDebug ? { reportDebug: aiFields.reportDebug } : {}),
-    });
-  } catch {
     return NextResponse.json(
       {
         ok: false,
-        error: "Failed to extract text from this PDF.",
+        error: "We hit an unexpected server error while processing this request. Please retry.",
       },
-      { status: 400 },
+      { status: 500 },
     );
   }
 }
