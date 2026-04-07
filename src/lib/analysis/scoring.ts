@@ -27,7 +27,7 @@ export function computeDeterministicLeaseRisk(input: {
   );
   if (renewalAuto) {
     score += 2;
-    reasons.push("Automatic renewal language (+2)");
+    reasons.push("This lease may renew automatically unless notice is given.");
   }
 
   const aggressiveLate =
@@ -35,18 +35,18 @@ export function computeDeterministicLeaseRisk(input: {
   const dailyLate = /\bper\s+day\b/i.test(text) && /\b(?:late|fee)\b/i.test(text);
   if (aggressiveLate || dailyLate) {
     score += 2;
-    reasons.push("Potentially aggressive late-rent wording (+2)");
+    reasons.push("Late-fee terms may add costs quickly if rent is late.");
   }
 
   if (input.unclearPhrases.length > 0) {
     score += 2;
-    reasons.push("Open-ended or vague fee/policy phrasing flagged (+2)");
+    reasons.push("Some fee or policy terms appear open-ended.");
   }
 
   const feeCount = input.findings.filter((f) => f.category === "fees").length;
   if (feeCount >= 3) {
     score += 2;
-    reasons.push(`${feeCount} fee-related snippets in scan (+2)`);
+    reasons.push(`We found ${feeCount} fee clauses that may increase total cost.`);
   }
 
   const earlyTerminatePenalty =
@@ -54,7 +54,7 @@ export function computeDeterministicLeaseRisk(input: {
     /\b(?:penalty|fee|forfeit|remainder\s+of\s+(?:the\s+)?rent)\b/i.test(lower);
   if (earlyTerminatePenalty) {
     score += 2;
-    reasons.push("Early termination penalties mentioned (+2)");
+    reasons.push("Ending the lease early may trigger extra charges.");
   }
 
   const utilitiesSnips = input.findings.filter((f) => f.category === "utilities");
@@ -65,7 +65,7 @@ export function computeDeterministicLeaseRisk(input: {
     !/\blandlord\b[^.]{0,200}\b(?:electric|gas|water)\b/i.test(text);
   if (utilitiesVague) {
     score += 1;
-    reasons.push("Utilities split not clearly tied to specific utilities (+1)");
+    reasons.push("Utility responsibilities are not clearly split.");
   }
 
   const tenantMajorMaint = input.findings.some(
@@ -76,14 +76,14 @@ export function computeDeterministicLeaseRisk(input: {
   );
   if (tenantMajorMaint) {
     score += 1;
-    reasons.push("Tenant named next to major systems maintenance (+1)");
+    reasons.push("Maintenance language may assign major repairs to the tenant.");
   }
 
   const entryBroad =
     /\blandlord\b[^.\n]{0,160}\benter\b[^.\n]{0,160}\b(?:without|at\s+any\s+time)\b/i.test(text);
   if (entryBroad) {
     score += 1;
-    reasons.push("Broad landlord entry wording (+1)");
+    reasons.push("Landlord entry language may be broad.");
   }
 
   const vagueNotice = input.findings.some(
@@ -94,7 +94,7 @@ export function computeDeterministicLeaseRisk(input: {
   );
   if (vagueNotice) {
     score += 1;
-    reasons.push("Notice timing described without a clear day count (+1)");
+    reasons.push("Notice timing may be unclear.");
   }
 
   let band: DeterministicRiskBand = "low";

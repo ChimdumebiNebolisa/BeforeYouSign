@@ -69,7 +69,7 @@ function reconcileReportRisk(
 
   const signalHint =
     deterministic.reasons.length > 0
-      ? `Strongest scan signals: ${deterministic.reasons.slice(0, 2).join("; ")}. `
+      ? `Key lease signals: ${deterministic.reasons.slice(0, 2).join("; ")}. `
       : "";
 
   return {
