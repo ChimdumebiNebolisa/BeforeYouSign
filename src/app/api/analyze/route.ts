@@ -48,6 +48,87 @@ function extractDayWindow(text: string): string | null {
   return match ? match[0] : null;
 }
 
+function normalizeQuoteKey(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .replace(/[“”"']/g, "")
+    .trim();
+}
+
+function shortClause(text: string, maxChars: number): string {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (normalized.length <= maxChars) return normalized;
+  const slice = normalized.slice(0, maxChars);
+  const breakAt = slice.lastIndexOf(" ");
+  const base = breakAt > maxChars * 0.55 ? slice.slice(0, breakAt).trimEnd() : slice.trimEnd();
+  return `${base}...`;
+}
+
+function feeLabelFromQuote(quote: string): string {
+  const q = quote.toLowerCase();
+  if (q.includes("late")) return "Late fee";
+  if (q.includes("deposit")) return "Deposit-related fee";
+  if (q.includes("pet")) return "Pet fee";
+  if (q.includes("parking")) return "Parking fee";
+  if (q.includes("clean")) return "Cleaning fee";
+  return "Additional fee";
+}
+
+function fallbackFlagTitle(category: RuleBasedFinding["category"]): string {
+  switch (category) {
+    case "fees":
+    case "deposit":
+      return "Extra fee terms to review";
+    case "renewal":
+      return "Renewal terms may limit flexibility";
+    case "notice":
+      return "Notice requirements may be strict";
+    case "maintenance":
+      return "Maintenance duties may shift costs to you";
+    case "utilities":
+      return "Utility cost responsibilities may be unclear";
+    default:
+      return "Lease clause to review";
+  }
+}
+
+function fallbackFlagExplanation(category: RuleBasedFinding["category"]): string {
+  switch (category) {
+    case "fees":
+    case "deposit":
+      return "This clause suggests charges beyond monthly rent.";
+    case "renewal":
+      return "This clause may affect how and when your lease renews.";
+    case "notice":
+      return "This clause sets or implies deadlines for giving notice.";
+    case "maintenance":
+      return "This clause may assign repair or upkeep duties to the tenant.";
+    case "utilities":
+      return "This clause may affect which utilities you must pay for.";
+    default:
+      return "This clause may affect your costs or lease obligations.";
+  }
+}
+
+function fallbackFlagWhyItMatters(category: RuleBasedFinding["category"]): string {
+  switch (category) {
+    case "fees":
+    case "deposit":
+      return "Unexpected fees can raise your total housing cost.";
+    case "renewal":
+      return "Renewal terms can affect move-out timing and flexibility.";
+    case "notice":
+      return "Missing a notice deadline can trigger extra rent obligations.";
+    case "maintenance":
+      return "Repair duties can create unexpected out-of-pocket costs.";
+    case "utilities":
+      return "Utility responsibility changes your true monthly cost.";
+    default:
+      return "Clarifying this clause helps avoid surprises later.";
+  }
+}
+
 function buildRuleOnlyFallbackReport(input: {
   fullLeaseText: string;
   ruleBasedFindings: RuleBasedFinding[];
@@ -63,7 +144,12 @@ function buildRuleOnlyFallbackReport(input: {
     utilities: [],
   };
 
+  const seenCategoryQuotes = new Set<string>();
+
   for (const finding of input.ruleBasedFindings) {
+    const key = `${finding.category}::${normalizeQuoteKey(finding.quote)}`;
+    if (seenCategoryQuotes.has(key)) continue;
+    seenCategoryQuotes.add(key);
     byCategory[finding.category].push(finding);
   }
 
@@ -88,7 +174,7 @@ function buildRuleOnlyFallbackReport(input: {
 
   for (const feeFinding of byCategory.fees.slice(0, 4)) {
     moneyAndFees.push({
-      label: "Additional Fee",
+      label: feeLabelFromQuote(feeFinding.quote),
       value: extractCurrencyValue(feeFinding.quote) ?? "See lease clause",
       evidence: [{ page: feeFinding.page, quote: feeFinding.quote }],
     });
@@ -113,11 +199,11 @@ function buildRuleOnlyFallbackReport(input: {
   }
 
   const responsibilities = [
-    ...byCategory.utilities.slice(0, 2).map((f) => `Utilities: ${f.quote}`),
-    ...byCategory.maintenance.slice(0, 2).map((f) => `Maintenance: ${f.quote}`),
+    ...byCategory.utilities.slice(0, 2).map((f) => `Utilities: ${shortClause(f.quote, 140)}`),
+    ...byCategory.maintenance.slice(0, 2).map((f) => `Maintenance: ${shortClause(f.quote, 140)}`),
   ];
   if (responsibilities.length === 0) {
-    responsibilities.push("Review tenant and landlord responsibility clauses in the lease.");
+    responsibilities.push("Tenant and landlord responsibilities were not clearly separated.");
   }
 
   const whatYoureAgreeingTo = Array.from(
@@ -138,8 +224,24 @@ function buildRuleOnlyFallbackReport(input: {
     utilities: "utilities",
   };
 
-  const potentialRedFlags = input.ruleBasedFindings
-    .filter((f) => f.category !== "rent")
+  const redFlagCandidates = [
+    ...byCategory.fees,
+    ...byCategory.deposit,
+    ...byCategory.renewal,
+    ...byCategory.notice,
+    ...byCategory.maintenance,
+    ...byCategory.utilities,
+  ];
+
+  const seenFlagQuotes = new Set<string>();
+
+  const potentialRedFlags = redFlagCandidates
+    .filter((f) => {
+      const key = normalizeQuoteKey(f.quote);
+      if (seenFlagQuotes.has(key)) return false;
+      seenFlagQuotes.add(key);
+      return true;
+    })
     .slice(0, 4)
     .map((f, index) => {
       const severity: "minor" | "moderate" | "critical" =
@@ -152,51 +254,73 @@ function buildRuleOnlyFallbackReport(input: {
       return {
         id: `rule-flag-${index + 1}`,
         category: categoryMap[f.category],
-        title: `${f.category[0].toUpperCase()}${f.category.slice(1)} clause to review`,
+        title: fallbackFlagTitle(f.category),
         severity,
-        explanation: "This clause was identified by rule-based scanning and may affect tenant obligations or costs.",
-        whyItMatters: "Clarifying this clause can reduce the risk of unexpected fees or constraints.",
+        explanation: fallbackFlagExplanation(f.category),
+        whyItMatters: fallbackFlagWhyItMatters(f.category),
         evidence: [{ page: f.page, quote: f.quote }],
       };
     });
 
-  const questionsToAsk: string[] = [
-    "Can you clarify any fees, penalties, and when they apply?",
-    "What are the exact notice and renewal requirements?",
-    "Which utilities and maintenance duties are the tenant's responsibility?",
-  ];
+  const questionsToAsk = Array.from(
+    new Set([
+      ...(moneyAndFees.length > 1
+        ? ["Can you list every required fee and explain when each one applies?"]
+        : []),
+      ...(byCategory.notice.length > 0 || byCategory.renewal.length > 0
+        ? ["What notice period do I need to move out or avoid automatic renewal?"]
+        : []),
+      ...(byCategory.utilities.length > 0
+        ? ["Which utilities are included in rent, and which ones do I pay directly?"]
+        : []),
+      ...(byCategory.maintenance.length > 0
+        ? ["Which repairs are my responsibility versus the landlord's?"]
+        : []),
+      "Can we get any unclear terms clarified in writing before I sign?",
+    ]),
+  ).slice(0, 5);
 
   const missingOrUnclear: string[] = [];
-  if (byCategory.notice.length === 0) missingOrUnclear.push("Notice period details are unclear.");
-  if (byCategory.renewal.length === 0) missingOrUnclear.push("Renewal terms are not clearly identified.");
-  if (byCategory.utilities.length === 0) missingOrUnclear.push("Utility responsibilities are unclear.");
-  if (byCategory.maintenance.length === 0) missingOrUnclear.push("Maintenance responsibilities are unclear.");
+  if (byCategory.notice.length === 0) {
+    missingOrUnclear.push("Notice timing was not clearly stated.");
+  }
+  if (byCategory.renewal.length === 0) {
+    missingOrUnclear.push("Renewal terms were not clearly stated.");
+  }
+  if (byCategory.utilities.length === 0) {
+    missingOrUnclear.push("Utility responsibility was not clearly stated.");
+  }
+  if (byCategory.maintenance.length === 0) {
+    missingOrUnclear.push("Maintenance responsibility was not clearly stated.");
+  }
   if (missingOrUnclear.length === 0) {
-    missingOrUnclear.push("Review the full lease for any clauses not captured by rule-based extraction.");
+    missingOrUnclear.push("Some terms may still need clarification in the full lease document.");
   }
 
   const summary =
     moneyAndFees.length > 0
-      ? "This report is based on extracted lease clauses and highlights key payments, deadlines, and obligations."
-      : "This report is based on extracted lease clauses and highlights key terms to review before signing.";
+      ? "We reviewed your lease and highlighted key costs, deadlines, and responsibilities."
+      : "We reviewed your lease and highlighted the main terms to check before signing.";
+
+  const fallbackRiskReason =
+    input.deterministicRisk.reasons.length > 0
+      ? input.deterministicRisk.reasons.slice(0, 3).join(" ")
+      : "Risk level is based on lease terms we could confirm from this document.";
 
   return {
     summary,
     whatYoureAgreeingTo,
     riskLevel: input.deterministicRisk.band,
-    riskReason:
-      input.deterministicRisk.reasons.length > 0
-        ? input.deterministicRisk.reasons.join(" ")
-        : "Risk level is based on rule-based clause detection from extracted lease text.",
+    riskReason: fallbackRiskReason,
     moneyAndFees,
     deadlinesAndNotice,
     responsibilities,
     potentialRedFlags,
     questionsToAsk,
     nextSteps: [
-      "Review the highlighted clauses directly in the lease text.",
-      "Ask the landlord or property manager to clarify unclear terms in writing.",
-      "Get legal advice for high-impact clauses before signing.",
+      "Confirm the total monthly cost, including recurring fees.",
+      "Ask for written clarification on any unclear lease terms.",
+      "Get legal advice before signing if any clause feels risky or unclear.",
     ],
     missingOrUnclear,
     disclaimer:
@@ -217,8 +341,7 @@ async function buildLeaseAiFields(input: {
   if (!apiKey?.trim()) {
     return {
       report: null,
-      reportError:
-        "Structured AI report skipped: add BYS_AI_KEY to .env.local on the server (never use NEXT_PUBLIC_).",
+      reportError: "The AI summary isn't available right now, but key lease details are still shown below.",
       reportDebug: null,
     };
   }
