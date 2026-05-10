@@ -167,6 +167,9 @@ export function RedFlagsSection({
   return (
     <section className={cardBase}>
       <h3 className={sectionTitle}>Potential Red Flags</h3>
+      <p className="mt-1 text-[11px] leading-snug text-[#757682]">
+        Click a red flag source quote to highlight it in the lease text.
+      </p>
       {report.potentialRedFlags.length ? (
         <ul className="mt-3 space-y-2.5">
           {report.potentialRedFlags.map((f) => {
@@ -223,7 +226,7 @@ export function RedFlagsSection({
                   ) : null}
                   {primary ? (
                     <p className="mt-2 text-[11px] leading-snug text-[#505f76]">
-                      <span className="font-medium text-[#191c1e]">p. {primary.page}: </span>
+                      <span className="font-medium text-[#191c1e]">Source quote · p. {primary.page}: </span>
                       <q className="text-[#444651]">{trimQuote(primary.quote, 140)}</q>
                     </p>
                   ) : null}
@@ -233,7 +236,7 @@ export function RedFlagsSection({
                         <ul className="space-y-1.5 text-[11px] text-[#505f76]">
                           {rest.map((ev, i) => (
                             <li key={`${f.id}-ev-${i}`}>
-                              <span className="font-medium text-[#191c1e]">p. {ev.page}: </span>
+                              <span className="font-medium text-[#191c1e]">Source quote · p. {ev.page}: </span>
                               <q className="text-[#444651]">{trimQuote(ev.quote, 160)}</q>
                             </li>
                           ))}
@@ -292,7 +295,7 @@ export function MoneySection({
                 </p>
                 {primaryEv ? (
                   <p className="mt-1 text-[11px] leading-snug text-[#505f76]">
-                    <span className="font-medium text-[#191c1e]">p. {primaryEv.page}: </span>
+                    <span className="font-medium text-[#191c1e]">Source quote · p. {primaryEv.page}: </span>
                     <q className="text-[#444651]">{trimQuote(primaryEv.quote, 180)}</q>
                   </p>
                 ) : null}
@@ -302,7 +305,7 @@ export function MoneySection({
                       <ul className="space-y-1 text-[11px] text-[#505f76]">
                         {restEv.map((ev, j) => (
                           <li key={`${key}-q-${j}`}>
-                            <span className="font-medium text-[#191c1e]">p. {ev.page}: </span>
+                            <span className="font-medium text-[#191c1e]">Source quote · p. {ev.page}: </span>
                             <q className="text-[#444651]">{trimQuote(ev.quote, 160)}</q>
                           </li>
                         ))}
@@ -344,7 +347,7 @@ export function DeadlinesSection({ report }: { report: BeforeYouSignReport }) {
               </p>
               {row.evidence?.[0] ? (
                 <p className="mt-1.5 text-[11px] text-[#757682]">
-                  <span className="font-medium text-[#191c1e]">p. {row.evidence[0].page}: </span>
+                  <span className="font-medium text-[#191c1e]">Source quote · p. {row.evidence[0].page}: </span>
                   <q>{trimQuote(row.evidence[0].quote, 140)}</q>
                 </p>
               ) : null}

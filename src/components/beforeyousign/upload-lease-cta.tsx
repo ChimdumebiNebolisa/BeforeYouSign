@@ -79,7 +79,7 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
             <Upload className="h-7 w-7" strokeWidth={2} aria-hidden />
           </div>
           <p className="mt-4 font-semibold text-[#191c1e]">Click to upload or drag &amp; drop</p>
-          <p className="mt-1 text-xs text-[#444651]">PDF up to your server limits</p>
+          <p className="mt-1 text-xs text-[#444651]">PDF lease document</p>
           <button
             type="button"
             className="mt-5 h-11 w-full rounded-xl bys-gradient-cta text-sm font-bold text-white shadow-sm transition hover:opacity-95 active:scale-[0.99]"

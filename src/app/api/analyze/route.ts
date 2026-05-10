@@ -75,21 +75,38 @@ function feeLabelFromQuote(quote: string): string {
   return "Additional fee";
 }
 
-function fallbackFlagTitle(category: RuleBasedFinding["category"]): string {
+function fallbackFlagTitle(category: RuleBasedFinding["category"], quote: string): string {
+  const q = quote.toLowerCase();
+
+  if (/\blandlord\b[^.\n]{0,120}\b(?:enter|entry)\b|\bentry\b/i.test(quote)) {
+    return "Landlord entry terms may need review";
+  }
+
   switch (category) {
     case "fees":
+      if (q.includes("late")) return "Late fee may increase housing cost";
+      if (q.includes("deposit")) return "Security deposit needs review";
+      if (q.includes("pet")) return "Pet fee may increase housing cost";
+      if (q.includes("parking")) return "Parking fee may increase housing cost";
+      if (q.includes("clean")) return "Cleaning fee may affect move-out cost";
+      if (q.includes("returned") || q.includes("nsf")) return "Returned payment fee needs review";
+      if (q.includes("early termination")) return "Early termination cost needs review";
+      if (q.includes("utility") || q.includes("administrative") || q.includes("application") || q.includes("processing")) {
+        return "Required fee may increase housing cost";
+      }
+      return "Fee may increase total housing cost";
     case "deposit":
-      return "Extra fee terms to review";
+      return "Security deposit needs review";
     case "renewal":
       return "Renewal terms may limit flexibility";
     case "notice":
-      return "Notice requirements may be strict";
+      return "Notice period may affect move-out timing";
     case "maintenance":
-      return "Maintenance duties may shift costs to you";
+      return "Maintenance responsibility may need clarification";
     case "utilities":
-      return "Utility cost responsibilities may be unclear";
+      return "Utility responsibility may need review";
     default:
-      return "Lease clause to review";
+      return "Lease term needs review";
   }
 }
 
@@ -127,6 +144,21 @@ function fallbackFlagWhyItMatters(category: RuleBasedFinding["category"]): strin
     default:
       return "Clarifying this clause helps avoid surprises later.";
   }
+}
+
+function formatResponsibilityLine(label: string, quote: string): string {
+  const clause = shortClause(quote, 140);
+  const normalizedLabel = label.toLowerCase();
+  const normalizedClause = clause.toLowerCase().trimStart();
+
+  if (
+    normalizedClause.startsWith(`${normalizedLabel}:`) ||
+    normalizedClause.startsWith(`${normalizedLabel} -`)
+  ) {
+    return clause;
+  }
+
+  return `${label}: ${clause}`;
 }
 
 function buildRuleOnlyFallbackReport(input: {
@@ -199,8 +231,8 @@ function buildRuleOnlyFallbackReport(input: {
   }
 
   const responsibilities = [
-    ...byCategory.utilities.slice(0, 2).map((f) => `Utilities: ${shortClause(f.quote, 140)}`),
-    ...byCategory.maintenance.slice(0, 2).map((f) => `Maintenance: ${shortClause(f.quote, 140)}`),
+    ...byCategory.utilities.slice(0, 2).map((f) => formatResponsibilityLine("Utilities", f.quote)),
+    ...byCategory.maintenance.slice(0, 2).map((f) => formatResponsibilityLine("Maintenance", f.quote)),
   ];
   if (responsibilities.length === 0) {
     responsibilities.push("Tenant and landlord responsibilities were not clearly separated.");
@@ -254,7 +286,7 @@ function buildRuleOnlyFallbackReport(input: {
       return {
         id: `rule-flag-${index + 1}`,
         category: categoryMap[f.category],
-        title: fallbackFlagTitle(f.category),
+        title: fallbackFlagTitle(f.category, f.quote),
         severity,
         explanation: fallbackFlagExplanation(f.category),
         whyItMatters: fallbackFlagWhyItMatters(f.category),
