@@ -146,8 +146,8 @@ export function SummarySection({
           </button>
           {showRiskInfo ? (
             <p id="risk-level-info" className="mt-1.5 rounded-md bg-black/5 px-2.5 py-1.5 text-center text-[11px] leading-snug text-[#38485d]">
-              Risk level is a review priority, not a legal judgment. It shows how much attention this lease may need
-              before signing. High means review carefully, not automatically illegal.
+              Risk level is a review priority, not a legal judgment. High means review carefully, not automatically
+              illegal. Medium means a few things are worth a closer look. Low means mostly standard terms.
             </p>
           ) : null}
           {riskNote ? (
