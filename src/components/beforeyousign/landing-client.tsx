@@ -314,7 +314,11 @@ export function LandingClient() {
               <span className="text-[#00246a]">before you sign</span>
             </h1>
             <p className="max-w-xl text-lg leading-relaxed text-[#444651]">
-              Upload or paste your residential lease to see key terms, fees, and risks in plain English.
+              Upload or paste your residential lease to flag renter-facing issues like fees, deadlines, renewal terms,
+              and responsibilities before you sign.
+            </p>
+            <p className="max-w-xl text-sm font-medium leading-snug text-[#505f76]">
+              Risk level means review priority, not a legal judgment.
             </p>
           </div>
 
@@ -339,7 +343,7 @@ export function LandingClient() {
             <span aria-hidden>
               ⓘ
             </span>
-            For informational purposes only. Not legal advice.
+            Informational only. This helps you spot terms to review or ask about before signing.
           </div>
         </div>
 

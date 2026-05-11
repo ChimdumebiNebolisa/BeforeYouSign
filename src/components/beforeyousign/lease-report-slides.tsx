@@ -132,6 +132,15 @@ export function SummarySection({
           <span className="mt-0.5 block font-[family-name:var(--font-headline)] text-lg font-extrabold uppercase leading-none tracking-tight">
             {report.riskLevel}
           </span>
+          <p className="mt-1.5 text-center text-[11px] leading-snug text-[#38485d]">
+            Risk level means how much attention this lease may need before signing. It is based on renter-facing issues
+            found in the text, not a legal ruling.
+          </p>
+          {report.riskLevel === "high" ? (
+            <p className="mt-1 text-center text-[11px] leading-snug text-[#38485d]">
+              High risk means review carefully, not automatically illegal.
+            </p>
+          ) : null}
           {riskNote ? (
             <p className="mt-1.5 text-center text-[11px] leading-snug text-[#38485d]">{riskNote}</p>
           ) : null}
@@ -456,7 +465,7 @@ export function NextStepsSection({ report }: { report: BeforeYouSignReport }) {
         <p className="mt-2 text-sm text-[#444651]">No next-step recommendations were generated for this lease.</p>
       )}
       <p className="mt-4 border-t border-[#e6e8ea] pt-3 text-[10px] leading-relaxed text-[#9ca3af]">
-        {report.disclaimer}
+        Informational only. This report helps you spot terms to review or ask about before signing.
       </p>
     </section>
   );

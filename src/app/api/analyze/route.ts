@@ -486,7 +486,7 @@ function buildRuleOnlyFallbackReport(input: {
   const fallbackRiskReason =
     input.deterministicRisk.reasons.length > 0
       ? input.deterministicRisk.reasons.slice(0, 3).join(" ")
-      : "Risk level is based on lease terms we could confirm from this document.";
+      : "Risk level shows how much attention this lease may need before signing based on renter-facing issues found in the text.";
 
   return normalizeReportForCredibility({
     summary,
@@ -505,7 +505,7 @@ function buildRuleOnlyFallbackReport(input: {
     ],
     missingOrUnclear,
     disclaimer:
-      "This information is for informational purposes only and not legal advice. Consult a legal professional for advice.",
+      "Informational only. This report helps you spot terms to review or ask about before signing.",
   });
 }
 
