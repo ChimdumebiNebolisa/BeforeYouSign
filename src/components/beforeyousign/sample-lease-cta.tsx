@@ -47,7 +47,7 @@ export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string
 
       <button
         type="button"
-        className="mt-3 inline-flex h-[42px] w-full items-center justify-center rounded-xl bg-[#e0e3e5] px-3 text-sm font-medium text-[#191c1e] transition hover:bg-[#d8dadc] active:scale-[0.99] disabled:opacity-60"
+        className="mt-3 inline-flex h-[42px] w-full items-center justify-center rounded-xl border border-[#00246a]/35 bg-[#ffffff] px-3 text-sm font-semibold text-[#00246a] shadow-sm transition hover:border-[#00246a]/55 hover:bg-[#eef2ff] active:scale-[0.99] disabled:opacity-60"
         disabled={isLoading}
         onClick={() => {
           const run = async () => {
@@ -76,7 +76,7 @@ export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string
           void run();
         }}
       >
-        {isLoading ? "Loading sample…" : "Try Sample Lease"}
+        {isLoading ? "Loading sample…" : "Run Sample Lease"}
       </button>
 
       {loadError ? <p className="mt-2 text-sm font-medium text-[#ba1a1a]">{loadError}</p> : null}

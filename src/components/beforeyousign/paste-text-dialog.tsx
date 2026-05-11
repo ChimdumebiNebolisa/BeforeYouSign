@@ -26,7 +26,7 @@ export function PasteTextDialog({
         className="mt-3 w-full rounded-xl border border-[#c5c5d3]/35 bg-[#ffffff] py-3 text-sm font-semibold text-[#191c1e] transition hover:bg-[#f2f4f6] active:scale-[0.99]"
         onClick={() => setIsOpen(true)}
       >
-        Paste Text
+        Paste Lease Text
       </button>
 
       {pasted ? (

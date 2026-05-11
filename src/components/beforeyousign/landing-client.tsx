@@ -317,17 +317,14 @@ export function LandingClient() {
               Upload or paste your residential lease to flag renter-facing issues like fees, deadlines, renewal terms,
               and responsibilities before you sign.
             </p>
-            <p className="max-w-xl text-sm font-medium leading-snug text-[#505f76]">
-              Risk level means review priority, not a legal judgment.
-            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             {[
-              { t: "Rent & Fees", d: "Rent, deposits, and recurring charges called out clearly." },
-              { t: "Red Flags", d: "Clauses that look unusually tenant-unfriendly or vague." },
-              { t: "Renewal & Notice", d: "End dates, renewal windows, and notice requirements." },
-              { t: "Questions", d: "Negotiation prompts you can bring to the landlord or agent." },
+              { t: "Find costs", d: "Rent, deposits, and recurring charges called out clearly." },
+              { t: "Spot red flags", d: "Clauses that look unusually tenant-unfriendly or vague." },
+              { t: "Check deadlines", d: "End dates, renewal windows, and notice requirements." },
+              { t: "Prepare questions", d: "Negotiation prompts you can bring to the landlord or agent." },
             ].map((c) => (
               <div
                 key={c.t}
@@ -343,7 +340,7 @@ export function LandingClient() {
             <span aria-hidden>
               ⓘ
             </span>
-            Informational only. This helps you spot terms to review or ask about before signing.
+            Informational only. Risk level means review priority, not a legal judgment.
           </div>
         </div>
 
@@ -351,9 +348,9 @@ export function LandingClient() {
           <div className="bys-glass-panel space-y-8 rounded-[2rem] border border-white/50 p-6 shadow-[0px_32px_64px_rgba(0,36,106,0.08)] sm:p-8 lg:sticky lg:top-32">
             <div className="space-y-1 text-center lg:text-left">
               <h2 className="font-[family-name:var(--font-headline)] text-2xl font-bold text-[#191c1e]">
-                Start your analysis
+                Analyze a lease
               </h2>
-              <p className="text-sm text-[#444651]">Upload a PDF lease or use a sample / pasted text</p>
+              <p className="text-sm text-[#444651]">Upload a lease, paste text, or run a sample report.</p>
             </div>
 
             <UploadLeaseCta
