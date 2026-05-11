@@ -1,4 +1,6 @@
-import type { Dispatch, SetStateAction } from "react";
+"use client";
+
+import { useState, type Dispatch, type SetStateAction } from "react";
 import type { BeforeYouSignReport, EvidenceRef, RiskLevel } from "@/lib/analysis/schema";
 
 export type EvidenceSourceLabel = "sample lease" | "pasted text";
@@ -120,6 +122,7 @@ export function SummarySection({
   agreeBullets: string[];
   riskNote: string;
 }) {
+  const [showRiskInfo, setShowRiskInfo] = useState(false);
   return (
     <section className={cardBase}>
       <div className="flex flex-col gap-4">
@@ -132,13 +135,19 @@ export function SummarySection({
           <span className="mt-0.5 block font-[family-name:var(--font-headline)] text-lg font-extrabold uppercase leading-none tracking-tight">
             {report.riskLevel}
           </span>
-          <p className="mt-1.5 text-center text-[11px] leading-snug text-[#38485d]">
-            Risk level means how much attention this lease may need before signing. It is based on renter-facing issues
-            found in the text, not a legal ruling.
-          </p>
-          {report.riskLevel === "high" ? (
-            <p className="mt-1 text-center text-[11px] leading-snug text-[#38485d]">
-              High risk means review carefully, not automatically illegal.
+          <button
+            type="button"
+            aria-expanded={showRiskInfo}
+            aria-controls="risk-level-info"
+            onClick={() => setShowRiskInfo((v) => !v)}
+            className="mt-1 text-[10px] font-medium opacity-60 underline underline-offset-2 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
+          >
+            {showRiskInfo ? "Hide explanation" : "What does this mean?"}
+          </button>
+          {showRiskInfo ? (
+            <p id="risk-level-info" className="mt-1.5 rounded-md bg-black/5 px-2.5 py-1.5 text-center text-[11px] leading-snug text-[#38485d]">
+              Risk level is a review priority, not a legal judgment. It shows how much attention this lease may need
+              before signing. High means review carefully, not automatically illegal.
             </p>
           ) : null}
           {riskNote ? (
