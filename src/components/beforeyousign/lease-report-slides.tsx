@@ -185,7 +185,7 @@ export function RedFlagsSection({
     <section className={cardBase}>
       <h3 className={sectionTitle}>Potential Red Flags</h3>
       <p className="mt-1 text-[11px] leading-snug text-[#757682]">
-        Click a red flag source quote to highlight it in the lease text.
+        Click a red flag card to highlight its source quote in the lease text.
       </p>
       {report.potentialRedFlags.length ? (
         <ul className="mt-3 space-y-2.5">
@@ -197,6 +197,11 @@ export function RedFlagsSection({
             const rest = deduped.slice(1);
             const expanded = expandedFlagEvidence[f.id] ?? false;
             const isSelected = selectedFindingId === f.id;
+            const highlightPrimary = () => {
+              if (primary && typeof primary.page === "number" && primary.page >= 1) {
+                onFlagEvidenceClick({ page: primary.page, quote: primary.quote, findingId: f.id });
+              }
+            };
 
             return (
               <li
@@ -207,7 +212,15 @@ export function RedFlagsSection({
                   isSelected ? "bg-[#eef2ff] ring-1 ring-[#00246a]/22" : "bg-[#f7f9fb]",
                 ].join(" ")}
               >
-                <div className="w-full rounded-md text-left">
+                <button
+                  type="button"
+                  disabled={!primary}
+                  className={[
+                    "w-full rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00246a]/25",
+                    primary ? "cursor-pointer" : "cursor-default opacity-95",
+                  ].join(" ")}
+                  onClick={highlightPrimary}
+                >
                   <div className="flex flex-wrap items-center gap-1.5 gap-y-1">
                     <span className="font-[family-name:var(--font-headline)] text-[13px] font-bold text-[#191c1e]">
                       {clampForScan(f.title, 100)}
@@ -229,44 +242,35 @@ export function RedFlagsSection({
                     </p>
                   ) : null}
                   {primary ? (
-                    <button
-                      type="button"
-                      className="mt-2 block w-full rounded-md text-left text-[11px] leading-snug text-[#505f76] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00246a]/25"
-                      onClick={() => {
-                        if (typeof primary.page === "number" && primary.page >= 1) {
-                          onFlagEvidenceClick({ page: primary.page, quote: primary.quote, findingId: f.id });
-                        }
-                      }}
-                    >
+                    <p className="mt-2 text-[11px] leading-snug text-[#505f76]">
                       <span className="font-medium text-[#191c1e]">{evidenceLabel(primary.page, evidenceSourceLabel)}</span>
                       <q className="text-[#444651]">{trimQuote(primary.quote, 140)}</q>
+                    </p>
+                  ) : null}
+                </button>
+                {rest.length > 0 ? (
+                  <div className="mt-2">
+                    {expanded ? (
+                      <ul className="space-y-1.5 text-[11px] text-[#505f76]">
+                        {rest.map((ev, i) => (
+                          <li key={`${f.id}-ev-${i}`}>
+                            <span className="font-medium text-[#191c1e]">{evidenceLabel(ev.page, evidenceSourceLabel)}</span>
+                            <q className="text-[#444651]">{trimQuote(ev.quote, 160)}</q>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="text-[11px] font-medium text-[#003ea8] underline-offset-2 hover:underline"
+                      onClick={() => {
+                        setExpandedFlagEvidence((prev) => ({ ...prev, [f.id]: !expanded }));
+                      }}
+                    >
+                      {expanded ? "Hide extra evidence" : `Show more evidence (${rest.length})`}
                     </button>
-                  ) : null}
-                  {rest.length > 0 ? (
-                    <div className="mt-2">
-                      {expanded ? (
-                        <ul className="space-y-1.5 text-[11px] text-[#505f76]">
-                          {rest.map((ev, i) => (
-                            <li key={`${f.id}-ev-${i}`}>
-                              <span className="font-medium text-[#191c1e]">{evidenceLabel(ev.page, evidenceSourceLabel)}</span>
-                              <q className="text-[#444651]">{trimQuote(ev.quote, 160)}</q>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
-                      <button
-                        type="button"
-                        className="mt-1.5 text-[11px] font-medium text-[#003ea8] underline-offset-2 hover:underline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setExpandedFlagEvidence((prev) => ({ ...prev, [f.id]: !expanded }));
-                        }}
-                      >
-                        {expanded ? "Hide extra evidence" : `Show more evidence (${rest.length})`}
-                      </button>
-                    </div>
-                  ) : null}
-                </div>
+                  </div>
+                ) : null}
               </li>
             );
           })}
