@@ -1,6 +1,7 @@
 import type { BeforeYouSignReport, EvidenceRef } from "@/lib/analysis/schema";
 
 type LabeledRow = BeforeYouSignReport["moneyAndFees"][number];
+type DeadlineKind = "rent-increase" | "move-out" | "renewal" | "termination" | "notice" | "other";
 
 const GENERIC_MONEY_LABELS = new Set([
   "additional fee",
@@ -47,10 +48,7 @@ export function classifyLeaseMoneyLabel(text: string): string | null {
   const q = normalizeTextKey(text);
 
   if (/\bsecurity deposit\b|\bdeposit\b[^.]{0,80}\$|\$[\d,]+(?:\.\d{2})?\b[^.]{0,80}\bdeposit\b/.test(q)) {
-    return "Security Deposit";
-  }
-  if (/\bmonthly rent\b|\bbase rent\b|\brent is\b|\brent:\b|\$[\d,]+(?:\.\d{2})?\b[^.]{0,80}\b(?:per month|monthly|\/mo)\b/.test(q)) {
-    return "Monthly Rent";
+    return "Security deposit";
   }
   if (/\bearly\s+(?:termination|move-?out)\b|\bbreak(?:ing)?\s+(?:the\s+)?lease\b/.test(q)) {
     return "Early termination fee";
@@ -79,14 +77,14 @@ export function classifyLeaseMoneyLabel(text: string): string | null {
   if (/\bclean(?:ing)?\b|\bmove-?out\b/.test(q)) {
     return "Cleaning fee";
   }
-  if (/\bmarketing\b/.test(q)) {
-    return "Marketing fee";
-  }
   if (/\bpackage\b/.test(q)) {
     return "Package fee";
   }
   if (/\blate\b/.test(q)) {
     return "Late fee";
+  }
+  if (/\bmonthly rent\b|\bbase rent\b|\brent is\b|\brent:\b|\brent\b[^.]{0,120}\$[\d,]+(?:\.\d{2})?\b|\$[\d,]+(?:\.\d{2})?\b[^.]{0,120}\brent\b/.test(q)) {
+    return "Monthly rent";
   }
 
   return null;
@@ -114,35 +112,95 @@ function normalizeMoneyAndFees(rows: LabeledRow[]): LabeledRow[] {
   });
 }
 
-function normalizedDeadlineLabel(row: LabeledRow): string {
+function deadlineKind(row: LabeledRow): DeadlineKind {
   const text = normalizeTextKey(`${row.label} ${row.value} ${evidenceText(row.evidence)}`);
 
   if (/\brent increase\b|\bincrease rent\b|\brent may be adjusted\b/.test(text)) {
-    return "Rent increase notice";
+    return "rent-increase";
   }
   if (/\bmove\s*out\b|\bmove-out\b|\bvacate\b/.test(text)) {
-    return "Move-out notice";
+    return "move-out";
   }
   if (/\brenew\b|\bnon-renew\b|\bend of the initial term\b|\bmonth-to-month\b/.test(text)) {
-    return "Renewal notice";
+    return "renewal";
   }
   if (/\btermination\b|\bterminate\b/.test(text)) {
-    return "Termination notice";
+    return "termination";
+  }
+  if (/\bnotice\b|\bwritten notice\b|\bdays?\b/.test(text)) {
+    return "notice";
   }
 
-  return row.label;
+  return "other";
+}
+
+function normalizedDeadlineLabel(row: LabeledRow): string {
+  switch (deadlineKind(row)) {
+    case "rent-increase":
+      return "Rent increase notice";
+    case "move-out":
+      return "Move-out notice";
+    case "renewal":
+      return "Renewal notice";
+    case "termination":
+      return "Termination notice";
+    case "notice":
+      return "Notice requirement";
+    case "other":
+      return row.label;
+  }
+}
+
+function normalizedEvidenceQuoteKey(row: LabeledRow): string {
+  return normalizeTextKey(evidenceText(row.evidence));
+}
+
+function normalizedDayWindow(row: LabeledRow): string | null {
+  const text = `${row.value} ${evidenceText(row.evidence)}`;
+  const dayMatch = text.match(/\b\d{1,3}\s*(?:calendar\s+)?days?\b/i);
+  return dayMatch ? dayMatch[0].replace(/\s+/g, " ") : null;
+}
+
+function hasReviewClauseValue(row: LabeledRow): boolean {
+  return /\breview\b.*\bclause\b/i.test(row.value);
 }
 
 function normalizedDeadlineValue(row: LabeledRow): string {
-  const text = `${row.value} ${evidenceText(row.evidence)}`;
-  const dayMatch = text.match(/\b\d{1,3}\s*(?:calendar\s+)?days?\b/i);
-  if (dayMatch) return dayMatch[0].replace(/\s+/g, " ");
+  const dayWindow = normalizedDayWindow(row);
+  if (dayWindow) return dayWindow;
 
-  if (/month-?to-?month/i.test(text)) {
+  if (/month-?to-?month/i.test(`${row.value} ${evidenceText(row.evidence)}`)) {
     return "Potential month-to-month renewal";
   }
 
   return row.value;
+}
+
+function deadlineDedupeKey(row: LabeledRow): string {
+  const kind = deadlineKind(row);
+  const dayWindow = normalizedDayWindow(row);
+  const quoteKey = normalizedEvidenceQuoteKey(row);
+  const isRenewalWithoutConcreteWindow =
+    kind === "renewal" && !dayWindow && /month-?to-?month/i.test(`${row.value} ${evidenceText(row.evidence)}`);
+
+  if (dayWindow) {
+    return `${kind}::days::${normalizeTextKey(dayWindow)}`;
+  }
+
+  if (quoteKey && !isRenewalWithoutConcreteWindow) {
+    return `${kind}::quote::${quoteKey}`;
+  }
+
+  return `${kind}::${normalizeTextKey(row.label)}::${normalizeTextKey(row.value)}`;
+}
+
+function chooseDeadlineValue(existing: LabeledRow, incoming: LabeledRow): string {
+  const existingDayWindow = normalizedDayWindow(existing);
+  const incomingDayWindow = normalizedDayWindow(incoming);
+  if (!existingDayWindow && incomingDayWindow) return incoming.value;
+  if (existingDayWindow && !incomingDayWindow) return existing.value;
+  if (hasReviewClauseValue(existing) && !hasReviewClauseValue(incoming)) return incoming.value;
+  return existing.value;
 }
 
 function normalizeDeadlines(rows: LabeledRow[]): LabeledRow[] {
@@ -156,7 +214,7 @@ function normalizeDeadlines(rows: LabeledRow[]): LabeledRow[] {
       value: normalizedDeadlineValue(row),
       evidence: dedupeEvidence(row.evidence),
     };
-    const key = `${normalizeTextKey(normalizedRow.label)}::${normalizeTextKey(normalizedRow.value)}`;
+    const key = deadlineDedupeKey(normalizedRow);
     const existingIndex = indexByKey.get(key);
 
     if (existingIndex === undefined) {
@@ -168,6 +226,7 @@ function normalizeDeadlines(rows: LabeledRow[]): LabeledRow[] {
     const existing = out[existingIndex];
     out[existingIndex] = {
       ...existing,
+      value: chooseDeadlineValue(existing, normalizedRow),
       evidence: dedupeEvidence([...(existing.evidence ?? []), ...(normalizedRow.evidence ?? [])]),
     };
   }
