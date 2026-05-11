@@ -253,7 +253,7 @@ export function LandingClient() {
                       intake.kind === "sample" ? "sample lease" : intake.kind === "paste" ? "pasted text" : undefined
                     }
                     onFlagEvidenceClick={({ page, quote, findingId }) => {
-                      setSelectedFindingId(findingId);
+                      setSelectedFindingId(findingId ?? null);
                       setViewerTargetPage(page);
                       setViewerHighlight({ page, quote });
                       setLeaseTextPanelExpanded(true);

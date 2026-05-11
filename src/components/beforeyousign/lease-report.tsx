@@ -70,7 +70,7 @@ function LeaseReportCarousel({
   setShowAllQuestions: Dispatch<SetStateAction<boolean>>;
   extraQuestionCount: number;
   selectedFindingId?: string | null;
-  onFlagEvidenceClick: (args: { page: number; quote: string; findingId: string }) => void;
+  onFlagEvidenceClick: (args: { page: number; quote: string; findingId?: string }) => void;
   evidenceSourceLabel?: EvidenceSourceLabel;
 }) {
   const hasMissing = report.missingOrUnclear.length > 0;
@@ -198,12 +198,17 @@ function LeaseReportCarousel({
                 expandedMoneyQuotes={expandedMoneyQuotes}
                 setExpandedMoneyQuotes={setExpandedMoneyQuotes}
                 evidenceSourceLabel={evidenceSourceLabel}
+                onEvidenceClick={onFlagEvidenceClick}
               />
             </div>
           </div>
           <div className="min-w-0 flex-[0_0_100%] px-0.5">
             <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
-              <DeadlinesSection report={report} evidenceSourceLabel={evidenceSourceLabel} />
+              <DeadlinesSection
+                report={report}
+                evidenceSourceLabel={evidenceSourceLabel}
+                onEvidenceClick={onFlagEvidenceClick}
+              />
             </div>
           </div>
           <div className="min-w-0 flex-[0_0_100%] px-0.5">
@@ -263,7 +268,7 @@ export function LeaseReportView({
   evidenceSourceLabel,
 }: {
   report: BeforeYouSignReport;
-  onFlagEvidenceClick: (args: { page: number; quote: string; findingId: string }) => void;
+  onFlagEvidenceClick: (args: { page: number; quote: string; findingId?: string }) => void;
   selectedFindingId?: string | null;
   evidenceSourceLabel?: EvidenceSourceLabel;
 }) {

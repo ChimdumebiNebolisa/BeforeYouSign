@@ -287,11 +287,13 @@ export function MoneySection({
   expandedMoneyQuotes,
   setExpandedMoneyQuotes,
   evidenceSourceLabel,
+  onEvidenceClick,
 }: {
   report: BeforeYouSignReport;
   expandedMoneyQuotes: Record<string, boolean>;
   setExpandedMoneyQuotes: Dispatch<SetStateAction<Record<string, boolean>>>;
   evidenceSourceLabel?: EvidenceSourceLabel;
+  onEvidenceClick: (args: { page: number; quote: string }) => void;
 }) {
   return (
     <section className={cardBase}>
@@ -304,19 +306,34 @@ export function MoneySection({
             const primaryEv = deduped[0];
             const restEv = deduped.slice(1);
             const expanded = expandedMoneyQuotes[key] ?? false;
+            const highlightPrimary = () => {
+              if (primaryEv && typeof primaryEv.page === "number" && primaryEv.page >= 1) {
+                onEvidenceClick({ page: primaryEv.page, quote: primaryEv.quote });
+              }
+            };
 
             return (
               <div key={key} className="border-b border-[#c5c5d3]/18 py-2 last:border-0 last:pb-0">
-                <p className="text-[12px] font-medium leading-snug text-[#444651]">{row.label}</p>
-                <p className="mt-1 min-w-0 break-words text-sm font-bold leading-snug text-[#191c1e] [overflow-wrap:anywhere]">
-                  {clampForScan(row.value, 220)}
-                </p>
-                {primaryEv ? (
-                  <p className="mt-1 text-[11px] leading-snug text-[#505f76]">
-                    <span className="font-medium text-[#191c1e]">{evidenceLabel(primaryEv.page, evidenceSourceLabel)}</span>
-                    <q className="text-[#444651]">{trimQuote(primaryEv.quote, 180)}</q>
+                <button
+                  type="button"
+                  disabled={!primaryEv}
+                  className={[
+                    "block w-full rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00246a]/25",
+                    primaryEv ? "cursor-pointer" : "cursor-default opacity-95",
+                  ].join(" ")}
+                  onClick={highlightPrimary}
+                >
+                  <p className="text-[12px] font-medium leading-snug text-[#444651]">{row.label}</p>
+                  <p className="mt-1 min-w-0 break-words text-sm font-bold leading-snug text-[#191c1e] [overflow-wrap:anywhere]">
+                    {clampForScan(row.value, 220)}
                   </p>
-                ) : null}
+                  {primaryEv ? (
+                    <p className="mt-1 text-[11px] leading-snug text-[#505f76]">
+                      <span className="font-medium text-[#191c1e]">{evidenceLabel(primaryEv.page, evidenceSourceLabel)}</span>
+                      <q className="text-[#444651]">{trimQuote(primaryEv.quote, 180)}</q>
+                    </p>
+                  ) : null}
+                </button>
                 {restEv.length > 0 ? (
                   <div className="mt-1">
                     {expanded ? (
@@ -354,29 +371,49 @@ export function MoneySection({
 export function DeadlinesSection({
   report,
   evidenceSourceLabel,
+  onEvidenceClick,
 }: {
   report: BeforeYouSignReport;
   evidenceSourceLabel?: EvidenceSourceLabel;
+  onEvidenceClick: (args: { page: number; quote: string }) => void;
 }) {
   return (
     <section className={`${cardInset} p-4`}>
       <h3 className={sectionTitle}>Deadlines and Notice Rules</h3>
       {report.deadlinesAndNotice.length ? (
         <div className="mt-3 space-y-2">
-          {report.deadlinesAndNotice.map((row, i) => (
-            <div key={`${row.label}-${i}`} className="rounded-md bg-[#ffffff] p-3 shadow-sm">
-              <p className="text-[13px] font-semibold text-[#191c1e]">{row.label}</p>
-              <p className="mt-0.5 text-[13px] leading-snug text-[#444651]">
-                {clampForScan(row.value, 200)}
-              </p>
-              {row.evidence?.[0] ? (
-                <p className="mt-1.5 text-[11px] text-[#757682]">
-                  <span className="font-medium text-[#191c1e]">{evidenceLabel(row.evidence[0].page, evidenceSourceLabel)}</span>
-                  <q>{trimQuote(row.evidence[0].quote, 140)}</q>
+          {report.deadlinesAndNotice.map((row, i) => {
+            const primaryEv = row.evidence?.[0];
+            const highlightPrimary = () => {
+              if (primaryEv && typeof primaryEv.page === "number" && primaryEv.page >= 1) {
+                onEvidenceClick({ page: primaryEv.page, quote: primaryEv.quote });
+              }
+            };
+
+            return (
+              <button
+                key={`${row.label}-${i}`}
+                type="button"
+                disabled={!primaryEv}
+                className={[
+                  "block w-full rounded-md bg-[#ffffff] p-3 text-left shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00246a]/25",
+                  primaryEv ? "cursor-pointer" : "cursor-default opacity-95",
+                ].join(" ")}
+                onClick={highlightPrimary}
+              >
+                <p className="text-[13px] font-semibold text-[#191c1e]">{row.label}</p>
+                <p className="mt-0.5 text-[13px] leading-snug text-[#444651]">
+                  {clampForScan(row.value, 200)}
                 </p>
-              ) : null}
-            </div>
-          ))}
+                {primaryEv ? (
+                  <p className="mt-1.5 text-[11px] text-[#757682]">
+                    <span className="font-medium text-[#191c1e]">{evidenceLabel(primaryEv.page, evidenceSourceLabel)}</span>
+                    <q>{trimQuote(primaryEv.quote, 140)}</q>
+                  </p>
+                ) : null}
+              </button>
+            );
+          })}
         </div>
       ) : (
         <p className="mt-2 text-sm text-[#444651]">Notice periods and deadlines were not clearly stated here.</p>
