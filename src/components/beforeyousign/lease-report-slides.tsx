@@ -207,20 +207,7 @@ export function RedFlagsSection({
                   isSelected ? "bg-[#eef2ff] ring-1 ring-[#00246a]/22" : "bg-[#f7f9fb]",
                 ].join(" ")}
               >
-                <button
-                  type="button"
-                  disabled={!primary}
-                  className={[
-                    "w-full rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00246a]/25",
-                    primary ? "cursor-pointer" : "cursor-default opacity-95",
-                  ].join(" ")}
-                  onClick={() => {
-                    const ev = primary;
-                    if (ev && typeof ev.page === "number" && ev.page >= 1) {
-                      onFlagEvidenceClick({ page: ev.page, quote: ev.quote, findingId: f.id });
-                    }
-                  }}
-                >
+                <div className="w-full rounded-md text-left">
                   <div className="flex flex-wrap items-center gap-1.5 gap-y-1">
                     <span className="font-[family-name:var(--font-headline)] text-[13px] font-bold text-[#191c1e]">
                       {clampForScan(f.title, 100)}
@@ -242,10 +229,18 @@ export function RedFlagsSection({
                     </p>
                   ) : null}
                   {primary ? (
-                    <p className="mt-2 text-[11px] leading-snug text-[#505f76]">
+                    <button
+                      type="button"
+                      className="mt-2 block w-full rounded-md text-left text-[11px] leading-snug text-[#505f76] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00246a]/25"
+                      onClick={() => {
+                        if (typeof primary.page === "number" && primary.page >= 1) {
+                          onFlagEvidenceClick({ page: primary.page, quote: primary.quote, findingId: f.id });
+                        }
+                      }}
+                    >
                       <span className="font-medium text-[#191c1e]">{evidenceLabel(primary.page, evidenceSourceLabel)}</span>
                       <q className="text-[#444651]">{trimQuote(primary.quote, 140)}</q>
-                    </p>
+                    </button>
                   ) : null}
                   {rest.length > 0 ? (
                     <div className="mt-2">
@@ -271,7 +266,7 @@ export function RedFlagsSection({
                       </button>
                     </div>
                   ) : null}
-                </button>
+                </div>
               </li>
             );
           })}
