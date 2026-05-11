@@ -31,9 +31,11 @@ Rules:
 - potentialRedFlags: title is a short headline (about 10 words or fewer). explanation: one tight sentence. whyItMatters: one short sentence.
 - responsibilities, questionsToAsk, nextSteps, missingOrUnclear: one short line per item; do not repeat the same idea in different words.
 - moneyAndFees and deadlinesAndNotice: value should state the key fact in few words (amount, date, or window); add a little context only if needed.
+- moneyAndFees and deadlinesAndNotice should include evidence when the lease text or RULE_SNIPPETS supports it; use the closest short quote that proves the amount, date, window, or obligation.
 - Base every factual claim on the lease text or the RULE_SNIPPETS below. If something is not in the text, say so in missingOrUnclear instead of guessing.
 - The deterministic risk band below is a rough heuristic from regex rules — your riskLevel should usually match it unless the lease text clearly contradicts it; explain any mismatch in riskReason.
-- riskLevel: Use "high" only when the lease shows multiple serious tenant burdens or high-impact ambiguities supported by evidence. If the deterministic scan is low or weak-medium but you still see major red flags in the text, explain that tension briefly in riskReason rather than defaulting to "high" without specifics.
+- riskLevel means renter review priority, not a legal judgment. It estimates how much attention the lease may need before signing based on renter-facing issues found in the text, such as fees, renewal terms, notice deadlines, utilities, repairs, entry rules, guests, pets, subletting, or early move-out costs. Use "high" to mean "review carefully," not "do not sign." Use "high" only when the lease shows multiple serious tenant burdens or high-impact ambiguities supported by evidence. If the deterministic scan is low or weak-medium but you still see major red flags in the text, explain that tension briefly in riskReason rather than defaulting to "high" without specifics.
+- Do not say or imply that a lease or clause is illegal, unsafe, invalid, enforceable, unenforceable, or that the renter should or should not sign. Instead, explain what the clause may affect and what the renter may want to review or ask about.
 - potentialRedFlags must cite evidence: each item needs at least one evidence entry with page and quote copied from the lease or RULE_SNIPPETS.
 - If uncertain, list items in missingOrUnclear rather than inventing numbers or clauses.
 
