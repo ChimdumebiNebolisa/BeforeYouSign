@@ -249,6 +249,9 @@ export function LandingClient() {
                   <LeaseReportView
                     report={uploadReceipt.report}
                     selectedFindingId={selectedFindingId}
+                    evidenceSourceLabel={
+                      intake.kind === "sample" ? "sample lease" : intake.kind === "paste" ? "pasted text" : undefined
+                    }
                     onFlagEvidenceClick={({ page, quote, findingId }) => {
                       setSelectedFindingId(findingId);
                       setViewerTargetPage(page);

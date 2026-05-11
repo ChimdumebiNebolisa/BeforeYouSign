@@ -9,6 +9,7 @@ import {
   parseBeforeYouSignReportJson,
   tryParseModelJson,
 } from "@/lib/analysis/schema";
+import { normalizeReportForCredibility } from "@/lib/analysis/report-normalization";
 import type { DeterministicLeaseRisk } from "@/lib/analysis/scoring";
 import { getBysGeminiModel } from "@/lib/env/bys-gemini-model";
 
@@ -209,5 +210,9 @@ export async function runStructuredLeaseAnalysis(input: {
     };
   }
 
-  return { ok: true, rawText, report: reconcileReportRisk(report, input.deterministicRisk) };
+  return {
+    ok: true,
+    rawText,
+    report: normalizeReportForCredibility(reconcileReportRisk(report, input.deterministicRisk)),
+  };
 }

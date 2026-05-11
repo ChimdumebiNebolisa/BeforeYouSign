@@ -91,6 +91,14 @@ export function findDepositSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
 
 export function findFeeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
+    /\bearly\s+(?:termination|move-?out)\b[^.\n]{0,180}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /\bbreak(?:ing)?\s+(?:the\s+)?lease\b[^.\n]{0,180}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /\breturned\s+payment(?:\s*\(nsf\))?\s+fee\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /\b(?:returned\s+payment|nsf)\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /\butility\s+(?:billing\s+and\s+processing|billing|processing)\s+fee\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?(?:\s*(?:per|\/)\s*(?:month|mo))?\b/gi,
+    /\bmarketing\s+fee\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /\bpackage(?:\s+acceptance)?\s+fee\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?(?:\s*(?:per|\/)\s*package)?\b/gi,
+    /\breserved\s+parking(?:\s+stall)?\s+fee\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?(?:\s*(?:per|\/)\s*(?:month|mo|vehicle))?\b/gi,
     /\b(?:late|administrative|application|processing|pet|parking|cleaning|move-?out|monthly)\s+fees?\b[^.\n]{0,160}\$[\d,]+(?:\.\d{2})?(?:\s*(?:per|\/)\s*(?:month|mo|day|night|package|pet|vehicle))?\b/gi,
     /\b(?:non-?refundable|one-?time)\s+[^.\n]{0,80}\bfees?\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}\b(?:late|administrative|pet|parking|cleaning)\s+fees?\b/gi,

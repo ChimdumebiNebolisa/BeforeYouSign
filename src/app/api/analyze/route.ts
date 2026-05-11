@@ -13,6 +13,7 @@ import {
   findUtilitiesSnippets,
   type RuleBasedFinding,
 } from "@/lib/analysis/rules";
+import { classifyLeaseMoneyLabel, normalizeReportForCredibility } from "@/lib/analysis/report-normalization";
 import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import { computeDeterministicLeaseRisk, type DeterministicLeaseRisk } from "@/lib/analysis/scoring";
 import { getBysAiKey } from "@/lib/env/bys-ai-key";
@@ -66,13 +67,24 @@ function shortClause(text: string, maxChars: number): string {
 }
 
 function feeLabelFromQuote(quote: string): string {
+  return classifyLeaseMoneyLabel(quote) ?? "Additional fee";
+}
+
+function noticeLabelFromQuote(quote: string): string {
   const q = quote.toLowerCase();
-  if (q.includes("late")) return "Late fee";
-  if (q.includes("deposit")) return "Deposit-related fee";
-  if (q.includes("pet")) return "Pet fee";
-  if (q.includes("parking")) return "Parking fee";
-  if (q.includes("clean")) return "Cleaning fee";
-  return "Additional fee";
+  if (/\brent increase\b|\bincrease rent\b|\brent may be adjusted\b/.test(q)) {
+    return "Rent increase notice";
+  }
+  if (/\bmove\s*out\b|\bmove-out\b|\bvacate\b/.test(q)) {
+    return "Move-out notice";
+  }
+  if (/\brenew\b|\bnon-renew\b|\bend of the initial term\b|\bmonth-to-month\b/.test(q)) {
+    return "Renewal notice";
+  }
+  if (/\btermination\b|\bterminate\b/.test(q)) {
+    return "Termination notice";
+  }
+  return "Notice requirement";
 }
 
 function fallbackFlagTitle(category: RuleBasedFinding["category"], quote: string): string {
@@ -110,11 +122,42 @@ function fallbackFlagTitle(category: RuleBasedFinding["category"], quote: string
   }
 }
 
-function fallbackFlagExplanation(category: RuleBasedFinding["category"]): string {
+function fallbackFlagExplanation(category: RuleBasedFinding["category"], quote: string): string {
+  const feeLabel = classifyLeaseMoneyLabel(quote);
+  if (category === "fees" || category === "deposit") {
+    switch (feeLabel) {
+      case "Monthly Rent":
+        return "This clause states the base rent amount or payment timing.";
+      case "Security Deposit":
+        return "This clause states a deposit amount or possible deposit use.";
+      case "Early termination fee":
+        return "This clause may charge a fee if you move out before the lease term ends.";
+      case "Returned payment fee":
+        return "This clause charges for rejected, reversed, or returned payments.";
+      case "Utility billing fee":
+        return "This clause adds a utility-related billing or processing charge.";
+      case "Administrative fee":
+      case "Application fee":
+      case "Processing fee":
+        return "This clause points to an administrative or processing charge beyond base rent.";
+      case "Pet fee":
+        return "This clause adds a charge tied to keeping an approved pet.";
+      case "Parking fee":
+        return "This clause adds a charge for parking or vehicle access.";
+      case "Cleaning fee":
+        return "This clause may add cleaning costs at move-out.";
+      case "Marketing fee":
+        return "This clause may add a marketing charge if the lease ends early.";
+      case "Package fee":
+        return "This clause adds a charge tied to package handling.";
+      case "Late fee":
+        return "This clause adds a late charge and may add daily costs if rent stays unpaid.";
+      default:
+        return "This clause suggests charges beyond monthly rent.";
+    }
+  }
+
   switch (category) {
-    case "fees":
-    case "deposit":
-      return "This clause suggests charges beyond monthly rent.";
     case "renewal":
       return "This clause may affect how and when your lease renews.";
     case "notice":
@@ -128,11 +171,42 @@ function fallbackFlagExplanation(category: RuleBasedFinding["category"]): string
   }
 }
 
-function fallbackFlagWhyItMatters(category: RuleBasedFinding["category"]): string {
+function fallbackFlagWhyItMatters(category: RuleBasedFinding["category"], quote: string): string {
+  const feeLabel = classifyLeaseMoneyLabel(quote);
+  if (category === "fees" || category === "deposit") {
+    switch (feeLabel) {
+      case "Monthly Rent":
+        return "Rent timing and payment rules affect your monthly budget.";
+      case "Security Deposit":
+        return "Deposit terms affect move-in cost and potential move-out deductions.";
+      case "Early termination fee":
+        return "Moving early could cost more than a single listed fee.";
+      case "Returned payment fee":
+        return "Payment problems can create extra charges quickly.";
+      case "Utility billing fee":
+        return "Utility-related fees can raise your recurring monthly cost.";
+      case "Administrative fee":
+      case "Application fee":
+      case "Processing fee":
+        return "Required service fees can increase the true cost of signing.";
+      case "Pet fee":
+        return "Pet charges can raise the ongoing monthly cost.";
+      case "Parking fee":
+        return "Parking charges can materially change the total monthly cost.";
+      case "Cleaning fee":
+        return "Move-out cleaning charges can reduce what you expect to get back.";
+      case "Marketing fee":
+        return "Re-rental charges can add cost if you need to leave early.";
+      case "Package fee":
+        return "Small recurring or per-use fees can add up over the lease term.";
+      case "Late fee":
+        return "Late-fee structures can become expensive if payment is delayed.";
+      default:
+        return "Unexpected fees can raise your total housing cost.";
+    }
+  }
+
   switch (category) {
-    case "fees":
-    case "deposit":
-      return "Unexpected fees can raise your total housing cost.";
     case "renewal":
       return "Renewal terms can affect move-out timing and flexibility.";
     case "notice":
@@ -215,7 +289,7 @@ function buildRuleOnlyFallbackReport(input: {
   const deadlinesAndNotice: { label: string; value: string; evidence?: { page: number; quote: string }[] }[] = [];
   for (const noticeFinding of byCategory.notice.slice(0, 2)) {
     deadlinesAndNotice.push({
-      label: "Notice Requirement",
+      label: noticeLabelFromQuote(noticeFinding.quote),
       value: extractDayWindow(noticeFinding.quote) ?? "Review notice clause",
       evidence: [{ page: noticeFinding.page, quote: noticeFinding.quote }],
     });
@@ -288,8 +362,8 @@ function buildRuleOnlyFallbackReport(input: {
         category: categoryMap[f.category],
         title: fallbackFlagTitle(f.category, f.quote),
         severity,
-        explanation: fallbackFlagExplanation(f.category),
-        whyItMatters: fallbackFlagWhyItMatters(f.category),
+        explanation: fallbackFlagExplanation(f.category, f.quote),
+        whyItMatters: fallbackFlagWhyItMatters(f.category, f.quote),
         evidence: [{ page: f.page, quote: f.quote }],
       };
     });
@@ -339,7 +413,7 @@ function buildRuleOnlyFallbackReport(input: {
       ? input.deterministicRisk.reasons.slice(0, 3).join(" ")
       : "Risk level is based on lease terms we could confirm from this document.";
 
-  return {
+  return normalizeReportForCredibility({
     summary,
     whatYoureAgreeingTo,
     riskLevel: input.deterministicRisk.band,
@@ -357,7 +431,7 @@ function buildRuleOnlyFallbackReport(input: {
     missingOrUnclear,
     disclaimer:
       "This information is for informational purposes only and not legal advice. Consult a legal professional for advice.",
-  };
+  });
 }
 
 async function buildLeaseAiFields(input: {

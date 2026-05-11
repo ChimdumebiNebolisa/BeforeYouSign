@@ -10,6 +10,7 @@ import {
   DeadlinesSection,
   displayRiskContext,
   displaySummaryIntro,
+  type EvidenceSourceLabel,
   INITIAL_QUESTIONS,
   MAX_AGREE_BULLETS,
   MissingSection,
@@ -54,6 +55,7 @@ function LeaseReportCarousel({
   extraQuestionCount,
   selectedFindingId,
   onFlagEvidenceClick,
+  evidenceSourceLabel,
 }: {
   report: BeforeYouSignReport;
   summaryIntro: string;
@@ -69,6 +71,7 @@ function LeaseReportCarousel({
   extraQuestionCount: number;
   selectedFindingId?: string | null;
   onFlagEvidenceClick: (args: { page: number; quote: string; findingId: string }) => void;
+  evidenceSourceLabel?: EvidenceSourceLabel;
 }) {
   const hasMissing = report.missingOrUnclear.length > 0;
   const slideLabels = useMemo(
@@ -184,6 +187,7 @@ function LeaseReportCarousel({
                 setExpandedFlagEvidence={setExpandedFlagEvidence}
                 selectedFindingId={selectedFindingId}
                 onFlagEvidenceClick={onFlagEvidenceClick}
+                evidenceSourceLabel={evidenceSourceLabel}
               />
             </div>
           </div>
@@ -193,12 +197,13 @@ function LeaseReportCarousel({
                 report={report}
                 expandedMoneyQuotes={expandedMoneyQuotes}
                 setExpandedMoneyQuotes={setExpandedMoneyQuotes}
+                evidenceSourceLabel={evidenceSourceLabel}
               />
             </div>
           </div>
           <div className="min-w-0 flex-[0_0_100%] px-0.5">
             <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
-              <DeadlinesSection report={report} />
+              <DeadlinesSection report={report} evidenceSourceLabel={evidenceSourceLabel} />
             </div>
           </div>
           <div className="min-w-0 flex-[0_0_100%] px-0.5">
@@ -255,10 +260,12 @@ export function LeaseReportView({
   report,
   onFlagEvidenceClick,
   selectedFindingId,
+  evidenceSourceLabel,
 }: {
   report: BeforeYouSignReport;
   onFlagEvidenceClick: (args: { page: number; quote: string; findingId: string }) => void;
   selectedFindingId?: string | null;
+  evidenceSourceLabel?: EvidenceSourceLabel;
 }) {
   const summaryIntro = displaySummaryIntro(report.summary);
   const agreeBullets = report.whatYoureAgreeingTo
@@ -293,6 +300,7 @@ export function LeaseReportView({
     extraQuestionCount,
     selectedFindingId,
     onFlagEvidenceClick,
+    evidenceSourceLabel,
   };
 
   return <LeaseReportCarousel {...shared} />;

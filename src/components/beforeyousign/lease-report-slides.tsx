@@ -1,6 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { BeforeYouSignReport, EvidenceRef, RiskLevel } from "@/lib/analysis/schema";
 
+export type EvidenceSourceLabel = "sample lease" | "pasted text";
+
 const MAX_SUMMARY_SENTENCES = 2;
 const MAX_SUMMARY_CHARS = 320;
 
@@ -81,6 +83,10 @@ export function dedupeEvidence(evidence: EvidenceRef[]): EvidenceRef[] {
   return out;
 }
 
+export function evidenceLabel(page: number, evidenceSourceLabel?: EvidenceSourceLabel): string {
+  return evidenceSourceLabel ? `Source quote · ${evidenceSourceLabel}: ` : `Source quote · p. ${page}: `;
+}
+
 export const MAX_AGREE_BULLETS = 5;
 export const INITIAL_QUESTIONS = 4;
 /** Max characters per “at a glance” list line (bullets, responsibilities, questions). */
@@ -157,12 +163,14 @@ export function RedFlagsSection({
   setExpandedFlagEvidence,
   selectedFindingId,
   onFlagEvidenceClick,
+  evidenceSourceLabel,
 }: {
   report: BeforeYouSignReport;
   expandedFlagEvidence: Record<string, boolean>;
   setExpandedFlagEvidence: Dispatch<SetStateAction<Record<string, boolean>>>;
   selectedFindingId?: string | null;
   onFlagEvidenceClick: (args: { page: number; quote: string; findingId: string }) => void;
+  evidenceSourceLabel?: EvidenceSourceLabel;
 }) {
   return (
     <section className={cardBase}>
@@ -226,7 +234,7 @@ export function RedFlagsSection({
                   ) : null}
                   {primary ? (
                     <p className="mt-2 text-[11px] leading-snug text-[#505f76]">
-                      <span className="font-medium text-[#191c1e]">Source quote · p. {primary.page}: </span>
+                      <span className="font-medium text-[#191c1e]">{evidenceLabel(primary.page, evidenceSourceLabel)}</span>
                       <q className="text-[#444651]">{trimQuote(primary.quote, 140)}</q>
                     </p>
                   ) : null}
@@ -236,7 +244,7 @@ export function RedFlagsSection({
                         <ul className="space-y-1.5 text-[11px] text-[#505f76]">
                           {rest.map((ev, i) => (
                             <li key={`${f.id}-ev-${i}`}>
-                              <span className="font-medium text-[#191c1e]">Source quote · p. {ev.page}: </span>
+                              <span className="font-medium text-[#191c1e]">{evidenceLabel(ev.page, evidenceSourceLabel)}</span>
                               <q className="text-[#444651]">{trimQuote(ev.quote, 160)}</q>
                             </li>
                           ))}
@@ -270,10 +278,12 @@ export function MoneySection({
   report,
   expandedMoneyQuotes,
   setExpandedMoneyQuotes,
+  evidenceSourceLabel,
 }: {
   report: BeforeYouSignReport;
   expandedMoneyQuotes: Record<string, boolean>;
   setExpandedMoneyQuotes: Dispatch<SetStateAction<Record<string, boolean>>>;
+  evidenceSourceLabel?: EvidenceSourceLabel;
 }) {
   return (
     <section className={cardBase}>
@@ -295,7 +305,7 @@ export function MoneySection({
                 </p>
                 {primaryEv ? (
                   <p className="mt-1 text-[11px] leading-snug text-[#505f76]">
-                    <span className="font-medium text-[#191c1e]">Source quote · p. {primaryEv.page}: </span>
+                    <span className="font-medium text-[#191c1e]">{evidenceLabel(primaryEv.page, evidenceSourceLabel)}</span>
                     <q className="text-[#444651]">{trimQuote(primaryEv.quote, 180)}</q>
                   </p>
                 ) : null}
@@ -305,7 +315,7 @@ export function MoneySection({
                       <ul className="space-y-1 text-[11px] text-[#505f76]">
                         {restEv.map((ev, j) => (
                           <li key={`${key}-q-${j}`}>
-                            <span className="font-medium text-[#191c1e]">Source quote · p. {ev.page}: </span>
+                            <span className="font-medium text-[#191c1e]">{evidenceLabel(ev.page, evidenceSourceLabel)}</span>
                             <q className="text-[#444651]">{trimQuote(ev.quote, 160)}</q>
                           </li>
                         ))}
@@ -333,7 +343,13 @@ export function MoneySection({
   );
 }
 
-export function DeadlinesSection({ report }: { report: BeforeYouSignReport }) {
+export function DeadlinesSection({
+  report,
+  evidenceSourceLabel,
+}: {
+  report: BeforeYouSignReport;
+  evidenceSourceLabel?: EvidenceSourceLabel;
+}) {
   return (
     <section className={`${cardInset} p-4`}>
       <h3 className={sectionTitle}>Deadlines and Notice Rules</h3>
@@ -347,7 +363,7 @@ export function DeadlinesSection({ report }: { report: BeforeYouSignReport }) {
               </p>
               {row.evidence?.[0] ? (
                 <p className="mt-1.5 text-[11px] text-[#757682]">
-                  <span className="font-medium text-[#191c1e]">Source quote · p. {row.evidence[0].page}: </span>
+                  <span className="font-medium text-[#191c1e]">{evidenceLabel(row.evidence[0].page, evidenceSourceLabel)}</span>
                   <q>{trimQuote(row.evidence[0].quote, 140)}</q>
                 </p>
               ) : null}
