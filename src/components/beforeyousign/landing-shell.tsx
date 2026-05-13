@@ -15,18 +15,18 @@ export function LandingShell({ children }: { children: ReactNode }) {
       />
 
       <header className="fixed top-4 left-1/2 z-50 w-full max-w-7xl -translate-x-1/2 px-4">
-        <nav className="bys-glass-panel bys-float-shadow flex h-16 items-center justify-between rounded-2xl px-5 sm:px-6">
-          <span className="relative block h-9 w-[min(100%,260px)] max-w-full shrink-0 sm:w-[280px]">
+        <nav className="bys-glass-panel bys-float-shadow flex h-[4.75rem] items-center justify-between rounded-2xl px-5 sm:h-20 sm:px-6">
+          <span className="relative block h-11 max-w-full shrink-0 sm:h-[3.25rem] w-[min(100%,320px)] sm:w-[min(100%,420px)]">
             <Image
               src="/images/before-you-sign-logo.png"
               alt="BeforeYouSign"
               fill
               className="object-contain object-left"
-              sizes="(max-width: 640px) 70vw, 280px"
+              sizes="(max-width: 640px) 85vw, 420px"
               priority
             />
           </span>
-          <p className="hidden text-xs text-[#757682] sm:block">Lease analysis</p>
+          <p className="hidden text-[13px] font-medium text-[#757682] sm:block">Lease analysis</p>
         </nav>
       </header>
 
