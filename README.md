@@ -205,9 +205,3 @@ flowchart LR
 - **PDF text extraction is not OCR** — scanned image-only PDFs may yield little or no extractable text.
 - **Evidence highlighting** uses substring matching (`indexOf` on the quote); minor mismatches between model quotes and extracted text can prevent a highlight.
 - **Automated `npm test` suite** is not present in this repo; use **`npm run lint`** and manual end-to-end checks.
-
----
-
-## License
-
-MIT — see `package.json` (`"license": "MIT"`).
