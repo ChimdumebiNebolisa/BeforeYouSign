@@ -102,6 +102,94 @@ npm run dev
 
 ---
 
+## Architecture
+
+High-level request flow from the browser through the single analyze route and back. There is **no database**: results exist only in client state after the response.
+
+### End-to-end flow
+
+```mermaid
+flowchart TB
+  subgraph Client["Browser — React"]
+    LC["LandingClient — intake"]
+    V["LeaseTextViewer"]
+    R["LeaseReportView"]
+    T["TechnicalDetailsPanel"]
+    LC --> V
+    LC --> R
+    LC --> T
+  end
+
+  subgraph Route["POST /api/analyze — src/app/api/analyze/route.ts"]
+    IN{"Body type?"}
+    PDF["extractPdfTextPages — pdf-parse"]
+    TXT["JSON leaseText → normalize → 1 synthetic page"]
+    NORM["normalizeLeasePageText"]
+    RULES["rules.ts — snippet finders"]
+    RISK["scoring.ts — deterministic band + reasons"]
+    GEM["gemini-report.ts — Gemini JSON schema"]
+    RNORM["report-normalization.ts"]
+    FALL["buildRuleOnlyFallbackReport"]
+    OUT["JSON — pages, snippets, risk, report"]
+
+    IN -->|multipart PDF| PDF
+    IN -->|application/json| TXT
+    PDF --> NORM
+    TXT --> NORM
+    NORM --> RULES
+    RULES --> RISK
+    RISK --> GEM
+    GEM -->|parsed OK| RNORM
+    GEM -->|timeout / parse / schema fail| FALL
+    RNORM --> OUT
+    FALL --> OUT
+  end
+
+  LC -->|"fetch POST"| IN
+  OUT -->|"response"| LC
+```
+
+### Key modules
+
+```mermaid
+flowchart LR
+  subgraph api["API route"]
+    RT["route.ts"]
+  end
+
+  subgraph pdf["PDF + text"]
+    EXT["pdf/extract-text.ts"]
+    NOR["pdf/normalize.ts"]
+  end
+
+  subgraph analysis["Analysis"]
+    RL["rules.ts"]
+    SC["scoring.ts"]
+    GR["gemini-report.ts"]
+    SCH["schema.ts"]
+    MR["model-json.ts"]
+    REP["report-normalization.ts"]
+    PR["prompt.ts"]
+  end
+
+  RT --> EXT
+  RT --> NOR
+  RT --> RL
+  RT --> SC
+  RT --> GR
+  GR --> SCH
+  GR --> MR
+  GR --> REP
+  GR --> PR
+```
+
+**Notes**
+
+- **`BYS_AI_KEY`**: If unset, the route still returns **snippets and deterministic risk**, but **`report` may be null** with a user-facing `reportError` string instead of a Gemini-produced report.
+- **Paste/sample text** skips PDF extraction and is analyzed as a single virtual page.
+
+---
+
 ## Stack (short)
 
 Next.js (App Router), React, TypeScript, Tailwind CSS, Gemini (`@google/generative-ai`), PDF tooling (`pdf-parse`, `pdf-lib`).
