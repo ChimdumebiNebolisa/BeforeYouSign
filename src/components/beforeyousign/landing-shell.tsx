@@ -18,10 +18,11 @@ export function LandingShell({ children }: { children: ReactNode }) {
         <nav className="bys-glass-panel bys-float-shadow flex h-[4.75rem] items-center justify-between rounded-2xl px-5 sm:h-20 sm:px-6">
           <span className="relative block h-11 max-w-full shrink-0 sm:h-[3.25rem] w-[min(100%,320px)] sm:w-[min(100%,420px)] flex items-center">
             <span
-              className="text-lg font-extrabold tracking-wider uppercase bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-sky-500 to-emerald-500 hover:scale-105 transition-transform duration-150"
+              className="text-lg font-bold uppercase tracking-tight text-[var(--primary)] hover:text-[rgb(0,36,106/.85)] transition-colors duration-150"
+              style={{ fontFamily: "var(--font-heading)" }}
               aria-label="BeforeYouSign"
             >
-              beforeyousign
+              BeforeYouSign
             </span>
           </span>
           <p className="hidden text-[13px] font-medium text-[#757682] sm:block">Lease analysis</p>
