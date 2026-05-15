@@ -46,7 +46,7 @@ npm install
 
 Create a `.env.local` file in the root (you can start from `.env.local.example`):
 
-**Windows (cmd):** `copy .env.local.example .env.local`  
+**Windows (cmd):** `copy .env.local.example .env.local`
 **macOS / Linux:** `cp .env.local.example .env.local`
 
 ```env
