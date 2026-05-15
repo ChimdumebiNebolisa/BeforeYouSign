@@ -17,14 +17,12 @@ export function LandingShell({ children }: { children: ReactNode }) {
       <header className="fixed top-4 left-1/2 z-50 w-full max-w-7xl -translate-x-1/2 px-4">
         <nav className="bys-glass-panel bys-float-shadow flex h-[4.75rem] items-center justify-between rounded-2xl px-5 sm:h-20 sm:px-6">
           <span className="relative block h-11 max-w-full shrink-0 sm:h-[3.25rem] w-[min(100%,320px)] sm:w-[min(100%,420px)] flex items-center">
-            <span className="bys-glass-panel bys-gradient-cta px-3 py-2 rounded-xl">
-              <span
-                className="text-lg font-extrabold uppercase tracking-tight text-[var(--primary-foreground)] transition-colors duration-150"
-                style={{ fontFamily: "var(--font-heading)" }}
-                aria-label="BeforeYouSign"
-              >
-                BeforeYouSign
-              </span>
+            <span
+              className="text-lg font-extrabold uppercase tracking-tight text-[var(--primary)] hover:text-[rgb(0,36,106/.95)] transition-colors duration-150"
+              style={{ fontFamily: "var(--font-heading)" }}
+              aria-label="BeforeYouSign"
+            >
+              BeforeYouSign
             </span>
           </span>
           <p className="hidden text-[13px] font-medium text-[#757682] sm:block">Lease analysis</p>
