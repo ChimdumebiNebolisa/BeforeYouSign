@@ -26,9 +26,9 @@ export function LandingHowItWorks() {
         {STEPS.map((item) => (
           <div
             key={item.step}
-            className="flex flex-col gap-3 rounded-2xl border border-border/40 bg-card p-6 shadow-[0_8px_24px_rgba(0,32,69,0.04)]"
+            className="flex min-h-[160px] flex-col gap-3 rounded-2xl border border-border/40 bg-card p-7 shadow-[0_8px_24px_rgba(0,32,69,0.04)] lg:p-8"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
               {item.step}
             </span>
             <h3 className="font-[family-name:var(--font-headline)] text-lg font-semibold text-foreground">

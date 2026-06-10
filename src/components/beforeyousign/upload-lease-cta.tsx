@@ -42,7 +42,7 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
         <div className="pointer-events-none absolute -inset-1 rounded-[1.75rem] bg-gradient-to-br from-[#00246a]/10 to-transparent opacity-25 blur-sm" />
         <div
           className={[
-            "relative cursor-pointer rounded-3xl border-2 border-dashed bg-[#ffffff] p-10 text-center transition-all",
+            "relative flex min-h-[12.5rem] cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed bg-[#ffffff] p-10 text-center transition-all",
             isDragActive
               ? "border-[#00246a]/45 shadow-[0px_12px_32px_rgba(0,36,106,0.12)]"
               : "border-[#c5c5d3]/35 hover:border-[#00246a]/35",

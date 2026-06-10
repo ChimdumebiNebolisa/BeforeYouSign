@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LeaseTextViewer } from "@/components/beforeyousign/lease-text-viewer";
 import { LeaseReportView } from "@/components/beforeyousign/lease-report";
@@ -14,7 +14,6 @@ import { LandingIntakeCard } from "@/components/beforeyousign/landing-intake-car
 import { LandingPreviewSection } from "@/components/beforeyousign/landing-preview-section";
 import { LandingHowItWorks } from "@/components/beforeyousign/landing-how-it-works";
 import { LandingWhatItChecks } from "@/components/beforeyousign/landing-what-it-checks";
-import { LandingTexasRenterPreview } from "@/components/beforeyousign/landing-texas-renter-preview";
 import { LandingLimitations } from "@/components/beforeyousign/landing-limitations";
 import { LandingFaq } from "@/components/beforeyousign/landing-faq";
 import { LandingFooter } from "@/components/beforeyousign/landing-footer";
@@ -61,6 +60,24 @@ export function LandingClient() {
   const scrollToIntake = () => {
     document.getElementById("review-intake")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  useEffect(() => {
+    const handleGoHome = () => {
+      setUploadReceipt(null);
+      setIsSubmitting(false);
+      setErrorMessage(null);
+      setViewerTargetPage(null);
+      setViewerHighlight(null);
+      setSelectedFindingId(null);
+      setLeaseTextPanelExpanded(true);
+      setIntake(null);
+      setIntakeTab("upload");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    window.addEventListener("bys:go-home", handleGoHome);
+    return () => window.removeEventListener("bys:go-home", handleGoHome);
+  }, []);
 
   const formatAnalysisError = (raw: string, status: number): string => {
     const trimmed = raw.trim();
@@ -352,34 +369,37 @@ export function LandingClient() {
   };
 
   return (
-    <div className="bys-container w-full px-4 font-sans">
-      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-16">
-        <div className="lg:col-span-7">
-          <LandingHero
-            onReviewLease={scrollToIntake}
-            onRunSample={() => {
-              scrollToIntake();
-              setIntakeTab("sample");
-            }}
-          />
-        </div>
+    <div className="bys-container w-full px-6 font-sans lg:px-8">
+      <section className="pt-12 pb-[4.5rem] lg:pt-16 lg:pb-24">
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
+          <div className="lg:col-span-7">
+            <LandingHero
+              onReviewLease={scrollToIntake}
+              onRunSample={() => {
+                scrollToIntake();
+                setIntakeTab("sample");
+              }}
+            />
+          </div>
 
-        <div className="lg:col-span-5">
-          <LandingIntakeCard
-            onStartUpload={startUpload}
-            onStartPaste={startPaste}
-            onStartSample={startSample}
-            pasteOpenRequestVersion={pasteOpenNonce}
-            activeTab={intakeTab}
-            onTabChange={setIntakeTab}
-          />
+          <div className="flex justify-center lg:col-span-5 lg:justify-end">
+            <div className="w-full max-w-[480px]">
+              <LandingIntakeCard
+                onStartUpload={startUpload}
+                onStartPaste={startPaste}
+                onStartSample={startSample}
+                pasteOpenRequestVersion={pasteOpenNonce}
+                activeTab={intakeTab}
+                onTabChange={setIntakeTab}
+              />
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       <LandingPreviewSection />
       <LandingHowItWorks />
       <LandingWhatItChecks />
-      <LandingTexasRenterPreview />
       <LandingLimitations />
       <LandingFaq />
       <LandingFooter />

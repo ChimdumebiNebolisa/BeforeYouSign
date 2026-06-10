@@ -22,7 +22,7 @@ export function LandingWhatItChecks() {
         {TOPICS.map((topic) => (
           <div
             key={topic}
-            className="rounded-2xl border border-border/40 bg-card px-5 py-4 shadow-[0_4px_16px_rgba(0,32,69,0.03)] transition hover:shadow-[0_8px_24px_rgba(0,32,69,0.06)]"
+            className="flex min-h-[72px] items-center rounded-2xl border border-border/50 bg-card px-5 py-4 shadow-sm transition hover:shadow-md lg:py-5"
           >
             <p className="text-sm font-semibold text-foreground">{topic}</p>
           </div>

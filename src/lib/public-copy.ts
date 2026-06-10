@@ -3,6 +3,10 @@
 export const PRIVACY_BLOCK =
   "BeforeYouSign is for educational lease review, not legal advice. We do not use a database or save your report after you close the page. When you analyze a lease, the text is processed on our server to generate your results. If AI summarization is enabled, lease text is also sent to our AI provider for that request.";
 
+/** Landing intake/footer — processing only; legal disclaimer lives in hero + footer disclaimer. */
+export const LANDING_PRIVACY_PROCESSING =
+  "We do not use a database or save your report after you close the page. When you analyze a lease, the text is processed on our server to generate your results. If AI summarization is enabled, lease text is also sent to our AI provider for that request.";
+
 export const PRIVACY_CONTINUE_LINE =
   "By continuing, you submit lease text for one-time analysis. Do not upload documents you are not comfortable processing through this tool.";
 

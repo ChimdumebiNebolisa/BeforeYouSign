@@ -82,25 +82,49 @@ async function run() {
   );
   note(
     "Support note: Texas leases only",
-    /Texas leases only for now\. City rules are not checked\. Educational only, not legal advice\./i.test(body),
+    /Texas leases only\. For education, not legal advice\./i.test(body),
   );
   note("Section: See what it finds", /See what it finds/i.test(body));
   note("Section: How it works", /How it works/i.test(body));
   note("Section: What it checks", /What it checks/i.test(body));
-  note("Section: Texas renter check", /Texas renter check/i.test(body));
+  note("Landing mentions Texas renter check", /Texas renter check/i.test(body));
   note("Section: What it does not do", /What it does not do/i.test(body));
   note("Section: FAQ", /\bFAQ\b/i.test(body));
-  note("Footer: BeforeYouSign", /Educational only, not legal advice/i.test(body));
+  note("Footer: disclaimer present", /Educational information only\. Not legal advice\./i.test(body));
 
-  // Nav anchor links visible on desktop
-  note("Nav: How it works link", await page.getByRole("link", { name: "How it works" }).first().isVisible());
-  note("Nav: Texas leases only badge", /Texas leases only/i.test(body));
+  // Brand-only navbar
+  const header = page.locator("header");
+  note("Nav: BeforeYouSign logo visible", await header.getByRole("button", { name: "BeforeYouSign" }).isVisible());
+  note(
+    "Nav: no section links in header",
+    (await header.getByRole("link", { name: "How it works" }).count()) === 0 &&
+      (await header.getByRole("link", { name: "FAQ" }).count()) === 0,
+  );
+  note("Nav: no Texas badge in header", (await header.getByText("Texas leases only").count()) === 0);
+  note(
+    "Nav: no Review a lease button in header",
+    (await header.getByRole("button", { name: "Review a lease" }).count()) === 0,
+  );
+  note("Nav: no hamburger menu", (await header.getByRole("button", { name: /Open menu|Close menu/i }).count()) === 0);
 
-  // Review a lease scrolls to intake
+  // Hero Review a lease scrolls to intake
   await page.getByRole("button", { name: "Review a lease" }).first().click();
   await page.waitForTimeout(600);
   const intakeInView = await page.locator("#review-intake").isVisible();
-  note('"Review a lease" reveals intake area', intakeInView);
+  note('Hero "Review a lease" reveals intake area', intakeInView);
+
+  // Logo returns to landing top from intake preview
+  await page.goto(BASE, { waitUntil: "networkidle" });
+  await page.getByRole("tab", { name: "Sample" }).click();
+  await page.locator("#review-intake").getByRole("button", { name: "Run Sample Lease", exact: true }).click();
+  await page.getByText(/Lease intake/i).waitFor({ timeout: 10000 });
+  await page.locator("header").getByRole("button", { name: "BeforeYouSign" }).click();
+  await page.waitForTimeout(600);
+  note(
+    "Nav: BeforeYouSign returns to landing",
+    (await page.getByRole("heading", { name: /Understand your lease/i }).count()) > 0 &&
+      (await page.getByText(/Lease intake/i).count()) === 0,
+  );
 
   // Run sample lease from hero
   await page.goto(BASE, { waitUntil: "networkidle" });
@@ -200,13 +224,12 @@ async function run() {
   captureSnippet(mobileBody, "landing-mobile");
   note('Mobile hero headline', /Understand your lease\s*before you sign\./i.test(mobileBody));
 
-  await mpage.getByRole("button", { name: "Open menu" }).click();
-  await mpage.waitForTimeout(400);
   note(
-    "Mobile hamburger opens menu",
-    await mpage.locator("header").getByRole("link", { name: "FAQ" }).isVisible(),
+    "Mobile: brand-only navbar",
+    (await mpage.locator("header").getByRole("button", { name: "BeforeYouSign" }).isVisible()) &&
+      (await mpage.locator("header").getByRole("button", { name: /Open menu|Close menu/i }).count()) === 0,
   );
-  await mpage.screenshot({ path: path.join(OUT, "09-mobile-menu.png"), fullPage: true });
+  await mpage.screenshot({ path: path.join(OUT, "09-mobile-navbar.png"), fullPage: false });
 
   const overflow = await mpage.evaluate(() => {
     const doc = document.documentElement;

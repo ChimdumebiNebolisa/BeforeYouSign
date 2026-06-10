@@ -72,8 +72,8 @@
   --bys-annotation-yellow: #fef08a;
   --bys-annotation-purple: #e9d5ff;
   --bys-annotation-blue: #bae6fd;
-  --bys-container-max: 70rem;
-  --bys-section-gap: 5rem;
+  --bys-container-max: 73.75rem;
+  --bys-section-gap: 3rem;
   --chart-1: oklch(0.62 0.12 198);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -122,6 +122,12 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.65 0.1 198);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --bys-section-gap: 5rem;
+  }
 }
 
 @layer base {
