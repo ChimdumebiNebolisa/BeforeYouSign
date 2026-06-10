@@ -9,7 +9,9 @@ export function LandingFaq() {
 
   return (
     <section id="faq" className="bys-section-gap mb-4 scroll-mt-28">
-      <h2 className="font-[family-name:var(--font-headline)] text-2xl font-bold text-foreground sm:text-3xl">FAQ</h2>
+      <h2 className="mx-auto max-w-[960px] text-center font-[family-name:var(--font-headline)] text-2xl font-bold text-foreground sm:text-3xl lg:text-left">
+        FAQ
+      </h2>
       <div className="mx-auto mt-8 max-w-[960px] overflow-hidden rounded-2xl border border-border/40 bg-card">
         {LANDING_FAQ.map((item, index) => {
           const isOpen = openIndex === index;

@@ -34,7 +34,7 @@ export function LandingHero({ onReviewLease, onRunSample }: LandingHeroProps) {
         </button>
       </div>
       <p className="mx-auto max-w-[560px] text-sm leading-relaxed text-muted-foreground lg:mx-0">
-        <span className="inline-flex items-start gap-2 text-left">
+        <span className="inline-flex items-start justify-center gap-2 lg:justify-start">
           <span className="mt-0.5 shrink-0 text-primary" aria-hidden>
             ⓘ
           </span>
