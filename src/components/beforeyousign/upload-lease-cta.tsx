@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState } from "react";
 import { Upload } from "lucide-react";
+import { OCR_WARNING, PRIVACY_CONTINUE_LINE } from "@/lib/public-copy";
 
 export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) => void }) {
   const fileInputId = useId();
@@ -92,6 +93,9 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
           </button>
         </div>
       </div>
+
+      <p className="mt-3 text-[11px] leading-relaxed text-[#757682]">{PRIVACY_CONTINUE_LINE}</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-[#757682]">{OCR_WARNING}</p>
 
       {errorMessage ? <p className="mt-3 text-sm font-medium text-[#ba1a1a]">{errorMessage}</p> : null}
 

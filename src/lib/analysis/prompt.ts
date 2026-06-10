@@ -1,5 +1,6 @@
 import type { DeterministicLeaseRisk } from "@/lib/analysis/scoring";
 import type { RuleBasedFinding } from "@/lib/analysis/rules";
+import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 
 const MAX_LEASE_CHARS = 120_000;
 
@@ -7,6 +8,7 @@ export function buildLeaseAnalysisUserPrompt(input: {
   leaseText: string;
   ruleBasedFindings: RuleBasedFinding[];
   deterministicRisk: DeterministicLeaseRisk;
+  texasRenterFindings?: TexasRenterFinding[];
 }): string {
   const leaseText =
     input.leaseText.length > MAX_LEASE_CHARS
@@ -14,8 +16,9 @@ export function buildLeaseAnalysisUserPrompt(input: {
       : input.leaseText;
 
   const findingsJson = JSON.stringify(input.ruleBasedFindings, null, 2);
+  const texasFindingsJson = JSON.stringify(input.texasRenterFindings ?? [], null, 2);
 
-  return `You help renters understand residential lease text. You are not a lawyer and must not give legal advice.
+  return `You help renters understand residential lease text for educational purposes only. You are not a lawyer and must not give legal advice. Your output helps renters review wording and prepare questions — it does not decide whether they should sign or whether a term is lawful. Local landlord-tenant law is not reviewed.
 
 Output format (critical):
 - Return one JSON object only. No other text.
@@ -35,17 +38,25 @@ Rules:
 - moneyAndFees and deadlinesAndNotice: value should state the key fact in few words (amount, date, or window); add a little context only if needed.
 - moneyAndFees and deadlinesAndNotice should include evidence when the lease text or RULE_SNIPPETS supports it; use the closest short quote that proves the amount, date, window, or obligation.
 - Base every factual claim on the lease text or the RULE_SNIPPETS below. If something is not in the text, say so in missingOrUnclear instead of guessing.
-- The deterministic risk band below is a rough heuristic from regex rules — your riskLevel should usually match it unless the lease text clearly contradicts it; explain any mismatch in riskReason.
-- riskLevel means renter review priority, not a legal judgment. It estimates how much attention the lease may need before signing based on renter-facing issues found in the text, such as fees, renewal terms, notice deadlines, utilities, repairs, entry rules, guests, pets, subletting, or early move-out costs. Use "high" to mean "review carefully," not "do not sign." Use "high" only when the lease shows multiple serious tenant burdens or high-impact ambiguities supported by evidence. If the deterministic scan is low or weak-medium but you still see major red flags in the text, explain that tension briefly in riskReason rather than defaulting to "high" without specifics.
-- Do not say or imply that a lease or clause is illegal, unsafe, invalid, enforceable, unenforceable, or that the renter should or should not sign. Instead, explain what the clause may affect and what the renter may want to review or ask about.
+- The deterministic band below is a rough heuristic from regex rules — your riskLevel should usually match it unless the lease text clearly contradicts it; explain any mismatch in riskReason.
+- riskLevel means review priority, not a legal judgment. It estimates how much attention the lease may need before signing based on renter-facing issues found in the text. Use "high" to mean more items worth a closer look, not "do not sign." If the deterministic scan is low or weak-medium but you still see notable terms in the text, explain that tension briefly in riskReason rather than defaulting to "high" without specifics.
+- In all user-facing string values (summary, titles, explanations, riskReason, nextSteps, etc.), use "review priority" and "terms to review" language. JSON field names stay riskLevel, riskReason, and potentialRedFlags — only the string content should use safer wording.
+- severity values in JSON stay minor, moderate, or critical — treat them as attention levels only; never use the word "critical" in titles or explanations.
+- Never use these words in any generated string value: illegal, valid, enforceable, unenforceable, unsafe, critical, red flag, risky, should sign, should not sign.
+- Do not say or imply that a lease or clause is unlawful, unenforceable, or that the renter should or should not sign. Instead, explain what the clause may affect and what the renter may want to review or ask about.
+- TEXAS_RENTER_FINDINGS are curated reference notes created by the app. Do not add new Texas law claims. Do not decide if a lease term is legal. Do not say illegal, valid, enforceable, unenforceable, safe, or unsafe. You may mention these findings only as educational items to review.
 - potentialRedFlags must cite evidence: each item needs at least one evidence entry with page and quote copied from the lease or RULE_SNIPPETS.
 - If uncertain, list items in missingOrUnclear rather than inventing numbers or clauses.
+- disclaimer: use educational, not-legal-advice wording consistent with: "Educational information only. Not legal advice."
 
 LEASE_TEXT:
 ${leaseText}
 
 RULE_SNIPPETS (page + quote, from automated scan):
 ${findingsJson}
+
+TEXAS_RENTER_FINDINGS (curated reference notes from the app — do not invent additional Texas law claims):
+${texasFindingsJson}
 
 DETERMINISTIC_SCAN:
 score: ${input.deterministicRisk.score}
@@ -65,5 +76,5 @@ Return JSON with exactly these keys and value types:
 - questionsToAsk: string[]
 - nextSteps: string[]
 - missingOrUnclear: string[]
-- disclaimer: string (short; state you are informational, not legal advice)`;
+- disclaimer: string (short; educational only, not legal advice)`;
 }

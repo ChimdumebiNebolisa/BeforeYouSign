@@ -22,10 +22,10 @@ const STEPS_UPLOAD = [
     subPending: "Waiting to scan key terms.",
   },
   {
-    title: "Identifying potential risks",
+    title: "Reviewing notable terms",
     subDone: "Notable clauses compared against your lease wording.",
     subActive: "Spotting unclear or potentially costly clauses...",
-    subPending: "Waiting to review risk signals.",
+    subPending: "Waiting to review lease wording.",
   },
   {
     title: "Preparing your summary",

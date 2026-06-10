@@ -18,6 +18,8 @@ import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import { computeDeterministicLeaseRisk, type DeterministicLeaseRisk } from "@/lib/analysis/scoring";
 import { getBysAiKey } from "@/lib/env/bys-ai-key";
 import { normalizeLeasePageText } from "@/lib/pdf/normalize";
+import { scanTexasRenterTopics } from "@/lib/legal-reference/texas-renter-scan";
+import { FIXED_REPORT_DISCLAIMER } from "@/lib/public-copy";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -486,7 +488,7 @@ function buildRuleOnlyFallbackReport(input: {
   const fallbackRiskReason =
     input.deterministicRisk.reasons.length > 0
       ? input.deterministicRisk.reasons.slice(0, 3).join(" ")
-      : "Risk level shows how much attention this lease may need before signing based on renter-facing issues found in the text.";
+      : "This lease may need more review because of renter-facing terms found in the text.";
 
   return normalizeReportForCredibility({
     summary,
@@ -501,11 +503,10 @@ function buildRuleOnlyFallbackReport(input: {
     nextSteps: [
       "Confirm the total monthly cost, including recurring fees.",
       "Ask for written clarification on any unclear lease terms.",
-      "Get legal advice before signing if any clause feels risky or unclear.",
+      "Consider speaking with a qualified attorney or tenant resource if any term is unclear.",
     ],
     missingOrUnclear,
-    disclaimer:
-      "Informational only. This report helps you spot terms to review or ask about before signing.",
+    disclaimer: FIXED_REPORT_DISCLAIMER,
   });
 }
 
@@ -513,6 +514,7 @@ async function buildLeaseAiFields(input: {
   fullLeaseText: string;
   ruleBasedFindings: RuleBasedFinding[];
   deterministicRisk: DeterministicLeaseRisk;
+  texasRenterFindings: ReturnType<typeof scanTexasRenterTopics>;
 }): Promise<{
   report: BeforeYouSignReport | null;
   reportError: string | null;
@@ -532,6 +534,7 @@ async function buildLeaseAiFields(input: {
     leaseText: input.fullLeaseText,
     ruleBasedFindings: input.ruleBasedFindings,
     deterministicRisk: input.deterministicRisk,
+    texasRenterFindings: input.texasRenterFindings,
   });
 
   if (ai.ok) {
@@ -613,6 +616,7 @@ export async function POST(request: Request) {
           utilities: utilitiesSnippets,
         });
         const unclearLeasePhrases = findUnclearLeasePhrases(extractedPages);
+        const texasRenterFindings = scanTexasRenterTopics(extractedPages);
         const fullLeaseText = extractedPages.map((p) => p.text).join("\n\n");
         const deterministicRisk = computeDeterministicLeaseRisk({
           fullText: fullLeaseText,
@@ -646,6 +650,7 @@ export async function POST(request: Request) {
           fullLeaseText,
           ruleBasedFindings,
           deterministicRisk,
+          texasRenterFindings,
         });
 
         return NextResponse.json({
@@ -663,6 +668,7 @@ export async function POST(request: Request) {
           utilitiesSnippets,
           ruleBasedFindings,
           unclearLeasePhrases,
+          texasRenterFindings,
           deterministicRiskScore: deterministicRisk.score,
           deterministicRiskBand: deterministicRisk.band,
           deterministicRiskReasons: deterministicRisk.reasons,
@@ -729,6 +735,7 @@ export async function POST(request: Request) {
         utilities: utilitiesSnippets,
       });
       const unclearLeasePhrases = findUnclearLeasePhrases(extractedPages);
+      const texasRenterFindings = scanTexasRenterTopics(extractedPages);
       const fullLeaseText = extractedPages.map((p) => p.text).join("\n\n");
       const deterministicRisk = computeDeterministicLeaseRisk({
         fullText: fullLeaseText,
@@ -761,6 +768,7 @@ export async function POST(request: Request) {
         fullLeaseText,
         ruleBasedFindings,
         deterministicRisk,
+        texasRenterFindings,
       });
 
       return NextResponse.json({
@@ -778,6 +786,7 @@ export async function POST(request: Request) {
         utilitiesSnippets,
         ruleBasedFindings,
         unclearLeasePhrases,
+        texasRenterFindings,
         deterministicRiskScore: deterministicRisk.score,
         deterministicRiskBand: deterministicRisk.band,
         deterministicRiskReasons: deterministicRisk.reasons,

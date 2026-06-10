@@ -19,7 +19,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "BeforeYouSign",
-  description: "Understand your lease before you sign.",
+  description:
+    "BeforeYouSign helps Texas students and first-time renters understand residential leases before signing.",
   icons: {
     icon: "/logo.png",
   },

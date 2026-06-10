@@ -4,6 +4,7 @@ import { USER_SAFE_AI_REPORT_UNAVAILABLE } from "@/lib/analysis/ai-user-messages
 import { LEASE_REPORT_RESPONSE_SCHEMA } from "@/lib/analysis/gemini-response-schema";
 import { buildLeaseAnalysisUserPrompt } from "@/lib/analysis/prompt";
 import type { RuleBasedFinding } from "@/lib/analysis/rules";
+import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 import {
   type BeforeYouSignReport,
   parseBeforeYouSignReportJson,
@@ -109,6 +110,7 @@ export async function runStructuredLeaseAnalysis(input: {
   leaseText: string;
   ruleBasedFindings: RuleBasedFinding[];
   deterministicRisk: DeterministicLeaseRisk;
+  texasRenterFindings?: TexasRenterFinding[];
 }): Promise<
   | { ok: true; rawText: string; report: BeforeYouSignReport }
   | {
@@ -126,6 +128,7 @@ export async function runStructuredLeaseAnalysis(input: {
     leaseText: input.leaseText,
     ruleBasedFindings: input.ruleBasedFindings,
     deterministicRisk: input.deterministicRisk,
+    texasRenterFindings: input.texasRenterFindings,
   });
 
   /** Long leases need a high ceiling; truncated JSON fails parsing. Gemini 2.5 Flash supports large outputs. */

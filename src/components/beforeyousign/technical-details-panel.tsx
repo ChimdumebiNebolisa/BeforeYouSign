@@ -1,5 +1,7 @@
 "use client";
 
+import { displayReviewPriority } from "@/lib/display-labels";
+
 function truncQuote(text: string, max: number): string {
   const t = text.trim().replace(/\s+/g, " ");
   if (t.length <= max) return t;
@@ -154,12 +156,12 @@ export function TechnicalDetailsPanel({ receipt }: { receipt: TechnicalDetailsRe
 
         {receipt.deterministicRiskBand !== undefined ? (
           <section className="rounded-lg border border-[#e0e3e8] bg-[#ffffff] p-4 text-[#191c1e] shadow-sm">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#757682]">Estimated risk from text patterns</p>
-            <p className="mt-2 font-[family-name:var(--font-headline)] text-sm font-semibold leading-snug">
-              Band <span className="uppercase">{receipt.deterministicRiskBand}</span>
-              <span className="ml-2 font-normal text-[#505f76]">
-                (score {receipt.deterministicRiskScore ?? "—"}, not legal advice)
-              </span>
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#757682]">
+              Pattern scan (informational)
+            </p>
+            <p className="mt-2 font-[family-name:var(--font-headline)] text-sm font-semibold leading-snug text-[#191c1e]">
+              Review priority hint:{" "}
+              <span>{displayReviewPriority(receipt.deterministicRiskBand)}</span>
             </p>
             {receipt.deterministicRiskReasons?.length ? (
               <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-xs text-[#444651] marker:font-semibold marker:text-[#00246a]">
@@ -170,7 +172,7 @@ export function TechnicalDetailsPanel({ receipt }: { receipt: TechnicalDetailsRe
                 ))}
               </ol>
             ) : (
-              <p className="mt-2 text-xs text-[#444651]">No strong risk signals from this rule scan.</p>
+              <p className="mt-2 text-xs text-[#444651]">No strong pattern matches from this rule scan.</p>
             )}
           </section>
         ) : null}

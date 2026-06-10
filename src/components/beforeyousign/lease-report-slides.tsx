@@ -2,6 +2,20 @@
 
 import { useState, type Dispatch, type SetStateAction } from "react";
 import type { BeforeYouSignReport, EvidenceRef, RiskLevel } from "@/lib/analysis/schema";
+import { displayReviewPriority, displaySeverity } from "@/lib/display-labels";
+import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
+import { SourceBadge } from "@/components/beforeyousign/source-badge";
+import {
+  CITY_RULES_NOT_CHECKED_BADGE,
+  FIXED_REPORT_DISCLAIMER,
+  FOUND_IN_LEASE_BADGE,
+  LOCAL_LAW_BANNER,
+  MISSING_UNCLEAR_BADGE,
+  TEXAS_RENTER_CHECK_BADGE,
+  TEXAS_RENTER_CHECK_EMPTY,
+  TEXAS_RENTER_CHECK_NOTE,
+  TEXAS_RENTER_SOURCE_NOTE,
+} from "@/lib/public-copy";
 
 export type EvidenceSourceLabel = "sample lease" | "pasted text";
 
@@ -122,7 +136,7 @@ export function SummarySection({
   agreeBullets: string[];
   riskNote: string;
 }) {
-  const [showRiskInfo, setShowRiskInfo] = useState(false);
+  const [showPriorityInfo, setShowPriorityInfo] = useState(false);
   return (
     <section className={cardBase}>
       <div className="flex flex-col gap-4">
@@ -131,23 +145,23 @@ export function SummarySection({
             report.riskLevel,
           )}`}
         >
-          <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#38485d]/90">Risk Level</span>
-          <span className="mt-0.5 block font-[family-name:var(--font-headline)] text-lg font-extrabold uppercase leading-none tracking-tight">
-            {report.riskLevel}
+          <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#38485d]/90">Review priority</span>
+          <span className="mt-0.5 block font-[family-name:var(--font-headline)] text-lg font-extrabold leading-none tracking-tight">
+            {displayReviewPriority(report.riskLevel)}
           </span>
           <button
             type="button"
-            aria-expanded={showRiskInfo}
-            aria-controls="risk-level-info"
-            onClick={() => setShowRiskInfo((v) => !v)}
+            aria-expanded={showPriorityInfo}
+            aria-controls="review-priority-info"
+            onClick={() => setShowPriorityInfo((v) => !v)}
             className="mt-1 text-[10px] font-medium opacity-60 underline underline-offset-2 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
           >
-            {showRiskInfo ? "Hide explanation" : "What does this mean?"}
+            {showPriorityInfo ? "Hide explanation" : "What does this mean?"}
           </button>
-          {showRiskInfo ? (
-            <p id="risk-level-info" className="mt-1.5 rounded-md bg-black/5 px-2.5 py-1.5 text-center text-[11px] leading-snug text-[#38485d]">
-              Risk level is a review priority, not a legal judgment. High means review carefully, not automatically
-              illegal. Medium means a few things are worth a closer look. Low means mostly standard terms.
+          {showPriorityInfo ? (
+            <p id="review-priority-info" className="mt-1.5 rounded-md bg-black/5 px-2.5 py-1.5 text-center text-[11px] leading-snug text-[#38485d]">
+              Review priority estimates how much attention lease terms may need. Higher means more items worth a closer
+              look; lower means fewer notable items were found. This is not legal advice.
             </p>
           ) : null}
           {riskNote ? (
@@ -192,9 +206,9 @@ export function RedFlagsSection({
 }) {
   return (
     <section className={cardBase}>
-      <h3 className={sectionTitle}>Potential Red Flags</h3>
+      <h3 className={sectionTitle}>Terms to review</h3>
       <p className="mt-1 text-[11px] leading-snug text-[#757682]">
-        Click a red flag card to highlight its source quote in the lease text.
+        Click an item to highlight its source quote in the lease text.
       </p>
       {report.potentialRedFlags.length ? (
         <ul className="mt-3 space-y-2.5">
@@ -234,8 +248,9 @@ export function RedFlagsSection({
                     <span className="font-[family-name:var(--font-headline)] text-[13px] font-bold text-[#191c1e]">
                       {clampForScan(f.title, 100)}
                     </span>
-                    <span className="rounded bg-[#e0e3e5] px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-[#444651]">
-                      {f.severity}
+                    {primary ? <SourceBadge label={FOUND_IN_LEASE_BADGE} /> : null}
+                    <span className="rounded bg-[#e0e3e5] px-1.5 py-px text-[10px] font-semibold tracking-wide text-[#444651]">
+                      {displaySeverity(f.severity)}
                     </span>
                     <span className="rounded border border-[#c5c5d3]/35 bg-[#ffffff]/80 px-1.5 py-px text-[10px] text-[#757682]">
                       {f.category}
@@ -285,7 +300,7 @@ export function RedFlagsSection({
           })}
         </ul>
       ) : (
-        <p className="mt-2 text-sm text-[#444651]">No major red flags were clearly identified in this lease text.</p>
+        <p className="mt-2 text-sm text-[#444651]">No major issues were clearly identified in this lease text.</p>
       )}
     </section>
   );
@@ -496,6 +511,99 @@ export function QuestionsSection({
   );
 }
 
+export function TexasRenterCheckSection({
+  findings,
+  selectedFindingId,
+  onEvidenceClick,
+  evidenceSourceLabel,
+}: {
+  findings: TexasRenterFinding[];
+  selectedFindingId?: string | null;
+  onEvidenceClick: (args: { page: number; quote: string; findingId?: string }) => void;
+  evidenceSourceLabel?: EvidenceSourceLabel;
+}) {
+  return (
+    <section className={cardBase}>
+      <h3 className={sectionTitle}>Texas renter check</h3>
+      <p className="mt-2 text-[12px] leading-relaxed text-[#57534e]">{TEXAS_RENTER_CHECK_NOTE}</p>
+      {findings.length ? (
+        <ul className="mt-4 space-y-3">
+          {findings.map((f) => {
+            const isSelected = selectedFindingId === f.id;
+            return (
+              <li
+                key={f.id}
+                data-finding-id={f.id}
+                className={[
+                  "rounded-lg border p-4 transition-colors",
+                  isSelected
+                    ? "border-[#002045]/25 bg-[#eef2ff] ring-1 ring-[#002045]/15"
+                    : "border-[#c5c5d3]/25 bg-[#f7f9fb]",
+                ].join(" ")}
+              >
+                <button
+                  type="button"
+                  className="w-full rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002045]/25"
+                  onClick={() =>
+                    onEvidenceClick({ page: f.page, quote: f.leaseQuote, findingId: f.id })
+                  }
+                >
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <SourceBadge label={TEXAS_RENTER_CHECK_BADGE} />
+                    <SourceBadge label={FOUND_IN_LEASE_BADGE} />
+                  </div>
+                  <p className={`${sectionLabel} mt-2`}>Topic</p>
+                  <p className="mt-0.5 font-[family-name:var(--font-headline)] text-[13px] font-bold text-[#191c1e]">
+                    {f.topicLabel}
+                  </p>
+                  <p className="mt-3 text-[11px] font-semibold uppercase tracking-wide text-[#757682]">
+                    Lease text
+                  </p>
+                  <p className="mt-1 text-[13px] leading-snug text-[#444651]">
+                    <q>{trimQuote(f.leaseQuote, 200)}</q>
+                  </p>
+                  <p className="mt-3 text-[12px] leading-snug text-[#444651]">
+                    <span className="font-semibold text-[#191c1e]">Why it matters: </span>
+                    {f.explanation}
+                  </p>
+                  <p className="mt-2 text-[12px] leading-snug text-[#444651]">
+                    <span className="font-semibold text-[#191c1e]">Question to ask: </span>
+                    {f.questionToAsk}
+                  </p>
+                  <p className="mt-2 text-[11px] text-[#505f76]">
+                    <span className="font-medium text-[#191c1e]">
+                      {evidenceLabel(f.page, evidenceSourceLabel)}
+                    </span>
+                    Tap to highlight in lease
+                  </p>
+                </button>
+                <div className="mt-3 border-t border-[#c5c5d3]/20 pt-3 text-[12px] leading-relaxed text-[#444651]">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-[#757682]">Source</p>
+                  <p className="mt-1">
+                    <a
+                      href={f.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-[#003ea8] underline-offset-2 hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {f.sourceTitle}
+                    </a>
+                  </p>
+                  <p className="mt-1 text-[#505f76]">{f.sourceSectionLabel}</p>
+                  <p className="mt-2 text-[11px] text-[#757682]">{TEXAS_RENTER_SOURCE_NOTE}</p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="mt-3 text-sm text-[#444651]">{TEXAS_RENTER_CHECK_EMPTY}</p>
+      )}
+    </section>
+  );
+}
+
 export function NextStepsSection({ report }: { report: BeforeYouSignReport }) {
   return (
     <section className={`${cardBase} p-4 sm:p-5`}>
@@ -509,17 +617,44 @@ export function NextStepsSection({ report }: { report: BeforeYouSignReport }) {
       ) : (
         <p className="mt-2 text-sm text-[#444651]">No next-step recommendations were generated for this lease.</p>
       )}
-      <p className="mt-4 border-t border-[#e6e8ea] pt-3 text-[10px] leading-relaxed text-[#9ca3af]">
-        Informational only. This report helps you spot terms to review or ask about before signing.
-      </p>
     </section>
+  );
+}
+
+export function LocalLawBanner() {
+  return (
+    <div className="rounded-lg border border-[#c5c5d3]/35 bg-[#f7f9fb] px-4 py-3 text-[12px] leading-relaxed text-[#444651]">
+      <div className="flex flex-wrap items-start gap-2">
+        <SourceBadge label={CITY_RULES_NOT_CHECKED_BADGE} />
+        <p className="min-w-0 flex-1">{LOCAL_LAW_BANNER}</p>
+      </div>
+    </div>
+  );
+}
+
+export function FixedReportDisclaimer({ report }: { report: BeforeYouSignReport }) {
+  const modelDisclaimer = report.disclaimer?.trim();
+  const showModelDisclaimer =
+    modelDisclaimer &&
+    modelDisclaimer.toLowerCase() !== FIXED_REPORT_DISCLAIMER.toLowerCase();
+
+  return (
+    <div className="rounded-lg border border-[#e6e8ea] bg-[#fafbfc] px-4 py-3 text-[11px] leading-relaxed text-[#757682]">
+      <p>{FIXED_REPORT_DISCLAIMER}</p>
+      {showModelDisclaimer ? (
+        <p className="mt-2 text-[10px] text-[#9ca3af]">{modelDisclaimer}</p>
+      ) : null}
+    </div>
   );
 }
 
 export function MissingSection({ report }: { report: BeforeYouSignReport }) {
   return (
     <section className="rounded-lg border border-[#c5c5d3]/25 bg-[#f4f6f8] p-4">
-      <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#57534e]">Not clearly stated</h3>
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#57534e]">Not clearly stated</h3>
+        <SourceBadge label={MISSING_UNCLEAR_BADGE} />
+      </div>
       <p className="mt-1 text-[13px] text-[#57534e]">
         We could not determine these confidently from the uploaded lease.
       </p>

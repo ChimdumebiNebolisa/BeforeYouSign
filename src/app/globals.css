@@ -49,25 +49,31 @@
 }
 
 :root {
-  /* Stitch: editorial lease intelligence (blue-gray canvas, navy primary) */
-  --background: #f7f9fb;
-  --foreground: #191c1e;
+  /* Stitch Scholar-Safe Analysis tokens */
+  --background: #f8f9ff;
+  --foreground: #0b1c30;
   --card: #ffffff;
-  --card-foreground: #191c1e;
+  --card-foreground: #0b1c30;
   --popover: #ffffff;
-  --popover-foreground: #191c1e;
-  --primary: #00246a;
+  --popover-foreground: #0b1c30;
+  --primary: #002045;
   --primary-foreground: #ffffff;
-  --secondary: #f2f4f6;
-  --secondary-foreground: #191c1e;
-  --muted: #f2f4f6;
-  --muted-foreground: #444651;
-  --accent: #dbe1ff;
-  --accent-foreground: #00174b;
+  --primary-container: #1a365d;
+  --secondary: #eff4ff;
+  --secondary-foreground: #0b1c30;
+  --muted: #e5eeff;
+  --muted-foreground: #43474e;
+  --accent: #dce9ff;
+  --accent-foreground: #002045;
   --destructive: #ba1a1a;
-  --border: rgb(197 197 211 / 0.22);
-  --input: #f2f4f6;
-  --ring: #00246a;
+  --border: #c4c6cf;
+  --input: #eff4ff;
+  --ring: #002045;
+  --bys-annotation-yellow: #fef08a;
+  --bys-annotation-purple: #e9d5ff;
+  --bys-annotation-blue: #bae6fd;
+  --bys-container-max: 70rem;
+  --bys-section-gap: 5rem;
   --chart-1: oklch(0.62 0.12 198);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -137,7 +143,27 @@
       radial-gradient(circle at bottom left, rgb(242 244 246 / 0.9) 0%, transparent 52%);
   }
   .bys-gradient-cta {
-    background-image: linear-gradient(135deg, #00246a 0%, #00389a 100%);
+    background-image: linear-gradient(135deg, #002045 0%, #1a365d 100%);
+  }
+  .bys-sticky-note-yellow {
+    background-color: var(--bys-annotation-yellow);
+    box-shadow: 4px 4px 12px rgb(254 240 138 / 0.35);
+  }
+  .bys-sticky-note-purple {
+    background-color: var(--bys-annotation-purple);
+    box-shadow: 4px 4px 12px rgb(233 213 255 / 0.35);
+  }
+  .bys-sticky-note-blue {
+    background-color: var(--bys-annotation-blue);
+    box-shadow: 4px 4px 12px rgb(186 230 253 / 0.35);
+  }
+  .bys-section-gap {
+    margin-top: var(--bys-section-gap);
+  }
+  .bys-container {
+    max-width: var(--bys-container-max);
+    margin-left: auto;
+    margin-right: auto;
   }
   .bys-glass-panel {
     background-color: rgb(255 255 255 / 0.7);

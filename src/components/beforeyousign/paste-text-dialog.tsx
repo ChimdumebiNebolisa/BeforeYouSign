@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { PRIVACY_CONTINUE_LINE } from "@/lib/public-copy";
 
 export function PasteTextDialog({
   onStartPaste,
   openRequestVersion = 0,
+  embedded = false,
 }: {
   onStartPaste: (text: string) => void;
   openRequestVersion?: number;
+  embedded?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [pasted, setPasted] = useState<string | null>(null);
@@ -19,18 +22,47 @@ export function PasteTextDialog({
     return () => window.cancelAnimationFrame(id);
   }, [openRequestVersion]);
 
+  if (embedded) {
+    return (
+      <div className="w-full">
+        <p className="text-sm text-muted-foreground">Paste the lease text you want to analyze.</p>
+        <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{PRIVACY_CONTINUE_LINE}</p>
+        <textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          className="mt-4 h-48 w-full resize-none rounded-xl bg-muted p-3 text-sm text-foreground outline-none ring-1 ring-border/40 focus:bg-card focus:ring-2 focus:ring-primary/25"
+          placeholder="Paste your Texas residential lease text here…"
+        />
+        <button
+          type="button"
+          className="mt-4 h-11 w-full rounded-xl bys-gradient-cta text-sm font-bold text-white shadow-sm"
+          onClick={() => {
+            const next = draft.trim();
+            setPasted(next.length ? next : null);
+            if (next.length) onStartPaste(next);
+          }}
+        >
+          Use pasted text
+        </button>
+        {pasted ? (
+          <p className="mt-2 text-xs text-muted-foreground">Pasted text loaded ({pasted.length.toLocaleString()} chars).</p>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <>
       <button
         type="button"
-        className="mt-3 w-full rounded-xl border border-[#c5c5d3]/35 bg-[#ffffff] py-3 text-sm font-semibold text-[#191c1e] transition hover:bg-[#f2f4f6] active:scale-[0.99]"
+        className="mt-3 w-full rounded-xl border border-border/60 bg-card py-3 text-sm font-semibold text-foreground transition hover:bg-muted active:scale-[0.99]"
         onClick={() => setIsOpen(true)}
       >
         Paste Lease Text
       </button>
 
       {pasted ? (
-        <p className="mt-2 text-xs text-[#444651]">Pasted text loaded ({pasted.length.toLocaleString()} chars).</p>
+        <p className="mt-2 text-xs text-muted-foreground">Pasted text loaded ({pasted.length.toLocaleString()} chars).</p>
       ) : null}
 
       {isOpen ? (
@@ -42,6 +74,7 @@ export function PasteTextDialog({
                   Paste lease text
                 </h2>
                 <p className="mt-1 text-sm text-[#444651]">Paste the lease text you want to analyze.</p>
+                <p className="mt-2 text-[11px] leading-relaxed text-[#757682]">{PRIVACY_CONTINUE_LINE}</p>
               </div>
               <button
                 type="button"

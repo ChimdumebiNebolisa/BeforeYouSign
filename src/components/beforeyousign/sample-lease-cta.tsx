@@ -16,7 +16,13 @@ const SAMPLE_LABEL: Record<SampleKey, string> = {
   "notice-heavy": "Lease with strict renewal terms",
 };
 
-export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string) => void }) {
+export function SampleLeaseCta({
+  onStartSample,
+  embedded = false,
+}: {
+  onStartSample: (text: string) => void;
+  embedded?: boolean;
+}) {
   const [sampleKey, setSampleKey] = useState<SampleKey>("standard");
   const [isOpen, setIsOpen] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -27,9 +33,16 @@ export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string
   return (
     <div className="flex w-full min-w-0 flex-col">
       <label className="block w-full text-left">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#757682]">Sample lease</span>
+        {!embedded ? (
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Sample lease</span>
+        ) : (
+          <span className="text-sm text-muted-foreground">Choose a sample Texas residential lease to review.</span>
+        )}
         <select
-          className="mt-2 w-full rounded-xl bg-[#e0e3e5] px-3 py-3 text-center text-sm font-medium text-[#191c1e] [text-align-last:center] outline-none transition focus:bg-[#ffffff] focus:ring-2 focus:ring-[#00246a]/20"
+          className={[
+            "w-full rounded-xl bg-muted px-3 py-3 text-sm font-medium text-foreground outline-none transition focus:bg-card focus:ring-2 focus:ring-primary/20",
+            embedded ? "mt-3" : "mt-2 text-center [text-align-last:center]",
+          ].join(" ")}
           value={sampleKey}
           onChange={(e) => {
             setSampleKey(e.target.value as SampleKey);
@@ -47,7 +60,7 @@ export function SampleLeaseCta({ onStartSample }: { onStartSample: (text: string
 
       <button
         type="button"
-        className="mt-3 inline-flex h-[42px] w-full items-center justify-center rounded-xl border border-[#00246a]/35 bg-[#ffffff] px-3 text-sm font-semibold text-[#00246a] shadow-sm transition hover:border-[#00246a]/55 hover:bg-[#eef2ff] active:scale-[0.99] disabled:opacity-60"
+        className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-xl border border-primary/35 bg-card px-3 text-sm font-semibold text-primary shadow-sm transition hover:border-primary/55 hover:bg-muted active:scale-[0.99] disabled:opacity-60"
         disabled={isLoading}
         onClick={() => {
           const run = async () => {

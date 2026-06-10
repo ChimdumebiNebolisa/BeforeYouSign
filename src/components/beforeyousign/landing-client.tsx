@@ -2,15 +2,23 @@
 
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UploadLeaseCta } from "@/components/beforeyousign/upload-lease-cta";
-import { SampleLeaseCta } from "@/components/beforeyousign/sample-lease-cta";
-import { PasteTextDialog } from "@/components/beforeyousign/paste-text-dialog";
 import { LeaseTextViewer } from "@/components/beforeyousign/lease-text-viewer";
 import { LeaseReportView } from "@/components/beforeyousign/lease-report";
 import { parseBeforeYouSignReportJson, type BeforeYouSignReport } from "@/lib/analysis/schema";
+import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 import { AnalysisInProgressView } from "@/components/beforeyousign/analysis-in-progress";
 import { IntakeDocumentPreview } from "@/components/beforeyousign/intake-document-preview";
 import { TechnicalDetailsPanel } from "@/components/beforeyousign/technical-details-panel";
+import { LandingHero } from "@/components/beforeyousign/landing-hero";
+import { LandingIntakeCard } from "@/components/beforeyousign/landing-intake-card";
+import { LandingPreviewSection } from "@/components/beforeyousign/landing-preview-section";
+import { LandingHowItWorks } from "@/components/beforeyousign/landing-how-it-works";
+import { LandingWhatItChecks } from "@/components/beforeyousign/landing-what-it-checks";
+import { LandingTexasRenterPreview } from "@/components/beforeyousign/landing-texas-renter-preview";
+import { LandingLimitations } from "@/components/beforeyousign/landing-limitations";
+import { LandingFaq } from "@/components/beforeyousign/landing-faq";
+import { LandingFooter } from "@/components/beforeyousign/landing-footer";
+import { OCR_WARNING } from "@/lib/public-copy";
 
 type IntakeState =
   | { kind: "upload"; file: File }
@@ -34,6 +42,7 @@ export function LandingClient() {
     utilitiesSnippets?: { page: number; quote: string }[];
     ruleBasedFindings?: { category: string; page: number; quote: string }[];
     unclearLeasePhrases?: { page: number; quote: string }[];
+    texasRenterFindings?: TexasRenterFinding[];
     deterministicRiskScore?: number;
     deterministicRiskBand?: "low" | "medium" | "high";
     deterministicRiskReasons?: string[];
@@ -47,6 +56,11 @@ export function LandingClient() {
   const [viewerHighlight, setViewerHighlight] = useState<{ page: number; quote: string } | null>(null);
   const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
   const [leaseTextPanelExpanded, setLeaseTextPanelExpanded] = useState(true);
+  const [intakeTab, setIntakeTab] = useState<"upload" | "paste" | "sample">("upload");
+
+  const scrollToIntake = () => {
+    document.getElementById("review-intake")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const formatAnalysisError = (raw: string, status: number): string => {
     const trimmed = raw.trim();
@@ -130,6 +144,7 @@ export function LandingClient() {
         utilitiesSnippets?: { page: number; quote: string }[];
         ruleBasedFindings?: { category: string; page: number; quote: string }[];
         unclearLeasePhrases?: { page: number; quote: string }[];
+        texasRenterFindings?: TexasRenterFinding[];
         deterministicRiskScore?: number;
         deterministicRiskBand?: "low" | "medium" | "high";
         deterministicRiskReasons?: string[];
@@ -205,6 +220,20 @@ export function LandingClient() {
           </div>
 
           {uploadReceipt ? (
+            <>
+              {(() => {
+                const isPdf =
+                  Boolean(uploadReceipt.contentType?.toLowerCase().includes("pdf")) ||
+                  /\.pdf$/i.test(uploadReceipt.fileName);
+                const extractedCharCount =
+                  uploadReceipt.extractedPages?.reduce((total, page) => total + page.text.length, 0) ?? 0;
+                const showLowExtractionNote = isPdf && extractedCharCount > 0 && extractedCharCount < 400;
+                return showLowExtractionNote ? (
+                  <p className="mt-2 rounded-lg border border-[#c5c5d3]/35 bg-[#f7f9fb] px-4 py-3 text-sm leading-relaxed text-[#444651]">
+                    {OCR_WARNING}
+                  </p>
+                ) : null;
+              })()}
             <div className="mt-2 flex min-w-0 flex-col gap-8 lg:flex-row lg:items-start">
               {uploadReceipt.extractedPages && uploadReceipt.extractedPages.length > 0 ? (
                 <div className="w-full min-w-0 lg:sticky lg:top-32 lg:w-[46%] lg:max-w-[46%] lg:shrink-0">
@@ -248,6 +277,8 @@ export function LandingClient() {
                 {uploadReceipt.report ? (
                   <LeaseReportView
                     report={uploadReceipt.report}
+                    texasRenterFindings={uploadReceipt.texasRenterFindings ?? []}
+                    fileName={uploadReceipt.fileName}
                     selectedFindingId={selectedFindingId}
                     evidenceSourceLabel={
                       intake.kind === "sample" ? "sample lease" : intake.kind === "paste" ? "pasted text" : undefined
@@ -262,6 +293,7 @@ export function LandingClient() {
                 ) : null}
               </div>
             </div>
+            </>
           ) : null}
 
           {errorMessage ? (
@@ -304,80 +336,53 @@ export function LandingClient() {
     );
   }
 
+  const startUpload = (file: File) => {
+    resetIntakeUi();
+    setIntake({ kind: "upload", file });
+  };
+
+  const startPaste = (text: string) => {
+    resetIntakeUi();
+    setIntake({ kind: "paste", text });
+  };
+
+  const startSample = (text: string) => {
+    resetIntakeUi();
+    setIntake({ kind: "sample", text });
+  };
+
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 font-sans">
+    <div className="bys-container w-full px-4 font-sans">
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-16">
-        <div className="space-y-10 lg:col-span-7">
-          <div className="space-y-6">
-            <h1 className="font-[family-name:var(--font-headline)] text-4xl font-extrabold leading-[1.1] tracking-tight text-[#191c1e] sm:text-5xl lg:text-6xl">
-              Understand your lease{" "}
-              <span className="text-[#00246a]">before you sign</span>
-            </h1>
-            <p className="max-w-xl text-lg leading-relaxed text-[#444651]">
-              Upload or paste your residential lease to flag renter-facing issues like fees, deadlines, renewal terms,
-              and responsibilities before you sign.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { t: "Find costs", d: "Rent, deposits, and recurring charges called out clearly." },
-              { t: "Spot red flags", d: "Clauses that look unusually tenant-unfriendly or vague." },
-              { t: "Check deadlines", d: "End dates, renewal windows, and notice requirements." },
-              { t: "Prepare questions", d: "Negotiation prompts you can bring to the landlord or agent." },
-            ].map((c) => (
-              <div
-                key={c.t}
-                className="flex flex-col gap-2 rounded-2xl bg-[#f2f4f6] p-5 shadow-sm transition-colors hover:bg-[#ffffff]"
-              >
-                <div className="font-[family-name:var(--font-headline)] text-base font-bold text-[#191c1e]">{c.t}</div>
-                <p className="text-xs leading-snug text-[#505f76]">{c.d}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2 text-[11px] font-medium tracking-wide text-[#757682]">
-            <span aria-hidden>
-              ⓘ
-            </span>
-            Informational only. Risk level means review priority, not a legal judgment.
-          </div>
+        <div className="lg:col-span-7">
+          <LandingHero
+            onReviewLease={scrollToIntake}
+            onRunSample={() => {
+              scrollToIntake();
+              setIntakeTab("sample");
+            }}
+          />
         </div>
 
         <div className="lg:col-span-5">
-          <div className="bys-glass-panel space-y-8 rounded-[2rem] border border-white/50 p-6 shadow-[0px_32px_64px_rgba(0,36,106,0.08)] sm:p-8 lg:sticky lg:top-32">
-            <div className="space-y-1 text-center lg:text-left">
-              <h2 className="font-[family-name:var(--font-headline)] text-2xl font-bold text-[#191c1e]">
-                Analyze a lease
-              </h2>
-              <p className="text-sm text-[#444651]">Upload a lease, paste text, or run a sample report.</p>
-            </div>
-
-            <UploadLeaseCta
-              onStartUpload={(file) => {
-                resetIntakeUi();
-                setIntake({ kind: "upload", file });
-              }}
-            />
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <SampleLeaseCta
-                onStartSample={(text) => {
-                  resetIntakeUi();
-                  setIntake({ kind: "sample", text });
-                }}
-              />
-              <PasteTextDialog
-                openRequestVersion={pasteOpenNonce}
-                onStartPaste={(text) => {
-                  resetIntakeUi();
-                  setIntake({ kind: "paste", text });
-                }}
-              />
-            </div>
-          </div>
+          <LandingIntakeCard
+            onStartUpload={startUpload}
+            onStartPaste={startPaste}
+            onStartSample={startSample}
+            pasteOpenRequestVersion={pasteOpenNonce}
+            activeTab={intakeTab}
+            onTabChange={setIntakeTab}
+          />
         </div>
       </div>
+
+      <LandingPreviewSection />
+      <LandingHowItWorks />
+      <LandingWhatItChecks />
+      <LandingTexasRenterPreview />
+      <LandingLimitations />
+      <LandingFaq />
+      <LandingFooter />
     </div>
   );
 }

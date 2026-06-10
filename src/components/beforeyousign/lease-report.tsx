@@ -21,17 +21,24 @@ import {
   ResponsibilitiesSection,
   SCAN_LINE_CHARS,
   SummarySection,
+  TexasRenterCheckSection,
+  LocalLawBanner,
+  FixedReportDisclaimer,
 } from "@/components/beforeyousign/lease-report-slides";
+import { ChecklistDownloadButton } from "@/components/beforeyousign/checklist-download-button";
+import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 
 const RED_FLAGS_SLIDE_INDEX = 1;
+const TEXAS_RENTER_SLIDE_INDEX = 6;
 
 const SLIDE_LABELS_BASE = [
   "Summary",
-  "Potential red flags",
+  "Terms to review",
   "Money and fees",
   "Deadlines and notices",
   "Responsibilities",
   "Questions to ask",
+  "Texas renter check",
   "Next steps",
 ] as const;
 
@@ -56,8 +63,10 @@ function LeaseReportCarousel({
   selectedFindingId,
   onFlagEvidenceClick,
   evidenceSourceLabel,
+  texasRenterFindings,
 }: {
   report: BeforeYouSignReport;
+  texasRenterFindings: TexasRenterFinding[];
   summaryIntro: string;
   agreeBullets: string[];
   riskNote: string;
@@ -107,16 +116,17 @@ function LeaseReportCarousel({
 
   useEffect(() => {
     if (!emblaApi || !selectedFindingId) return;
-    const hit = report.potentialRedFlags.some((f) => f.id === selectedFindingId);
-    if (!hit) return;
+    const hitRedFlag = report.potentialRedFlags.some((f) => f.id === selectedFindingId);
+    const hitTexas = texasRenterFindings.some((f) => f.id === selectedFindingId);
+    if (!hitRedFlag && !hitTexas) return;
     const jump = prefersReducedMotion();
-    emblaApi.scrollTo(RED_FLAGS_SLIDE_INDEX, jump);
+    emblaApi.scrollTo(hitTexas ? TEXAS_RENTER_SLIDE_INDEX : RED_FLAGS_SLIDE_INDEX, jump);
     const id = selectedFindingId;
     requestAnimationFrame(() => {
       const el = document.querySelector<HTMLElement>(`[data-finding-id="${CSS.escape(id)}"]`);
       el?.scrollIntoView({ block: "nearest", behavior: jump ? "auto" : "smooth" });
     });
-  }, [selectedFindingId, emblaApi, report.potentialRedFlags]);
+  }, [selectedFindingId, emblaApi, report.potentialRedFlags, texasRenterFindings]);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
@@ -229,6 +239,16 @@ function LeaseReportCarousel({
           </div>
           <div className="min-w-0 flex-[0_0_100%] px-0.5">
             <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
+              <TexasRenterCheckSection
+                findings={texasRenterFindings}
+                selectedFindingId={selectedFindingId}
+                onEvidenceClick={onFlagEvidenceClick}
+                evidenceSourceLabel={evidenceSourceLabel}
+              />
+            </div>
+          </div>
+          <div className="min-w-0 flex-[0_0_100%] px-0.5">
+            <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
               <NextStepsSection report={report} />
             </div>
           </div>
@@ -263,14 +283,18 @@ function LeaseReportCarousel({
 
 export function LeaseReportView({
   report,
+  texasRenterFindings = [],
   onFlagEvidenceClick,
   selectedFindingId,
   evidenceSourceLabel,
+  fileName,
 }: {
   report: BeforeYouSignReport;
+  texasRenterFindings?: TexasRenterFinding[];
   onFlagEvidenceClick: (args: { page: number; quote: string; findingId?: string }) => void;
   selectedFindingId?: string | null;
   evidenceSourceLabel?: EvidenceSourceLabel;
+  fileName?: string;
 }) {
   const summaryIntro = displaySummaryIntro(report.summary);
   const agreeBullets = report.whatYoureAgreeingTo
@@ -292,6 +316,7 @@ export function LeaseReportView({
 
   const shared = {
     report,
+    texasRenterFindings,
     summaryIntro,
     agreeBullets,
     riskNote,
@@ -308,5 +333,18 @@ export function LeaseReportView({
     evidenceSourceLabel,
   };
 
-  return <LeaseReportCarousel {...shared} />;
+  return (
+    <div className="space-y-4">
+      <LocalLawBanner />
+      <div className="flex flex-wrap justify-end">
+        <ChecklistDownloadButton
+          report={report}
+          texasRenterFindings={texasRenterFindings}
+          fileName={fileName}
+        />
+      </div>
+      <LeaseReportCarousel {...shared} />
+      <FixedReportDisclaimer report={report} />
+    </div>
+  );
 }

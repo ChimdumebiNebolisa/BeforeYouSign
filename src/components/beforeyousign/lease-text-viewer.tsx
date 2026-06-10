@@ -58,18 +58,45 @@ const META_LABELS = [
   "Item",
 ];
 
-function splitHighlight(text: string, quote: string): HighlightMatch | null {
-  const q = quote.trim();
-  if (!q) return null;
-  const idx = text.indexOf(q);
-  if (idx === -1) return null;
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function makeHighlightMatch(text: string, start: number, end: number): HighlightMatch {
   return {
-    before: text.slice(0, idx),
-    match: text.slice(idx, idx + q.length),
-    after: text.slice(idx + q.length),
-    start: idx,
-    end: idx + q.length,
+    before: text.slice(0, start),
+    match: text.slice(start, end),
+    after: text.slice(end),
+    start,
+    end,
   };
+}
+
+function splitHighlight(text: string, quote: string): HighlightMatch | null {
+  const trimmed = quote.trim();
+  if (!trimmed) return null;
+
+  const withoutEllipsis = trimmed.replace(/…+$/, "").trim();
+  const candidates = [trimmed];
+  if (withoutEllipsis && withoutEllipsis !== trimmed) candidates.push(withoutEllipsis);
+  if (withoutEllipsis.length > 48) candidates.push(withoutEllipsis.slice(0, 48));
+
+  for (const q of candidates) {
+    const idx = text.indexOf(q);
+    if (idx !== -1) return makeHighlightMatch(text, idx, idx + q.length);
+  }
+
+  const collapsed = (withoutEllipsis || trimmed).replace(/\s+/g, " ").trim();
+  if (collapsed.length < 20) return null;
+
+  const words = collapsed.split(" ").filter(Boolean).slice(0, 12);
+  if (words.length < 3) return null;
+
+  const pattern = words.map(escapeRegex).join("\\s+");
+  const match = new RegExp(pattern, "i").exec(text);
+  if (!match) return null;
+
+  return makeHighlightMatch(text, match.index, match.index + match[0].length);
 }
 
 function lineOverlapsHighlight(line: DisplayLine, match: HighlightMatch | null): boolean {
