@@ -27,7 +27,7 @@ export function LandingPreviewSection() {
           </p>
         </div>
 
-        <div className="relative overflow-visible px-10 sm:px-12 lg:px-14">
+        <div className="relative overflow-hidden">
           <div className="rounded-3xl border border-[#e2e8f0] bg-card p-8 shadow-[0_24px_48px_rgba(0,32,69,0.12)] sm:p-10 lg:p-11">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Sample preview</p>
             <h3 className="mt-2 font-[family-name:var(--font-headline)] text-lg font-semibold text-foreground">
@@ -51,16 +51,16 @@ export function LandingPreviewSection() {
             </div>
           </div>
 
-          <div className="bys-sticky-note-yellow absolute right-0 top-6 z-10 hidden w-[11.5rem] rotate-2 rounded-md px-3 py-2.5 text-[13px] leading-snug text-[#0b1c30] sm:block">
+          <div className="bys-sticky-note-yellow absolute -right-4 top-6 z-10 hidden w-max max-w-[12.5rem] rotate-2 rounded-md py-2.5 pr-10 pl-3 text-[13px] leading-snug text-[#0b1c30] sm:block">
             {STICKY_NOTES[0]}
           </div>
-          <div className="bys-sticky-note-purple absolute left-0 top-[39%] z-10 hidden w-max max-w-none -translate-y-1/2 -rotate-1 whitespace-nowrap rounded-md px-3 py-2.5 text-[13px] leading-snug text-[#0b1c30] sm:block">
+          <div className="bys-sticky-note-purple absolute -left-4 top-[40%] z-10 hidden w-max -translate-y-1/2 -rotate-1 whitespace-nowrap rounded-md py-2.5 pr-3 pl-10 text-[13px] leading-snug text-[#0b1c30] sm:block">
             {STICKY_NOTES[1]}
           </div>
-          <div className="bys-sticky-note-blue absolute bottom-24 left-0 z-10 hidden w-[11.5rem] rotate-1 rounded-md px-3 py-2.5 text-[13px] leading-snug text-[#0b1c30] sm:block">
+          <div className="bys-sticky-note-blue absolute -left-3 bottom-24 z-10 hidden w-max max-w-[12.5rem] rotate-1 rounded-md py-2.5 pr-3 pl-10 text-[13px] leading-snug text-[#0b1c30] sm:block">
             {STICKY_NOTES[2]}
           </div>
-          <div className="bys-sticky-note-yellow absolute bottom-6 right-0 z-10 hidden w-[11.5rem] -rotate-2 rounded-md px-3 py-2.5 text-[13px] leading-snug text-[#0b1c30] sm:block">
+          <div className="bys-sticky-note-yellow absolute -right-4 bottom-6 z-10 hidden w-max max-w-[12.5rem] -rotate-2 rounded-md py-2.5 pr-10 pl-3 text-[13px] leading-snug text-[#0b1c30] sm:block">
             {STICKY_NOTES[3]}
           </div>
         </div>
