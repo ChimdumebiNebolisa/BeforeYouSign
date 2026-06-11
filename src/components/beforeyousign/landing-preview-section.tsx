@@ -27,7 +27,7 @@ export function LandingPreviewSection() {
           </p>
         </div>
 
-        <div className="relative overflow-hidden">
+        <div className="relative overflow-visible px-10 sm:px-12 lg:px-14">
           <div className="rounded-3xl border border-[#e2e8f0] bg-card p-8 shadow-[0_24px_48px_rgba(0,32,69,0.12)] sm:p-10 lg:p-11">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Sample preview</p>
             <h3 className="mt-2 font-[family-name:var(--font-headline)] text-lg font-semibold text-foreground">
@@ -51,33 +51,18 @@ export function LandingPreviewSection() {
             </div>
           </div>
 
-          <div className="bys-sticky-note-yellow absolute -right-2 top-6 hidden w-[10.5rem] max-w-[11.875rem] rotate-2 rounded-md px-3 py-2.5 text-[13px] leading-snug text-[#0b1c30] sm:block lg:-right-10">
+          <div className="bys-sticky-note-yellow absolute right-0 top-6 z-10 hidden w-[11.5rem] rotate-2 rounded-md px-3 py-2.5 text-[13px] leading-snug text-[#0b1c30] sm:block">
             {STICKY_NOTES[0]}
           </div>
-          <div className="bys-sticky-note-purple absolute -left-2 top-1/3 hidden w-max max-w-none -rotate-1 whitespace-nowrap rounded-md px-3 py-2.5 text-[13px] leading-snug text-[#0b1c30] sm:block lg:-left-10">
+          <div className="bys-sticky-note-purple absolute left-0 top-[39%] z-10 hidden w-max max-w-none -translate-y-1/2 -rotate-1 whitespace-nowrap rounded-md px-3 py-2.5 text-[13px] leading-snug text-[#0b1c30] sm:block">
             {STICKY_NOTES[1]}
           </div>
-          <div className="bys-sticky-note-blue absolute -left-1 bottom-24 hidden w-[10.5rem] max-w-[11.875rem] rotate-1 rounded-md px-3 py-2.5 text-[13px] leading-snug text-[#0b1c30] sm:block lg:-left-8">
+          <div className="bys-sticky-note-blue absolute bottom-24 left-0 z-10 hidden w-[11.5rem] rotate-1 rounded-md px-3 py-2.5 text-[13px] leading-snug text-[#0b1c30] sm:block">
             {STICKY_NOTES[2]}
           </div>
-          <div className="bys-sticky-note-yellow absolute -right-3 bottom-6 hidden w-[10.5rem] max-w-[11.875rem] -rotate-2 rounded-md px-3 py-2.5 text-[13px] leading-snug text-[#0b1c30] sm:block lg:-right-8">
+          <div className="bys-sticky-note-yellow absolute bottom-6 right-0 z-10 hidden w-[11.5rem] -rotate-2 rounded-md px-3 py-2.5 text-[13px] leading-snug text-[#0b1c30] sm:block">
             {STICKY_NOTES[3]}
           </div>
-        </div>
-
-        <p className="mt-6 text-center text-sm text-muted-foreground lg:text-left">
-          Texas renter check notes cover statewide topics like deposits, repairs, and landlord entry.
-        </p>
-
-        <div className="mt-4 flex flex-wrap justify-center gap-3 lg:hidden">
-          {STICKY_NOTES.map((note) => (
-            <span
-              key={note}
-              className="bys-sticky-note-yellow inline-block max-w-[11rem] rounded-md px-3 py-1.5 text-xs font-medium text-[#0b1c30]"
-            >
-              {note}
-            </span>
-          ))}
         </div>
       </div>
     </section>
