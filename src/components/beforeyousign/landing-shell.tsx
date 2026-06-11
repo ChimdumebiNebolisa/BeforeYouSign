@@ -16,7 +16,7 @@ export function LandingShell({ children }: { children: ReactNode }) {
 
       <LandingNav />
 
-      <main className="relative z-0 pt-24 pb-16 lg:pt-28">{children}</main>
+      <main className="relative z-0 pt-24 pb-16 lg:pt-24">{children}</main>
     </div>
   );
 }

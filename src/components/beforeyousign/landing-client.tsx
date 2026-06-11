@@ -370,7 +370,7 @@ export function LandingClient() {
 
   return (
     <div className="bys-container w-full px-6 font-sans lg:px-8">
-      <section className="pt-12 pb-[4.5rem] lg:pt-16 lg:pb-24">
+      <section className="pt-12 pb-[4.5rem] lg:pt-8 lg:pb-24">
         <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
           <div className="lg:col-span-7">
             <LandingHero
