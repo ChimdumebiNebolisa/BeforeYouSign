@@ -25,7 +25,7 @@ Lease agreements are long and written in dense legal language. Renters often str
 
 **AI/API:** Google Gemini via `@google/generative-ai` (`src/lib/analysis/gemini-report.ts`), structured output aligned with `src/lib/analysis/schema.ts`.
 
-**Other tools:** `pdf-parse` + `pdf-lib` (`src/lib/pdf/`), ESLint (`npm run lint`).
+**Other tools:** `pdf-parse` + `pdf-lib` (`src/lib/pdf/`), ESLint (`npm run lint`), Playwright QA smoke scripts.
 
 ## Setup
 
@@ -198,10 +198,46 @@ flowchart LR
 
 ---
 
+## Verification
+
+Pull requests run the **QA script syntax** GitHub Actions workflow, which installs dependencies and verifies the committed QA scripts parse successfully:
+
+```bash
+node --check scripts/phase2-scan-smoke.mjs
+node --check scripts/smoke-test.mjs
+node --check scripts/phase1-browser-qa.mjs
+node --check scripts/phase2-browser-qa.mjs
+```
+
+Run static linting:
+
+```bash
+npm run lint
+```
+
+Run the API scan smoke test against a running local server:
+
+```bash
+npm run dev
+npm run smoke:scan
+```
+
+Run browser QA smoke checks against a running local server:
+
+```bash
+npm run qa:smoke
+npm run qa:phase1
+npm run qa:phase2
+```
+
+The browser QA scripts use Playwright and write screenshots under `qa-screenshots/` for visual review.
+
+---
+
 ## Known limitations
 
 - **No user accounts or persisted reports** — refreshing loses in-session results unless the user runs analysis again.
 - **Single synchronous HTTP request** — very large PDFs or slow model responses may hit hosting timeouts (`maxDuration` on the route is capped for serverless-style deployments).
 - **PDF text extraction is not OCR** — scanned image-only PDFs may yield little or no extractable text.
 - **Evidence highlighting** uses substring matching (`indexOf` on the quote); minor mismatches between model quotes and extracted text can prevent a highlight.
-- **Automated `npm test` suite** is not present in this repo; use **`npm run lint`** and manual end-to-end checks.
+- **Automated `npm test` suite** is not present in this repo; use the **QA script syntax** workflow, **`npm run lint`**, **`npm run smoke:scan`**, and the Playwright QA scripts for repeatable checks.
