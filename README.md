@@ -222,7 +222,11 @@ npm run dev
 npm run smoke:scan
 ```
 
-Run browser QA smoke checks against a running local server:
+Run browser QA smoke checks against a running local server. Install Playwright browser binaries first if you have not run browser QA on this machine:
+
+```bash
+npx playwright install
+```
 
 ```bash
 npm run qa:smoke
