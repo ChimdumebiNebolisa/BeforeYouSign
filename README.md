@@ -200,6 +200,15 @@ flowchart LR
 
 ## Verification
 
+Pull requests run the **QA script syntax** GitHub Actions workflow, which installs dependencies and verifies the committed QA scripts parse successfully:
+
+```bash
+node --check scripts/phase2-scan-smoke.mjs
+node --check scripts/smoke-test.mjs
+node --check scripts/phase1-browser-qa.mjs
+node --check scripts/phase2-browser-qa.mjs
+```
+
 Run static linting:
 
 ```bash
@@ -231,4 +240,4 @@ The browser QA scripts use Playwright and write screenshots under `qa-screenshot
 - **Single synchronous HTTP request** — very large PDFs or slow model responses may hit hosting timeouts (`maxDuration` on the route is capped for serverless-style deployments).
 - **PDF text extraction is not OCR** — scanned image-only PDFs may yield little or no extractable text.
 - **Evidence highlighting** uses substring matching (`indexOf` on the quote); minor mismatches between model quotes and extracted text can prevent a highlight.
-- **Automated `npm test` suite** is not present in this repo; use **`npm run lint`**, **`npm run smoke:scan`**, and the Playwright QA scripts for repeatable checks.
+- **Automated `npm test` suite** is not present in this repo; use the **QA script syntax** workflow, **`npm run lint`**, **`npm run smoke:scan`**, and the Playwright QA scripts for repeatable checks.
