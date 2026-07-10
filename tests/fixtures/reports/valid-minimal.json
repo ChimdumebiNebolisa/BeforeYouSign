@@ -1,0 +1,29 @@
+{
+  "summary": "Sample grounded report",
+  "whatYoureAgreeingTo": ["Pay monthly rent"],
+  "riskLevel": "low",
+  "riskReason": "Few notable terms detected.",
+  "moneyAndFees": [
+    {
+      "label": "Monthly rent",
+      "value": "$1,450",
+      "evidence": [
+        {
+          "evidenceId": "ev-test-1",
+          "page": 1,
+          "quote": "Monthly rent is $1,450",
+          "startIndex": 0,
+          "endIndex": 22,
+          "supportStatus": "grounded"
+        }
+      ]
+    }
+  ],
+  "deadlinesAndNotice": [],
+  "responsibilities": [],
+  "potentialRedFlags": [],
+  "questionsToAsk": [],
+  "nextSteps": [],
+  "missingOrUnclear": [],
+  "disclaimer": "Educational information only. Not legal advice."
+}

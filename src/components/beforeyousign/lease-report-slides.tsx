@@ -2,6 +2,7 @@
 
 import { useState, type Dispatch, type SetStateAction } from "react";
 import type { BeforeYouSignReport, EvidenceRef, RiskLevel } from "@/lib/analysis/schema";
+import type { EvidenceClickArgs } from "@/lib/analysis/api-schema";
 import { displayReviewPriority, displaySeverity } from "@/lib/display-labels";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 import { SourceBadge } from "@/components/beforeyousign/source-badge";
@@ -91,12 +92,27 @@ export function dedupeEvidence(evidence: EvidenceRef[]): EvidenceRef[] {
   const seen = new Set<string>();
   const out: EvidenceRef[] = [];
   for (const ev of evidence) {
-    const k = ev.quote.replace(/\s+/g, " ").trim();
+    const k =
+      typeof ev.startIndex === "number" && typeof ev.endIndex === "number"
+        ? `${ev.page}:${ev.startIndex}:${ev.endIndex}`
+        : ev.evidenceId ?? ev.quote.replace(/\s+/g, " ").trim();
     if (!k || seen.has(k)) continue;
     seen.add(k);
     out.push(ev);
   }
   return out;
+}
+
+function toEvidenceClick(ev: EvidenceRef, findingId?: string): EvidenceClickArgs {
+  return {
+    page: ev.page,
+    quote: ev.quote,
+    findingId,
+    startIndex: ev.startIndex,
+    endIndex: ev.endIndex,
+    evidenceId: ev.evidenceId,
+    exact: ev.supportStatus === "grounded" && ev.startIndex !== undefined && ev.endIndex !== undefined,
+  };
 }
 
 export function evidenceLabel(page: number, evidenceSourceLabel?: EvidenceSourceLabel): string {
@@ -201,7 +217,7 @@ export function RedFlagsSection({
   expandedFlagEvidence: Record<string, boolean>;
   setExpandedFlagEvidence: Dispatch<SetStateAction<Record<string, boolean>>>;
   selectedFindingId?: string | null;
-  onFlagEvidenceClick: (args: { page: number; quote: string; findingId: string }) => void;
+  onFlagEvidenceClick: (args: EvidenceClickArgs & { findingId: string }) => void;
   evidenceSourceLabel?: EvidenceSourceLabel;
 }) {
   return (
@@ -222,7 +238,7 @@ export function RedFlagsSection({
             const isSelected = selectedFindingId === f.id;
             const highlightPrimary = () => {
               if (primary && typeof primary.page === "number" && primary.page >= 1) {
-                onFlagEvidenceClick({ page: primary.page, quote: primary.quote, findingId: f.id });
+                onFlagEvidenceClick({ ...toEvidenceClick(primary), findingId: f.id });
               }
             };
 
@@ -317,7 +333,7 @@ export function MoneySection({
   expandedMoneyQuotes: Record<string, boolean>;
   setExpandedMoneyQuotes: Dispatch<SetStateAction<Record<string, boolean>>>;
   evidenceSourceLabel?: EvidenceSourceLabel;
-  onEvidenceClick: (args: { page: number; quote: string }) => void;
+  onEvidenceClick: (args: EvidenceClickArgs) => void;
 }) {
   return (
     <section className={cardBase}>
@@ -332,7 +348,7 @@ export function MoneySection({
             const expanded = expandedMoneyQuotes[key] ?? false;
             const highlightPrimary = () => {
               if (primaryEv && typeof primaryEv.page === "number" && primaryEv.page >= 1) {
-                onEvidenceClick({ page: primaryEv.page, quote: primaryEv.quote });
+                onEvidenceClick(toEvidenceClick(primaryEv));
               }
             };
 
@@ -399,7 +415,7 @@ export function DeadlinesSection({
 }: {
   report: BeforeYouSignReport;
   evidenceSourceLabel?: EvidenceSourceLabel;
-  onEvidenceClick: (args: { page: number; quote: string }) => void;
+  onEvidenceClick: (args: EvidenceClickArgs) => void;
 }) {
   return (
     <section className={`${cardInset} p-4`}>
@@ -410,7 +426,7 @@ export function DeadlinesSection({
             const primaryEv = row.evidence?.[0];
             const highlightPrimary = () => {
               if (primaryEv && typeof primaryEv.page === "number" && primaryEv.page >= 1) {
-                onEvidenceClick({ page: primaryEv.page, quote: primaryEv.quote });
+                onEvidenceClick(toEvidenceClick(primaryEv));
               }
             };
 
@@ -519,7 +535,7 @@ export function TexasRenterCheckSection({
 }: {
   findings: TexasRenterFinding[];
   selectedFindingId?: string | null;
-  onEvidenceClick: (args: { page: number; quote: string; findingId?: string }) => void;
+  onEvidenceClick: (args: EvidenceClickArgs) => void;
   evidenceSourceLabel?: EvidenceSourceLabel;
 }) {
   return (
@@ -545,7 +561,15 @@ export function TexasRenterCheckSection({
                   type="button"
                   className="w-full rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002045]/25"
                   onClick={() =>
-                    onEvidenceClick({ page: f.page, quote: f.leaseQuote, findingId: f.id })
+                    onEvidenceClick({
+                      page: f.page,
+                      quote: f.leaseQuote,
+                      findingId: f.id,
+                      startIndex: f.startIndex,
+                      endIndex: f.endIndex,
+                      evidenceId: f.evidenceId,
+                      exact: f.startIndex !== undefined && f.endIndex !== undefined,
+                    })
                   }
                 >
                   <div className="flex flex-wrap items-center gap-1.5">
@@ -579,18 +603,26 @@ export function TexasRenterCheckSection({
                 </button>
                 <div className="mt-3 border-t border-[#c5c5d3]/20 pt-3 text-[12px] leading-relaxed text-[#444651]">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-[#757682]">Source</p>
-                  <p className="mt-1">
-                    <a
-                      href={f.sourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-semibold text-[#003ea8] underline-offset-2 hover:underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {f.sourceTitle}
-                    </a>
-                  </p>
-                  <p className="mt-1 text-[#505f76]">{f.sourceSectionLabel}</p>
+                  {f.sourceUrl ? (
+                    <p className="mt-1">
+                      <a
+                        href={f.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-[#003ea8] underline-offset-2 hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {f.sourceTitle ?? "Texas renter resource"}
+                      </a>
+                      {f.sourceSectionLabel ? (
+                        <span className="mt-1 block text-[11px] text-[#505f76]">{f.sourceSectionLabel}</span>
+                      ) : null}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-[11px] text-[#505f76]">
+                      Contextual source under review. Lease wording match only.
+                    </p>
+                  )}
                   <p className="mt-2 text-[11px] text-[#757682]">{TEXAS_RENTER_SOURCE_NOTE}</p>
                 </div>
               </li>

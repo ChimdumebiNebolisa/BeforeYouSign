@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "fixtures": [
+    {
+      "id": "synthetic-standard",
+      "path": "synthetic/standard-lease.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Standard fictional residential lease excerpt"
+    }
+  ]
+}

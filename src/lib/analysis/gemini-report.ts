@@ -5,16 +5,10 @@ import { LEASE_REPORT_RESPONSE_SCHEMA } from "@/lib/analysis/gemini-response-sch
 import { buildLeaseAnalysisUserPrompt } from "@/lib/analysis/prompt";
 import type { RuleBasedFinding } from "@/lib/analysis/rules";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
-import {
-  type BeforeYouSignReport,
-  parseBeforeYouSignReportJson,
-  tryParseModelJson,
-} from "@/lib/analysis/schema";
-import { normalizeReportForCredibility } from "@/lib/analysis/report-normalization";
+import { tryParseModelJson } from "@/lib/analysis/schema";
 import type { DeterministicLeaseRisk } from "@/lib/analysis/scoring";
 import { getBysGeminiModel } from "@/lib/env/bys-gemini-model";
-
-const isDev = process.env.NODE_ENV === "development";
+import { ANALYSIS_LIMITS } from "@/lib/analysis/limits";
 
 const DEFAULT_AI_TIMEOUT_MS = process.env.VERCEL ? 8_500 : 20_000;
 
@@ -50,37 +44,6 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T
   }
 }
 
-/**
- * Cap "high" risk when the heuristic scan does not support it, so the badge matches defensible signals.
- */
-function reconcileReportRisk(
-  report: BeforeYouSignReport,
-  deterministic: DeterministicLeaseRisk,
-): BeforeYouSignReport {
-  if (report.riskLevel !== "high") {
-    return report;
-  }
-
-  const highJustified =
-    deterministic.band === "high" ||
-    (deterministic.band === "medium" && deterministic.score >= 4);
-
-  if (highJustified) {
-    return report;
-  }
-
-  const signalHint =
-    deterministic.reasons.length > 0
-      ? `Key lease signals: ${deterministic.reasons.slice(0, 2).join("; ")}. `
-      : "";
-
-  return {
-    ...report,
-    riskLevel: "medium",
-    riskReason: `${signalHint}${report.riskReason.trim()}`.trim(),
-  };
-}
-
 function collectModelText(response: EnhancedGenerateContentResponse): string {
   try {
     return response.text();
@@ -111,12 +74,12 @@ export async function runStructuredLeaseAnalysis(input: {
   ruleBasedFindings: RuleBasedFinding[];
   deterministicRisk: DeterministicLeaseRisk;
   texasRenterFindings?: TexasRenterFinding[];
+  evidenceCatalog?: { id: string; page: number; text: string }[];
 }): Promise<
-  | { ok: true; rawText: string; report: BeforeYouSignReport }
+  | { ok: true; rawText: string; rawParsed: unknown }
   | {
       ok: false;
       userMessage: string;
-      rawText?: string;
       failureStage: StructuredLeaseFailureStage;
     }
 > {
@@ -129,9 +92,10 @@ export async function runStructuredLeaseAnalysis(input: {
     ruleBasedFindings: input.ruleBasedFindings,
     deterministicRisk: input.deterministicRisk,
     texasRenterFindings: input.texasRenterFindings,
+    evidenceCatalog: input.evidenceCatalog,
+    maxLeaseChars: ANALYSIS_LIMITS.maxChars,
   });
 
-  /** Long leases need a high ceiling; truncated JSON fails parsing. Gemini 2.5 Flash supports large outputs. */
   const baseConfig = {
     temperature: 0.2,
     maxOutputTokens: 8_192,
@@ -164,31 +128,18 @@ export async function runStructuredLeaseAnalysis(input: {
       try {
         const result = await withTimeout(modelPlain.generateContent(prompt), aiTimeoutMs);
         rawText = collectModelText(result.response);
-      } catch (e2) {
-        const message = e2 instanceof Error ? e2.message : "Gemini request failed.";
-        if (isDev) {
-          console.error("[beforeyousign][gemini] request failed (fallback)", message);
-        }
+      } catch {
         return { ok: false, userMessage: USER_SAFE_AI_REPORT_UNAVAILABLE, failureStage: "network" };
       }
     } else {
-      const message = e instanceof Error ? e.message : "Gemini request failed.";
-      if (isDev) {
-        console.error("[beforeyousign][gemini] request failed", message);
-      }
       return { ok: false, userMessage: USER_SAFE_AI_REPORT_UNAVAILABLE, failureStage: "network" };
     }
-  }
-
-  if (isDev) {
-    console.log("[beforeyousign][gemini] raw model response\n", rawText);
   }
 
   if (!rawText.trim()) {
     return {
       ok: false,
       userMessage: USER_SAFE_AI_REPORT_UNAVAILABLE,
-      rawText,
       failureStage: "json_parse",
     };
   }
@@ -198,24 +149,13 @@ export async function runStructuredLeaseAnalysis(input: {
     return {
       ok: false,
       userMessage: USER_SAFE_AI_REPORT_UNAVAILABLE,
-      rawText,
       failureStage: "json_parse",
-    };
-  }
-
-  const report = parseBeforeYouSignReportJson(parsed);
-  if (!report) {
-    return {
-      ok: false,
-      userMessage: USER_SAFE_AI_REPORT_UNAVAILABLE,
-      rawText,
-      failureStage: "schema_validation",
     };
   }
 
   return {
     ok: true,
     rawText,
-    report: normalizeReportForCredibility(reconcileReportRisk(report, input.deterministicRisk)),
+    rawParsed: parsed,
   };
 }

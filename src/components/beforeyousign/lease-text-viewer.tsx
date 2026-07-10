@@ -72,6 +72,30 @@ function makeHighlightMatch(text: string, start: number, end: number): Highlight
   };
 }
 
+function resolveHighlight(
+  text: string,
+  highlight?: { page: number; quote: string; startIndex?: number; endIndex?: number; exact?: boolean } | null,
+): HighlightMatch | null {
+  if (!highlight) return null;
+
+  if (
+    typeof highlight.startIndex === "number" &&
+    typeof highlight.endIndex === "number" &&
+    highlight.startIndex >= 0 &&
+    highlight.endIndex > highlight.startIndex &&
+    highlight.endIndex <= text.length
+  ) {
+    const slice = text.slice(highlight.startIndex, highlight.endIndex);
+    const normalizedSlice = slice.replace(/\s+/g, " ").trim();
+    const normalizedQuote = highlight.quote.replace(/\s+/g, " ").trim();
+    if (highlight.exact || normalizedSlice === normalizedQuote || slice === highlight.quote) {
+      return makeHighlightMatch(text, highlight.startIndex, highlight.endIndex);
+    }
+  }
+
+  return splitHighlight(text, highlight.quote);
+}
+
 function splitHighlight(text: string, quote: string): HighlightMatch | null {
   const trimmed = quote.trim();
   if (!trimmed) return null;
@@ -249,11 +273,11 @@ function LeasePageBlock({
   pageNumber: number;
   text: string;
   scrollToPage?: number | null;
-  highlight?: { page: number; quote: string } | null;
+  highlight?: { page: number; quote: string; startIndex?: number; endIndex?: number; exact?: boolean } | null;
   evidenceLinked?: boolean;
 }) {
   const rootRef = useRef<HTMLElement | null>(null);
-  const match = highlight?.page === pageNumber ? splitHighlight(text, highlight.quote) : null;
+  const match = highlight?.page === pageNumber ? resolveHighlight(text, highlight) : null;
   const displayLines = buildDisplayLines(text, match);
 
   useEffect(() => {
@@ -337,7 +361,7 @@ export function LeaseTextViewer({
 }: {
   pages: LeaseTextPage[];
   scrollToPage?: number | null;
-  highlight?: { page: number; quote: string } | null;
+  highlight?: { page: number; quote: string; startIndex?: number; endIndex?: number; exact?: boolean } | null;
   evidenceLinked?: boolean;
   extractedFromPdf?: boolean;
   fileLabel?: string;

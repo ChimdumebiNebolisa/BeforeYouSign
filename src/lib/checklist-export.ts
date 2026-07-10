@@ -2,6 +2,13 @@ import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 import { FIXED_REPORT_DISCLAIMER } from "@/lib/public-copy";
 
+function formatEvidence(ev: { page: number; quote: string; evidenceId?: string }): string {
+  const page = `p. ${ev.page}`;
+  const id = ev.evidenceId ? ` [${ev.evidenceId}]` : "";
+  const quote = ev.quote.replace(/\s+/g, " ").trim().slice(0, 120);
+  return `${page}${id}: "${quote}"`;
+}
+
 export function buildChecklistMarkdown(input: {
   report: BeforeYouSignReport;
   texasRenterFindings: TexasRenterFinding[];
@@ -29,7 +36,10 @@ export function buildChecklistMarkdown(input: {
 
   lines.push("## Money and fees", "");
   if (report.moneyAndFees.length) {
-    report.moneyAndFees.forEach((row) => lines.push(`- **${row.label}:** ${row.value}`));
+    report.moneyAndFees.forEach((row) => {
+      lines.push(`- **${row.label}:** ${row.value}`);
+      row.evidence?.forEach((ev) => lines.push(`  - Source: ${formatEvidence(ev)}`));
+    });
   } else {
     lines.push("- None listed in this report.");
   }
@@ -37,7 +47,10 @@ export function buildChecklistMarkdown(input: {
 
   lines.push("## Deadlines and notices", "");
   if (report.deadlinesAndNotice.length) {
-    report.deadlinesAndNotice.forEach((row) => lines.push(`- **${row.label}:** ${row.value}`));
+    report.deadlinesAndNotice.forEach((row) => {
+      lines.push(`- **${row.label}:** ${row.value}`);
+      row.evidence?.forEach((ev) => lines.push(`  - Source: ${formatEvidence(ev)}`));
+    });
   } else {
     lines.push("- None listed in this report.");
   }
@@ -48,6 +61,7 @@ export function buildChecklistMarkdown(input: {
     report.potentialRedFlags.forEach((f) => {
       lines.push(`- **${f.title}**`);
       if (f.explanation) lines.push(`  - ${f.explanation}`);
+      f.evidence?.forEach((ev) => lines.push(`  - Source: ${formatEvidence(ev)}`));
     });
   } else {
     lines.push("- None listed in this report.");
@@ -59,6 +73,8 @@ export function buildChecklistMarkdown(input: {
     texasRenterFindings.forEach((f) => {
       lines.push(`- **${f.topicLabel}**`);
       lines.push(`  - ${f.questionToAsk}`);
+      lines.push(`  - Lease quote (p. ${f.page}): "${f.leaseQuote.replace(/\s+/g, " ").trim().slice(0, 120)}"`);
+      if (f.sourceUrl) lines.push(`  - Source: ${f.sourceTitle ?? f.sourceUrl}`);
     });
   } else {
     lines.push("- No Texas renter check topics were matched in this lease.");

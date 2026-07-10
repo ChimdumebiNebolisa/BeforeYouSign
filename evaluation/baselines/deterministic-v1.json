@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-07-10T17:31:31.829Z",
+  "fixtureCount": 1,
+  "avgGroundingRate": 1,
+  "results": [
+    {
+      "fixtureId": "synthetic-standard",
+      "mode": "rules_only",
+      "metrics": {
+        "groundingRate": 1,
+        "unsupportedFindingRate": 0,
+        "ruleFindings": 6,
+        "texasTopics": 3
+      },
+      "errors": []
+    }
+  ]
+}

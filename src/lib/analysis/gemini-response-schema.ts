@@ -18,25 +18,14 @@ const SEVERITY_ENUM = ["minor", "moderate", "critical"] as const;
 
 const RISK_LEVEL_ENUM = ["low", "medium", "high"] as const;
 
-const evidenceRefSchema: ObjectSchema = {
-  type: SchemaType.OBJECT,
-  properties: {
-    page: { type: SchemaType.INTEGER },
-    quote: { type: SchemaType.STRING },
-    startIndex: { type: SchemaType.INTEGER, nullable: true },
-    endIndex: { type: SchemaType.INTEGER, nullable: true },
-  },
-  required: ["page", "quote"],
-};
-
 const labeledRowSchema: ObjectSchema = {
   type: SchemaType.OBJECT,
   properties: {
     label: { type: SchemaType.STRING },
     value: { type: SchemaType.STRING },
-    evidence: {
+    evidenceIds: {
       type: SchemaType.ARRAY,
-      items: evidenceRefSchema,
+      items: { type: SchemaType.STRING },
     },
   },
   required: ["label", "value"],
@@ -59,17 +48,17 @@ const findingSchema: ObjectSchema = {
     },
     explanation: { type: SchemaType.STRING },
     whyItMatters: { type: SchemaType.STRING },
-    evidence: {
+    evidenceIds: {
       type: SchemaType.ARRAY,
-      items: evidenceRefSchema,
+      items: { type: SchemaType.STRING },
       minItems: 1,
     },
   },
-  required: ["id", "category", "title", "severity", "explanation", "whyItMatters", "evidence"],
+  required: ["id", "category", "title", "severity", "explanation", "whyItMatters", "evidenceIds"],
 };
 
 /**
- * Gemini JSON response schema aligned with {@link BeforeYouSignReport} in schema.ts.
+ * Gemini JSON response schema for untrusted model candidates (evidence IDs only).
  */
 export const LEASE_REPORT_RESPONSE_SCHEMA: ObjectSchema = {
   type: SchemaType.OBJECT,
