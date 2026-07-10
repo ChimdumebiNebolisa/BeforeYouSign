@@ -1,0 +1,15 @@
+{
+  "id": "synthetic-standard",
+  "text": "Monthly rent is $1,450 due on the first of each month. Security deposit: $1,450. Late fee of $75 applies after a 3-day grace period.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "RESIDENTIAL LEASE AGREEMENT\n\nMonthly rent is $1,450 due on the first of each month. Security deposit: $1,450. Late fee of $75 applies after a 3-day grace period. Tenant shall maintain the premises in good condition. Landlord may enter with reasonable notice of at least 24 hours."
+    }
+  ],
+  "expected": {
+    "rentAmount": "$1,450",
+    "depositAmount": "$1,450",
+    "topics": ["securityDeposit", "lateFees", "landlordEntry"]
+  }
+}

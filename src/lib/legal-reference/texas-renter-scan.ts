@@ -1,6 +1,7 @@
 import type { ExtractedTextPage } from "@/lib/pdf/extract-text";
 import {
   getTexasRenterTopicRecord,
+  isTexasContextEnabled,
   type TexasRenterTopic,
   type TexasSourceType,
 } from "@/lib/legal-reference/texas-renter-references";
@@ -11,13 +12,17 @@ export type TexasRenterFinding = {
   topicLabel: string;
   page: number;
   leaseQuote: string;
+  startIndex?: number;
+  endIndex?: number;
+  evidenceId?: string;
   explanation: string;
   questionToAsk: string;
-  sourceTitle: string;
-  sourceUrl: string;
-  sourceType: TexasSourceType;
-  sourceSectionLabel: string;
-  plainEnglishSummary: string;
+  sourceTitle?: string;
+  sourceUrl?: string;
+  sourceType?: TexasSourceType;
+  sourceSectionLabel?: string;
+  plainEnglishSummary?: string;
+  contextAvailable: boolean;
 };
 
 type TopicRule = {
@@ -180,6 +185,7 @@ export function scanTexasRenterTopics(pages: ExtractedTextPage[]): TexasRenterFi
     if (overlaps) continue;
 
     const record = getTexasRenterTopicRecord(match.topic);
+    const contextAvailable = isTexasContextEnabled(record);
     const id = `texas-${match.topic}-${match.page}-${findings.length + 1}`;
 
     findings.push({
@@ -188,13 +194,22 @@ export function scanTexasRenterTopics(pages: ExtractedTextPage[]): TexasRenterFi
       topicLabel: record.topicLabel,
       page: match.page,
       leaseQuote: match.quote,
-      explanation: record.safeOutputTemplate,
+      startIndex: match.start,
+      endIndex: match.end,
+      explanation: contextAvailable
+        ? record.safeOutputTemplate
+        : "This lease wording matched a Texas renter topic. Contextual source is under review.",
       questionToAsk: record.questionToAsk,
-      sourceTitle: record.sourceTitle,
-      sourceUrl: record.sourceUrl,
-      sourceType: record.sourceType,
-      sourceSectionLabel: record.sourceSectionLabel,
-      plainEnglishSummary: record.plainEnglishSummary,
+      ...(contextAvailable
+        ? {
+            sourceTitle: record.sourceTitle,
+            sourceUrl: record.sourceUrl,
+            sourceType: record.sourceType,
+            sourceSectionLabel: record.sourceSectionLabel,
+            plainEnglishSummary: record.plainEnglishSummary,
+          }
+        : {}),
+      contextAvailable,
     });
 
     seenQuotes.add(quoteKey);

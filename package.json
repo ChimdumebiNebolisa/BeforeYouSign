@@ -8,6 +8,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:watch": "vitest",
+    "evaluate": "node scripts/evaluate.mjs",
+    "test:e2e": "playwright test",
+    "verify:legal": "node scripts/verify-legal-references.mjs",
     "smoke:scan": "node scripts/phase2-scan-smoke.mjs",
     "qa:smoke": "node scripts/smoke-test.mjs",
     "qa:phase1": "node scripts/phase1-browser-qa.mjs",
@@ -42,6 +49,7 @@
     "eslint-config-next": "16.2.0",
     "playwright": "^1.61.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }

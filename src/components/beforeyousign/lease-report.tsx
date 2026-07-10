@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { BeforeYouSignReport } from "@/lib/analysis/schema";
+import type { EvidenceClickArgs } from "@/lib/analysis/api-schema";
 import {
   clampForScan,
   DeadlinesSection,
@@ -79,7 +80,7 @@ function LeaseReportCarousel({
   setShowAllQuestions: Dispatch<SetStateAction<boolean>>;
   extraQuestionCount: number;
   selectedFindingId?: string | null;
-  onFlagEvidenceClick: (args: { page: number; quote: string; findingId?: string }) => void;
+  onFlagEvidenceClick: (args: EvidenceClickArgs) => void;
   evidenceSourceLabel?: EvidenceSourceLabel;
 }) {
   const hasMissing = report.missingOrUnclear.length > 0;
@@ -291,7 +292,7 @@ export function LeaseReportView({
 }: {
   report: BeforeYouSignReport;
   texasRenterFindings?: TexasRenterFinding[];
-  onFlagEvidenceClick: (args: { page: number; quote: string; findingId?: string }) => void;
+  onFlagEvidenceClick: (args: EvidenceClickArgs) => void;
   selectedFindingId?: string | null;
   evidenceSourceLabel?: EvidenceSourceLabel;
   fileName?: string;

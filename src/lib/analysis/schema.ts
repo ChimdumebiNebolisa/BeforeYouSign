@@ -2,11 +2,15 @@ import { parseGeminiModelJson } from "@/lib/analysis/model-json";
 
 export type RiskLevel = "low" | "medium" | "high";
 
+export type SupportStatus = "grounded" | "unknown" | "unsupported";
+
 export type EvidenceRef = {
+  evidenceId?: string;
   page: number;
   quote: string;
   startIndex?: number;
   endIndex?: number;
+  supportStatus?: SupportStatus;
 };
 
 export type FindingCategory =
@@ -85,11 +89,17 @@ function parseEvidenceRef(v: unknown): EvidenceRef | null {
     return null;
   }
   const ref: EvidenceRef = { page: o.page, quote: o.quote.trim() };
+  if (typeof o.evidenceId === "string" && o.evidenceId.trim()) {
+    ref.evidenceId = o.evidenceId.trim();
+  }
   if (typeof o.startIndex === "number" && Number.isFinite(o.startIndex)) {
     ref.startIndex = o.startIndex;
   }
   if (typeof o.endIndex === "number" && Number.isFinite(o.endIndex)) {
     ref.endIndex = o.endIndex;
+  }
+  if (o.supportStatus === "grounded" || o.supportStatus === "unknown" || o.supportStatus === "unsupported") {
+    ref.supportStatus = o.supportStatus;
   }
   return ref;
 }

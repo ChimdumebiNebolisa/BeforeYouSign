@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { LeaseTextViewer } from "@/components/beforeyousign/lease-text-viewer";
 import { LeaseReportView } from "@/components/beforeyousign/lease-report";
 import { parseBeforeYouSignReportJson, type BeforeYouSignReport } from "@/lib/analysis/schema";
+import type { EvidenceClickArgs } from "@/lib/analysis/api-schema";
+import type { AnalysisSuccessResponse } from "@/lib/analysis/pipeline/types";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 import { AnalysisInProgressView } from "@/components/beforeyousign/analysis-in-progress";
 import { IntakeDocumentPreview } from "@/components/beforeyousign/intake-document-preview";
@@ -47,12 +49,17 @@ export function LandingClient() {
     deterministicRiskReasons?: string[];
     report?: BeforeYouSignReport | null;
     reportError?: string | null;
-    reportDebug?: { rawModelResponse?: string; failureStage?: string } | null;
+    reportDebug?: { failureStage?: string } | null;
+    analysisVersion?: number;
+    mode?: AnalysisSuccessResponse["mode"];
+    requestId?: string;
+    groundingSummary?: AnalysisSuccessResponse["groundingSummary"];
+    document?: AnalysisSuccessResponse["document"];
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [viewerTargetPage, setViewerTargetPage] = useState<number | null>(null);
-  const [viewerHighlight, setViewerHighlight] = useState<{ page: number; quote: string } | null>(null);
+  const [viewerHighlight, setViewerHighlight] = useState<EvidenceClickArgs | null>(null);
   const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
   const [leaseTextPanelExpanded, setLeaseTextPanelExpanded] = useState(true);
   const [intakeTab, setIntakeTab] = useState<"upload" | "paste" | "sample">("upload");
@@ -140,6 +147,13 @@ export function LandingClient() {
           const errJson = JSON.parse(text) as { error?: unknown };
           if (typeof errJson.error === "string" && errJson.error) {
             message = errJson.error;
+          } else if (
+            errJson.error &&
+            typeof errJson.error === "object" &&
+            "message" in errJson.error &&
+            typeof (errJson.error as { message: unknown }).message === "string"
+          ) {
+            message = (errJson.error as { message: string }).message;
           }
         } catch {
           // use raw body or status message
@@ -147,27 +161,10 @@ export function LandingClient() {
         throw new Error(message);
       }
 
-      const data = (await res.json()) as {
-        fileName: string;
-        fileSizeBytes: number;
-        contentType: string | null;
-        extractedPages?: { page: number; text: string }[];
-        rentSnippets?: { page: number; quote: string }[];
-        depositSnippets?: { page: number; quote: string }[];
-        feeSnippets?: { page: number; quote: string }[];
-        noticeSnippets?: { page: number; quote: string }[];
-        renewalSnippets?: { page: number; quote: string }[];
-        maintenanceSnippets?: { page: number; quote: string }[];
-        utilitiesSnippets?: { page: number; quote: string }[];
-        ruleBasedFindings?: { category: string; page: number; quote: string }[];
-        unclearLeasePhrases?: { page: number; quote: string }[];
-        texasRenterFindings?: TexasRenterFinding[];
-        deterministicRiskScore?: number;
-        deterministicRiskBand?: "low" | "medium" | "high";
-        deterministicRiskReasons?: string[];
+      const data = (await res.json()) as AnalysisSuccessResponse & {
         report?: unknown;
         reportError?: string | null;
-        reportDebug?: { rawModelResponse?: string; failureStage?: string };
+        reportDebug?: { failureStage?: string };
       };
 
       const report =
@@ -243,8 +240,14 @@ export function LandingClient() {
                   Boolean(uploadReceipt.contentType?.toLowerCase().includes("pdf")) ||
                   /\.pdf$/i.test(uploadReceipt.fileName);
                 const extractedCharCount =
-                  uploadReceipt.extractedPages?.reduce((total, page) => total + page.text.length, 0) ?? 0;
-                const showLowExtractionNote = isPdf && extractedCharCount > 0 && extractedCharCount < 400;
+                  uploadReceipt.document?.extraction.totalChars ??
+                  uploadReceipt.extractedPages?.reduce((total, page) => total + page.text.length, 0) ??
+                  0;
+                const coverageStatus = uploadReceipt.document?.extraction.coverageStatus;
+                const showLowExtractionNote =
+                  (isPdf && extractedCharCount > 0 && extractedCharCount < 400) ||
+                  coverageStatus === "partial" ||
+                  coverageStatus === "unreadable";
                 return showLowExtractionNote ? (
                   <p className="mt-2 rounded-lg border border-[#c5c5d3]/35 bg-[#f7f9fb] px-4 py-3 text-sm leading-relaxed text-[#444651]">
                     {OCR_WARNING}
@@ -275,19 +278,14 @@ export function LandingClient() {
                 {uploadReceipt.reportError ? (
                   <div className="rounded-xl bg-[#fff7ed] p-4 text-sm text-[#9a3412]">{uploadReceipt.reportError}</div>
                 ) : null}
-                {uploadReceipt.reportDebug &&
-                (uploadReceipt.reportDebug.rawModelResponse || uploadReceipt.reportDebug.failureStage) ? (
+                {uploadReceipt.reportDebug?.failureStage ? (
                   <details className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-3 text-xs text-[#334155]">
                     <summary className="cursor-pointer font-medium text-[#0f172a]">
-                      Developer: AI response debug
+                      Developer: analysis debug
                     </summary>
-                    {uploadReceipt.reportDebug.failureStage ? (
-                      <p className="mt-2 font-mono">stage: {uploadReceipt.reportDebug.failureStage}</p>
-                    ) : null}
-                    {uploadReceipt.reportDebug.rawModelResponse ? (
-                      <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed">
-                        {uploadReceipt.reportDebug.rawModelResponse}
-                      </pre>
+                    <p className="mt-2 font-mono">stage: {uploadReceipt.reportDebug.failureStage}</p>
+                    {uploadReceipt.mode ? (
+                      <p className="mt-1 font-mono">mode: {uploadReceipt.mode}</p>
                     ) : null}
                   </details>
                 ) : null}
@@ -300,10 +298,17 @@ export function LandingClient() {
                     evidenceSourceLabel={
                       intake.kind === "sample" ? "sample lease" : intake.kind === "paste" ? "pasted text" : undefined
                     }
-                    onFlagEvidenceClick={({ page, quote, findingId }) => {
+                    onFlagEvidenceClick={({ page, quote, findingId, startIndex, endIndex, evidenceId, exact }) => {
                       setSelectedFindingId(findingId ?? null);
                       setViewerTargetPage(page);
-                      setViewerHighlight({ page, quote });
+                      setViewerHighlight({
+                        page,
+                        quote,
+                        startIndex,
+                        endIndex,
+                        evidenceId,
+                        exact: exact ?? (startIndex !== undefined && endIndex !== undefined),
+                      });
                       setLeaseTextPanelExpanded(true);
                     }}
                   />

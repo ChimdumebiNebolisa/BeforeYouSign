@@ -1,11 +1,14 @@
 /** Shared user-facing copy for disclaimers and privacy notices. */
 
 export const PRIVACY_BLOCK =
-  "BeforeYouSign is for educational lease review, not legal advice. We do not use a database or save your report after you close the page. When you analyze a lease, the text is processed on our server to generate your results. If AI summarization is enabled, lease text is also sent to our AI provider for that request.";
+  "BeforeYouSign is for educational lease review, not legal advice. We do not use a database or save your report after you close the page unless you explicitly opt into short-lived recovery when that feature is enabled. When you analyze a lease, the text is processed on our server to generate your results. If AI summarization is enabled, lease text is sent to Google Gemini for that request only. See Google's privacy policy for how they handle API data.";
 
 /** Landing intake/footer — processing only; legal disclaimer lives in hero + footer disclaimer. */
 export const LANDING_PRIVACY_PROCESSING =
-  "We do not use a database or save your report after you close the page. When you analyze a lease, the text is processed on our server to generate your results. If AI summarization is enabled, lease text is also sent to our AI provider for that request.";
+  "We do not save your report after you close the page unless recovery is explicitly enabled. Lease text is processed on our server. If AI summarization is enabled, text is also sent to Google Gemini for that request.";
+
+export const UPLOAD_LIMITS_NOTE =
+  "PDF uploads are limited to 10 MB, 100 pages, and 120,000 extracted characters. Pasted text is limited to 120,000 characters.";
 
 export const PRIVACY_CONTINUE_LINE =
   "By continuing, you submit lease text for one-time analysis. Do not upload documents you are not comfortable processing through this tool.";

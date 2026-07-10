@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PRIVACY_CONTINUE_LINE } from "@/lib/public-copy";
+import { PRIVACY_CONTINUE_LINE, UPLOAD_LIMITS_NOTE } from "@/lib/public-copy";
+import { ANALYSIS_LIMITS } from "@/lib/analysis/limits";
 
 export function PasteTextDialog({
   onStartPaste,
@@ -27,6 +28,7 @@ export function PasteTextDialog({
       <div className="w-full">
         <p className="text-sm text-muted-foreground">Paste the lease text you want to analyze.</p>
         <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{PRIVACY_CONTINUE_LINE}</p>
+        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">{UPLOAD_LIMITS_NOTE}</p>
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -38,9 +40,13 @@ export function PasteTextDialog({
           className="mt-4 h-11 w-full rounded-xl bys-gradient-cta text-sm font-bold text-white shadow-sm"
           onClick={() => {
             const next = draft.trim();
+            if (next.length > ANALYSIS_LIMITS.maxChars) {
+              return;
+            }
             setPasted(next.length ? next : null);
             if (next.length) onStartPaste(next);
           }}
+          disabled={draft.trim().length > ANALYSIS_LIMITS.maxChars}
         >
           Use pasted text
         </button>

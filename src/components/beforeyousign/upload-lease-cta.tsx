@@ -2,7 +2,8 @@
 
 import { useId, useRef, useState } from "react";
 import { Upload } from "lucide-react";
-import { OCR_WARNING, PRIVACY_CONTINUE_LINE } from "@/lib/public-copy";
+import { OCR_WARNING, PRIVACY_CONTINUE_LINE, UPLOAD_LIMITS_NOTE } from "@/lib/public-copy";
+import { ANALYSIS_LIMITS } from "@/lib/analysis/limits";
 
 export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) => void }) {
   const fileInputId = useId();
@@ -16,6 +17,12 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
     const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
     if (!isPdf) {
       setErrorMessage("We only accept PDF files. Please upload a PDF version of your lease.");
+      return;
+    }
+    if (file.size > ANALYSIS_LIMITS.maxPdfBytes) {
+      setErrorMessage(
+        `This PDF exceeds the ${Math.round(ANALYSIS_LIMITS.maxPdfBytes / (1024 * 1024))} MB upload limit.`,
+      );
       return;
     }
 
@@ -95,6 +102,7 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
       </div>
 
       <p className="mt-3 text-[11px] leading-relaxed text-[#757682]">{PRIVACY_CONTINUE_LINE}</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-[#757682]">{UPLOAD_LIMITS_NOTE}</p>
       <p className="mt-2 text-[11px] leading-relaxed text-[#757682]">{OCR_WARNING}</p>
 
       {errorMessage ? <p className="mt-3 text-sm font-medium text-[#ba1a1a]">{errorMessage}</p> : null}
