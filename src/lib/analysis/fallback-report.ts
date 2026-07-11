@@ -3,8 +3,10 @@ import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import type { RuleBasedFinding } from "@/lib/analysis/rules";
 import type { DeterministicLeaseRisk } from "@/lib/analysis/scoring";
 import { FIXED_REPORT_DISCLAIMER } from "@/lib/public-copy";
+import type { ExtractedTextPage } from "@/lib/pdf/extract-text";
 import type { EvidenceRegistry } from "@/lib/evidence/types";
 import { registerSpanEvidence } from "@/lib/evidence/registry";
+import { resolveQuoteToChunk } from "@/lib/evidence/segment";
 import type { GroundedEvidenceRef } from "@/lib/evidence/types";
 
 function extractCurrencyValue(text: string): string | null {
@@ -282,37 +284,78 @@ function toEvidence(
   registry: EvidenceRegistry | undefined,
   documentId: string,
   finding: RuleBasedFinding,
+  pageTexts: Map<number, string>,
 ): GroundedEvidenceRef[] {
-  const pageText = registry?.chunks.find((c) => c.page === finding.page)?.text ?? finding.quote;
-  const startIndex = pageText.indexOf(finding.quote);
-  if (startIndex >= 0 && registry) {
-    return [
-      registerSpanEvidence(registry, {
-        documentId,
-        page: finding.page,
-        startIndex,
-        endIndex: startIndex + finding.quote.length,
-        text: finding.quote,
-      }),
-    ];
+  if (registry) {
+    const chunk = resolveQuoteToChunk(registry.chunks, finding.page, finding.quote);
+    if (chunk) {
+      return [hydrateFromChunk(registry, documentId, chunk, finding.quote)];
+    }
+
+    const pageText = pageTexts.get(finding.page) ?? "";
+    const startIndex = pageText.indexOf(finding.quote);
+    if (startIndex >= 0) {
+      return [
+        registerSpanEvidence(registry, {
+          documentId,
+          page: finding.page,
+          startIndex,
+          endIndex: startIndex + finding.quote.length,
+          text: finding.quote,
+        }),
+      ];
+    }
   }
-  return [
-    {
-      evidenceId: `legacy-${finding.page}-${startIndex >= 0 ? startIndex : 0}`,
-      page: finding.page,
-      quote: finding.quote,
-      ...(startIndex >= 0 ? { startIndex, endIndex: startIndex + finding.quote.length } : {}),
-      supportStatus: "grounded",
-    },
-  ];
+
+  return [];
+}
+
+function hydrateFromChunk(
+  registry: EvidenceRegistry,
+  documentId: string,
+  chunk: { id: string; page: number; startIndex: number; endIndex: number; text: string },
+  quote: string,
+): GroundedEvidenceRef {
+  const trimmedQuote = quote.trim();
+  const quoteStart = trimmedQuote ? chunk.text.indexOf(trimmedQuote) : -1;
+  if (quoteStart >= 0 && trimmedQuote.length > 0 && trimmedQuote.length < chunk.text.length) {
+    return registerSpanEvidence(registry, {
+      documentId,
+      page: chunk.page,
+      startIndex: chunk.startIndex + quoteStart,
+      endIndex: chunk.startIndex + quoteStart + trimmedQuote.length,
+      text: trimmedQuote,
+    });
+  }
+
+  return {
+    evidenceId: chunk.id,
+    page: chunk.page,
+    quote: chunk.text,
+    startIndex: chunk.startIndex,
+    endIndex: chunk.endIndex,
+    supportStatus: "grounded",
+  };
 }
 
 export function buildRuleOnlyFallbackReport(input: {
   documentId: string;
+  pages?: ExtractedTextPage[];
   ruleBasedFindings: RuleBasedFinding[];
   deterministicRisk: DeterministicLeaseRisk;
   evidenceRegistry?: EvidenceRegistry;
 }): BeforeYouSignReport {
+  const pageTexts = new Map<number, string>();
+  for (const page of input.pages ?? []) {
+    pageTexts.set(page.page, page.text);
+  }
+  if (input.evidenceRegistry && pageTexts.size === 0) {
+    for (const chunk of input.evidenceRegistry.chunks) {
+      if (!pageTexts.has(chunk.page)) {
+        pageTexts.set(chunk.page, chunk.text);
+      }
+    }
+  }
   const byCategory: Record<RuleBasedFinding["category"], RuleBasedFinding[]> = {
     rent: [],
     deposit: [],
@@ -338,7 +381,7 @@ export function buildRuleOnlyFallbackReport(input: {
     moneyAndFees.push({
       label: "Monthly rent",
       value: extractCurrencyValue(rentFinding.quote) ?? "See lease clause",
-      evidence: toEvidence(input.evidenceRegistry, input.documentId, rentFinding),
+      evidence: toEvidence(input.evidenceRegistry, input.documentId, rentFinding, pageTexts),
     });
   }
 
@@ -347,7 +390,7 @@ export function buildRuleOnlyFallbackReport(input: {
     moneyAndFees.push({
       label: "Security deposit",
       value: extractCurrencyValue(depositFinding.quote) ?? "See lease clause",
-      evidence: toEvidence(input.evidenceRegistry, input.documentId, depositFinding),
+      evidence: toEvidence(input.evidenceRegistry, input.documentId, depositFinding, pageTexts),
     });
   }
 
@@ -355,7 +398,7 @@ export function buildRuleOnlyFallbackReport(input: {
     moneyAndFees.push({
       label: feeLabelFromQuote(feeFinding.quote),
       value: extractCurrencyValue(feeFinding.quote) ?? "See lease clause",
-      evidence: toEvidence(input.evidenceRegistry, input.documentId, feeFinding),
+      evidence: toEvidence(input.evidenceRegistry, input.documentId, feeFinding, pageTexts),
     });
   }
 
@@ -364,7 +407,7 @@ export function buildRuleOnlyFallbackReport(input: {
     deadlinesAndNotice.push({
       label: noticeLabelFromQuote(noticeFinding.quote),
       value: extractDayWindow(noticeFinding.quote) ?? "Review notice clause",
-      evidence: toEvidence(input.evidenceRegistry, input.documentId, noticeFinding),
+      evidence: toEvidence(input.evidenceRegistry, input.documentId, noticeFinding, pageTexts),
     });
   }
   for (const renewalFinding of byCategory.renewal.slice(0, 2)) {
@@ -373,7 +416,7 @@ export function buildRuleOnlyFallbackReport(input: {
       value: /month-?to-?month/i.test(renewalFinding.quote)
         ? "Potential month-to-month renewal"
         : "Review renewal clause",
-      evidence: toEvidence(input.evidenceRegistry, input.documentId, renewalFinding),
+      evidence: toEvidence(input.evidenceRegistry, input.documentId, renewalFinding, pageTexts),
     });
   }
 
@@ -437,7 +480,7 @@ export function buildRuleOnlyFallbackReport(input: {
         severity,
         explanation: fallbackFlagExplanation(f.category, f.quote),
         whyItMatters: fallbackFlagWhyItMatters(f.category, f.quote),
-        evidence: toEvidence(input.evidenceRegistry, input.documentId, f),
+        evidence: toEvidence(input.evidenceRegistry, input.documentId, f, pageTexts),
       };
     });
 

@@ -19,12 +19,23 @@ import { LandingWhatItChecks } from "@/components/beforeyousign/landing-what-it-
 import { LandingLimitations } from "@/components/beforeyousign/landing-limitations";
 import { LandingFaq } from "@/components/beforeyousign/landing-faq";
 import { LandingFooter } from "@/components/beforeyousign/landing-footer";
+import { AnalysisModeBanner } from "@/components/beforeyousign/analysis-mode-banner";
+import type { EvidenceIndex } from "@/lib/evidence/index";
 import { OCR_WARNING } from "@/lib/public-copy";
 
 type IntakeState =
   | { kind: "upload"; file: File }
   | { kind: "sample"; text: string }
   | { kind: "paste"; text: string };
+
+type ModelRetryCache = {
+  documentId: string;
+  pages: { page: number; text: string }[];
+  fileName: string;
+  fileSizeBytes: number;
+  contentType: string | null;
+  extraction: AnalysisSuccessResponse["document"]["extraction"];
+};
 
 export function LandingClient() {
   const [intake, setIntake] = useState<IntakeState | null>(null);
@@ -54,9 +65,12 @@ export function LandingClient() {
     mode?: AnalysisSuccessResponse["mode"];
     requestId?: string;
     groundingSummary?: AnalysisSuccessResponse["groundingSummary"];
+    evidenceIndex?: EvidenceIndex;
     document?: AnalysisSuccessResponse["document"];
   } | null>(null);
+  const [modelRetryCache, setModelRetryCache] = useState<ModelRetryCache | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRetryingModel, setIsRetryingModel] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [viewerTargetPage, setViewerTargetPage] = useState<number | null>(null);
   const [viewerHighlight, setViewerHighlight] = useState<EvidenceClickArgs | null>(null);
@@ -71,6 +85,7 @@ export function LandingClient() {
   useEffect(() => {
     const handleGoHome = () => {
       setUploadReceipt(null);
+      setModelRetryCache(null);
       setIsSubmitting(false);
       setErrorMessage(null);
       setViewerTargetPage(null);
@@ -102,6 +117,7 @@ export function LandingClient() {
 
   const resetIntakeUi = () => {
     setUploadReceipt(null);
+    setModelRetryCache(null);
     setIsSubmitting(false);
     setErrorMessage(null);
     setViewerTargetPage(null);
@@ -109,6 +125,36 @@ export function LandingClient() {
     setSelectedFindingId(null);
     setLeaseTextPanelExpanded(true);
   };
+
+  const applyAnalysisResponse = useCallback((data: AnalysisSuccessResponse & {
+    report?: unknown;
+    reportError?: string | null;
+    reportDebug?: { failureStage?: string };
+  }) => {
+    const report =
+      data.report === undefined || data.report === null
+        ? null
+        : parseBeforeYouSignReportJson(data.report);
+
+    if (data.extractedPages?.length && data.document?.extraction && data.documentId) {
+      setModelRetryCache({
+        documentId: data.documentId,
+        pages: data.extractedPages,
+        fileName: data.fileName,
+        fileSizeBytes: data.fileSizeBytes,
+        contentType: data.contentType,
+        extraction: data.document.extraction,
+      });
+    }
+
+    setUploadReceipt({
+      ...data,
+      report,
+      reportError: typeof data.reportError === "string" ? data.reportError : null,
+      reportDebug:
+        data.reportDebug && typeof data.reportDebug === "object" ? data.reportDebug : null,
+    });
+  }, []);
 
   const runLeaseAnalysis = useCallback(async () => {
     if (!intake) return;
@@ -167,23 +213,66 @@ export function LandingClient() {
         reportDebug?: { failureStage?: string };
       };
 
-      const report =
-        data.report === undefined || data.report === null
-          ? null
-          : parseBeforeYouSignReportJson(data.report);
-      setUploadReceipt({
-        ...data,
-        report,
-        reportError: typeof data.reportError === "string" ? data.reportError : null,
-        reportDebug:
-          data.reportDebug && typeof data.reportDebug === "object" ? data.reportDebug : null,
-      });
+      applyAnalysisResponse(data);
     } catch (e) {
       setErrorMessage(e instanceof Error ? e.message : "Failed to run analysis on the server.");
     } finally {
       setIsSubmitting(false);
     }
-  }, [intake]);
+  }, [intake, applyAnalysisResponse]);
+
+  const runModelRetry = useCallback(async () => {
+    if (!modelRetryCache) return;
+    try {
+      setIsRetryingModel(true);
+      setErrorMessage(null);
+
+      const res = await fetch("/api/analyze/retry-model", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          documentId: modelRetryCache.documentId,
+          pages: modelRetryCache.pages,
+          fileName: modelRetryCache.fileName,
+          fileSizeBytes: modelRetryCache.fileSizeBytes,
+          contentType: modelRetryCache.contentType,
+          extraction: modelRetryCache.extraction,
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        let message = formatAnalysisError(text, res.status);
+        try {
+          const errJson = JSON.parse(text) as { error?: unknown };
+          if (typeof errJson.error === "string" && errJson.error) {
+            message = errJson.error;
+          } else if (
+            errJson.error &&
+            typeof errJson.error === "object" &&
+            "message" in errJson.error &&
+            typeof (errJson.error as { message: unknown }).message === "string"
+          ) {
+            message = (errJson.error as { message: string }).message;
+          }
+        } catch {
+          // use raw body
+        }
+        throw new Error(message);
+      }
+
+      const data = (await res.json()) as AnalysisSuccessResponse & {
+        report?: unknown;
+        reportError?: string | null;
+        reportDebug?: { failureStage?: string };
+      };
+      applyAnalysisResponse(data);
+    } catch (e) {
+      setErrorMessage(e instanceof Error ? e.message : "Failed to retry AI analysis.");
+    } finally {
+      setIsRetryingModel(false);
+    }
+  }, [modelRetryCache, applyAnalysisResponse]);
 
   if (intake && isSubmitting) {
     return <AnalysisInProgressView intake={intake} />;
@@ -262,6 +351,7 @@ export function LandingClient() {
                     scrollToPage={viewerTargetPage}
                     highlight={viewerHighlight}
                     evidenceLinked={Boolean(viewerHighlight)}
+                    evidenceIndex={uploadReceipt.evidenceIndex}
                     fileLabel={uploadReceipt.fileName}
                     textPanelExpanded={leaseTextPanelExpanded}
                     onTextPanelExpandedChange={setLeaseTextPanelExpanded}
@@ -273,27 +363,26 @@ export function LandingClient() {
                 </div>
               ) : null}
               <div className="min-w-0 flex-1 space-y-6">
+                <AnalysisModeBanner
+                  mode={uploadReceipt.mode}
+                  reportDebug={uploadReceipt.reportDebug}
+                  groundingSummary={uploadReceipt.groundingSummary}
+                  onRetryModel={modelRetryCache ? () => void runModelRetry() : undefined}
+                  isRetrying={isRetryingModel}
+                />
                 <TechnicalDetailsPanel receipt={uploadReceipt} />
 
                 {uploadReceipt.reportError ? (
                   <div className="rounded-xl bg-[#fff7ed] p-4 text-sm text-[#9a3412]">{uploadReceipt.reportError}</div>
-                ) : null}
-                {uploadReceipt.reportDebug?.failureStage ? (
-                  <details className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-3 text-xs text-[#334155]">
-                    <summary className="cursor-pointer font-medium text-[#0f172a]">
-                      Developer: analysis debug
-                    </summary>
-                    <p className="mt-2 font-mono">stage: {uploadReceipt.reportDebug.failureStage}</p>
-                    {uploadReceipt.mode ? (
-                      <p className="mt-1 font-mono">mode: {uploadReceipt.mode}</p>
-                    ) : null}
-                  </details>
                 ) : null}
                 {uploadReceipt.report ? (
                   <LeaseReportView
                     report={uploadReceipt.report}
                     texasRenterFindings={uploadReceipt.texasRenterFindings ?? []}
                     fileName={uploadReceipt.fileName}
+                    mode={uploadReceipt.mode}
+                    deterministicRiskBand={uploadReceipt.deterministicRiskBand}
+                    deterministicRiskReasons={uploadReceipt.deterministicRiskReasons}
                     selectedFindingId={selectedFindingId}
                     evidenceSourceLabel={
                       intake.kind === "sample" ? "sample lease" : intake.kind === "paste" ? "pasted text" : undefined

@@ -32,6 +32,9 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: Coverage (critical modules)
+        run: npm run test:coverage
+
       - name: Deterministic evaluation
         run: npm run evaluate
 

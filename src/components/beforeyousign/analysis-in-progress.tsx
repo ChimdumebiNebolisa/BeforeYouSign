@@ -114,6 +114,7 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
               </h1>
               <p className="max-w-md text-sm leading-relaxed text-[#505f76] sm:text-base">
                 We&apos;re extracting key terms, checking notable clauses, and generating a plain-English report.
+                Progress below is estimated — not a live server stage.
               </p>
             </div>
 

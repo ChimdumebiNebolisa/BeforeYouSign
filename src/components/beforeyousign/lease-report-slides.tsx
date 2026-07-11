@@ -3,6 +3,7 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import type { BeforeYouSignReport, EvidenceRef, RiskLevel } from "@/lib/analysis/schema";
 import type { EvidenceClickArgs } from "@/lib/analysis/api-schema";
+import { isClickableGroundedEvidence } from "@/lib/analysis/evidence-click";
 import { displayReviewPriority, displaySeverity } from "@/lib/display-labels";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 import { SourceBadge } from "@/components/beforeyousign/source-badge";
@@ -15,7 +16,6 @@ import {
   TEXAS_RENTER_CHECK_BADGE,
   TEXAS_RENTER_CHECK_EMPTY,
   TEXAS_RENTER_CHECK_NOTE,
-  TEXAS_RENTER_SOURCE_NOTE,
 } from "@/lib/public-copy";
 
 export type EvidenceSourceLabel = "sample lease" | "pasted text";
@@ -103,7 +103,8 @@ export function dedupeEvidence(evidence: EvidenceRef[]): EvidenceRef[] {
   return out;
 }
 
-function toEvidenceClick(ev: EvidenceRef, findingId?: string): EvidenceClickArgs {
+function toEvidenceClick(ev: EvidenceRef, findingId?: string): EvidenceClickArgs | null {
+  if (!isClickableGroundedEvidence(ev)) return null;
   return {
     page: ev.page,
     quote: ev.quote,
@@ -111,7 +112,7 @@ function toEvidenceClick(ev: EvidenceRef, findingId?: string): EvidenceClickArgs
     startIndex: ev.startIndex,
     endIndex: ev.endIndex,
     evidenceId: ev.evidenceId,
-    exact: ev.supportStatus === "grounded" && ev.startIndex !== undefined && ev.endIndex !== undefined,
+    exact: true,
   };
 }
 
@@ -231,14 +232,15 @@ export function RedFlagsSection({
           {report.potentialRedFlags.map((f) => {
             const explanation = displaySentences(f.explanation, 1);
             const why = displaySentences(f.whyItMatters, 1);
-            const deduped = dedupeEvidence(f.evidence);
+            const deduped = dedupeEvidence(f.evidence.filter(isClickableGroundedEvidence));
             const primary = deduped[0];
             const rest = deduped.slice(1);
             const expanded = expandedFlagEvidence[f.id] ?? false;
             const isSelected = selectedFindingId === f.id;
             const highlightPrimary = () => {
-              if (primary && typeof primary.page === "number" && primary.page >= 1) {
-                onFlagEvidenceClick({ ...toEvidenceClick(primary), findingId: f.id });
+              const clickArgs = primary ? toEvidenceClick(primary) : null;
+              if (clickArgs) {
+                onFlagEvidenceClick({ ...clickArgs, findingId: f.id });
               }
             };
 
@@ -342,14 +344,15 @@ export function MoneySection({
         <div className="mt-3 space-y-2">
           {report.moneyAndFees.map((row, i) => {
             const key = `${row.label}-${i}`;
-            const deduped = row.evidence?.length ? dedupeEvidence(row.evidence) : [];
+            const deduped = row.evidence?.length
+              ? dedupeEvidence(row.evidence.filter(isClickableGroundedEvidence))
+              : [];
             const primaryEv = deduped[0];
             const restEv = deduped.slice(1);
             const expanded = expandedMoneyQuotes[key] ?? false;
             const highlightPrimary = () => {
-              if (primaryEv && typeof primaryEv.page === "number" && primaryEv.page >= 1) {
-                onEvidenceClick(toEvidenceClick(primaryEv));
-              }
+              const clickArgs = primaryEv ? toEvidenceClick(primaryEv) : null;
+              if (clickArgs) onEvidenceClick(clickArgs);
             };
 
             return (
@@ -423,11 +426,11 @@ export function DeadlinesSection({
       {report.deadlinesAndNotice.length ? (
         <div className="mt-3 space-y-2">
           {report.deadlinesAndNotice.map((row, i) => {
-            const primaryEv = row.evidence?.[0];
+            const grounded = row.evidence?.filter(isClickableGroundedEvidence) ?? [];
+            const primaryEv = grounded[0];
             const highlightPrimary = () => {
-              if (primaryEv && typeof primaryEv.page === "number" && primaryEv.page >= 1) {
-                onEvidenceClick(toEvidenceClick(primaryEv));
-              }
+              const clickArgs = primaryEv ? toEvidenceClick(primaryEv) : null;
+              if (clickArgs) onEvidenceClick(clickArgs);
             };
 
             return (
@@ -623,7 +626,6 @@ export function TexasRenterCheckSection({
                       Contextual source under review. Lease wording match only.
                     </p>
                   )}
-                  <p className="mt-2 text-[11px] text-[#757682]">{TEXAS_RENTER_SOURCE_NOTE}</p>
                 </div>
               </li>
             );

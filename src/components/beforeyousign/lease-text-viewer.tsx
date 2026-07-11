@@ -2,6 +2,8 @@
 
 import { ChevronDown } from "lucide-react";
 import { useEffect, useId, useRef } from "react";
+import type { EvidenceIndex } from "@/lib/evidence/index";
+import { lookupEvidenceHighlight } from "@/lib/evidence/index";
 
 export type LeaseTextPage = { page: number; text: string };
 
@@ -74,9 +76,26 @@ function makeHighlightMatch(text: string, start: number, end: number): Highlight
 
 function resolveHighlight(
   text: string,
-  highlight?: { page: number; quote: string; startIndex?: number; endIndex?: number; exact?: boolean } | null,
+  highlight?: {
+    page: number;
+    quote: string;
+    startIndex?: number;
+    endIndex?: number;
+    exact?: boolean;
+    evidenceId?: string;
+  } | null,
+  evidenceIndex?: EvidenceIndex,
 ): HighlightMatch | null {
   if (!highlight) return null;
+
+  const indexed = lookupEvidenceHighlight(evidenceIndex, highlight.evidenceId);
+  if (indexed && indexed.page === highlight.page) {
+    const pageStart = indexed.startIndex;
+    const pageEnd = indexed.endIndex;
+    if (pageStart >= 0 && pageEnd > pageStart && pageEnd <= text.length) {
+      return makeHighlightMatch(text, pageStart, pageEnd);
+    }
+  }
 
   if (
     typeof highlight.startIndex === "number" &&
@@ -269,15 +288,25 @@ function LeasePageBlock({
   scrollToPage,
   highlight,
   evidenceLinked,
+  evidenceIndex,
 }: {
   pageNumber: number;
   text: string;
   scrollToPage?: number | null;
-  highlight?: { page: number; quote: string; startIndex?: number; endIndex?: number; exact?: boolean } | null;
+  highlight?: {
+    page: number;
+    quote: string;
+    startIndex?: number;
+    endIndex?: number;
+    exact?: boolean;
+    evidenceId?: string;
+  } | null;
   evidenceLinked?: boolean;
+  evidenceIndex?: EvidenceIndex;
 }) {
   const rootRef = useRef<HTMLElement | null>(null);
-  const match = highlight?.page === pageNumber ? resolveHighlight(text, highlight) : null;
+  const match =
+    highlight?.page === pageNumber ? resolveHighlight(text, highlight, evidenceIndex) : null;
   const displayLines = buildDisplayLines(text, match);
 
   useEffect(() => {
@@ -354,6 +383,7 @@ export function LeaseTextViewer({
   scrollToPage,
   highlight,
   evidenceLinked,
+  evidenceIndex,
   extractedFromPdf,
   fileLabel,
   textPanelExpanded,
@@ -361,8 +391,16 @@ export function LeaseTextViewer({
 }: {
   pages: LeaseTextPage[];
   scrollToPage?: number | null;
-  highlight?: { page: number; quote: string; startIndex?: number; endIndex?: number; exact?: boolean } | null;
+  highlight?: {
+    page: number;
+    quote: string;
+    startIndex?: number;
+    endIndex?: number;
+    exact?: boolean;
+    evidenceId?: string;
+  } | null;
   evidenceLinked?: boolean;
+  evidenceIndex?: EvidenceIndex;
   extractedFromPdf?: boolean;
   fileLabel?: string;
   textPanelExpanded: boolean;
@@ -440,6 +478,7 @@ export function LeaseTextViewer({
               scrollToPage={scrollToPage}
               highlight={highlight}
               evidenceLinked={evidenceLinked}
+              evidenceIndex={evidenceIndex}
             />
           ))}
         </div>

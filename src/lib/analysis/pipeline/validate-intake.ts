@@ -1,8 +1,10 @@
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 
 import { ANALYSIS_LIMITS, createAnalysisProblem, type AnalysisProblem } from "@/lib/analysis/limits";
 import type { AnalysisInput } from "@/lib/analysis/pipeline/types";
 import { normalizeLeasePageText } from "@/lib/pdf/normalize";
+
+export { hashDocumentId, computeContentIntegrityKey } from "@/lib/analysis/pipeline/content-integrity";
 
 const inFlightByClient = new Map<string, number>();
 
@@ -32,10 +34,6 @@ export function releaseClientSlot(clientKey: string): void {
   const current = inFlightByClient.get(clientKey) ?? 0;
   if (current <= 1) inFlightByClient.delete(clientKey);
   else inFlightByClient.set(clientKey, current - 1);
-}
-
-export function hashDocumentId(content: string): string {
-  return createHash("sha256").update(content).digest("hex").slice(0, 16);
 }
 
 export async function parseAnalysisInput(request: Request): Promise<

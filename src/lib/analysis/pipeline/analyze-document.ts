@@ -1,6 +1,6 @@
 import { ANALYSIS_LIMITS, createAnalysisProblem } from "@/lib/analysis/limits";
 import type { AnalysisInput, NormalizedDocument } from "@/lib/analysis/pipeline/types";
-import { hashDocumentId } from "@/lib/analysis/pipeline/validate-intake";
+import { computeContentIntegrityKey } from "@/lib/analysis/pipeline/content-integrity";
 import { assessExtractionQuality, toDocumentExtraction } from "@/lib/pdf/extraction-quality";
 import { normalizeLeasePageText } from "@/lib/pdf/normalize";
 import type { PdfExtractor } from "@/lib/analysis/pipeline/types";
@@ -16,7 +16,7 @@ export async function analyzeDocument(
   if (input.kind === "text") {
     const pages = [{ page: 1, text: input.leaseText }];
     const quality = assessExtractionQuality(pages);
-    const documentId = hashDocumentId(input.leaseText);
+    const documentId = computeContentIntegrityKey([{ page: 1, text: input.leaseText }]);
     return {
       ok: true,
       contentType: "text/plain",
@@ -89,7 +89,7 @@ export async function analyzeDocument(
     };
   }
 
-  const documentId = hashDocumentId(extractedPages.map((p) => p.text).join("\n"));
+  const documentId = computeContentIntegrityKey(extractedPages);
   const extraction = toDocumentExtraction(method, extractedPages, quality);
 
   return {

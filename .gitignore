@@ -1,6 +1,8 @@
 # Design/spec docs (local source of truth; do not commit)
-docs/
 design/
+# Track committed audit and reference docs; ignore other local notes under docs/
+docs/*
+!docs/POLICYINSIGHT_EXTRACTION_AUDIT.md
 
 # Local environment — never commit secrets
 .env
