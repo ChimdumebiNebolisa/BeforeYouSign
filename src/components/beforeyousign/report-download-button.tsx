@@ -3,7 +3,7 @@
 import { Download } from "lucide-react";
 import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import type { AnalysisMode } from "@/lib/analysis/pipeline/types";
-import { buildReportMarkdown } from "@/lib/report-export";
+import { buildReportMarkdown, sanitizeExportFilename } from "@/lib/report-export";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 
 export function ReportDownloadButton({
@@ -34,7 +34,7 @@ export function ReportDownloadButton({
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = "beforeyousign-report.md";
+    anchor.download = fileName ? sanitizeExportFilename(fileName) : "beforeyousign-report.md";
     anchor.click();
     URL.revokeObjectURL(url);
   };

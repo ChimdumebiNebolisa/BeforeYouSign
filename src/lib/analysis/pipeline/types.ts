@@ -54,6 +54,7 @@ export type GroundingSummary = {
 };
 
 export type ModelRetryInput = {
+  /** Content integrity key (SHA256 prefix of joined page text). Not authentication. */
   documentId: string;
   pages: ExtractedTextPage[];
   fileName: string;

@@ -36,6 +36,7 @@ export async function runAnalysisPipeline(input: {
       return {
         report: buildRuleOnlyFallbackReport({
           documentId: document.documentId,
+          pages: document.pages,
           ruleBasedFindings: deterministic.ruleBasedFindings,
           deterministicRisk: deterministic.deterministicRisk,
           evidenceRegistry: registry,
@@ -187,6 +188,7 @@ export async function runModelRetryPipeline(input: {
       return {
         report: buildRuleOnlyFallbackReport({
           documentId: document.documentId,
+          pages: document.pages,
           ruleBasedFindings: deterministic.ruleBasedFindings,
           deterministicRisk: deterministic.deterministicRisk,
           evidenceRegistry: registry,

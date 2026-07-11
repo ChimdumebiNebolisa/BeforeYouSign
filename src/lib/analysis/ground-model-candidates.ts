@@ -2,6 +2,7 @@ import { buildRuleOnlyFallbackReport } from "@/lib/analysis/fallback-report";
 import { containsBannedWording, type ModelReportCandidate } from "@/lib/analysis/model-candidate-schema";
 import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import type { GroundingSummary } from "@/lib/analysis/pipeline/types";
+import type { ExtractedTextPage } from "@/lib/pdf/extract-text";
 import type { EvidenceRegistry } from "@/lib/evidence/types";
 import { hydrateEvidence } from "@/lib/evidence/registry";
 import type { DeterministicLeaseRisk } from "@/lib/analysis/scoring";
@@ -15,7 +16,10 @@ function hydrateEvidenceIds(
   if (!evidenceIds?.length) return { evidence: [], dropped: 1 };
   const evidence = [];
   let dropped = 0;
+  const seen = new Set<string>();
   for (const id of evidenceIds) {
+    if (seen.has(id)) continue;
+    seen.add(id);
     const hydrated = hydrateEvidence(registry, id);
     if (hydrated) evidence.push(hydrated);
     else dropped += 1;
@@ -27,6 +31,7 @@ export function groundModelCandidates(input: {
   candidate: ModelReportCandidate;
   registry: EvidenceRegistry;
   documentId: string;
+  pages: ExtractedTextPage[];
   ruleBasedFindings: RuleBasedFinding[];
   deterministicRisk: DeterministicLeaseRisk;
 }): {
@@ -41,6 +46,7 @@ export function groundModelCandidates(input: {
     return {
       report: buildRuleOnlyFallbackReport({
         documentId: input.documentId,
+        pages: input.pages,
         ruleBasedFindings: input.ruleBasedFindings,
         deterministicRisk: input.deterministicRisk,
         evidenceRegistry: input.registry,
@@ -95,6 +101,7 @@ export function groundModelCandidates(input: {
     return {
       report: buildRuleOnlyFallbackReport({
         documentId: input.documentId,
+        pages: input.pages,
         ruleBasedFindings: input.ruleBasedFindings,
         deterministicRisk: input.deterministicRisk,
         evidenceRegistry: input.registry,

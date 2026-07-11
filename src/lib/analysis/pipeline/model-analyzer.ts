@@ -50,6 +50,7 @@ export function createDefaultModelAnalyzer(): ModelAnalyzer {
     if (!ai.ok) {
       const fallbackReport = buildRuleOnlyFallbackReport({
         documentId: document.documentId,
+        pages: document.pages,
         ruleBasedFindings: deterministic.ruleBasedFindings,
         deterministicRisk: deterministic.deterministicRisk,
         evidenceRegistry: registry,
@@ -67,6 +68,7 @@ export function createDefaultModelAnalyzer(): ModelAnalyzer {
     if (!candidate) {
       const fallbackReport = buildRuleOnlyFallbackReport({
         documentId: document.documentId,
+        pages: document.pages,
         ruleBasedFindings: deterministic.ruleBasedFindings,
         deterministicRisk: deterministic.deterministicRisk,
         evidenceRegistry: registry,
@@ -83,6 +85,7 @@ export function createDefaultModelAnalyzer(): ModelAnalyzer {
       candidate,
       registry,
       documentId: document.documentId,
+      pages: document.pages,
       ruleBasedFindings: deterministic.ruleBasedFindings,
       deterministicRisk: deterministic.deterministicRisk,
     });
