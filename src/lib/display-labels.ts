@@ -1,23 +1,25 @@
 import type { FindingSeverity, RiskLevel } from "@/lib/analysis/schema";
 
-export function displayReviewPriority(level: RiskLevel): string {
+type AttentionLevel = RiskLevel | FindingSeverity;
+
+function displayAttentionLevel(level: AttentionLevel): string {
   switch (level) {
     case "low":
+    case "minor":
       return "Lower attention";
     case "medium":
+    case "moderate":
       return "Moderate attention";
     case "high":
+    case "critical":
       return "Higher attention";
   }
 }
 
+export function displayReviewPriority(level: RiskLevel): string {
+  return displayAttentionLevel(level);
+}
+
 export function displaySeverity(severity: FindingSeverity): string {
-  switch (severity) {
-    case "minor":
-      return "Lower attention";
-    case "moderate":
-      return "Moderate attention";
-    case "critical":
-      return "Higher attention";
-  }
+  return displayAttentionLevel(severity);
 }

@@ -375,17 +375,6 @@ export function LandingClient() {
                 {uploadReceipt.reportError ? (
                   <div className="rounded-xl bg-[#fff7ed] p-4 text-sm text-[#9a3412]">{uploadReceipt.reportError}</div>
                 ) : null}
-                {uploadReceipt.reportDebug?.failureStage ? (
-                  <details className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-3 text-xs text-[#334155]">
-                    <summary className="cursor-pointer font-medium text-[#0f172a]">
-                      Developer: analysis debug
-                    </summary>
-                    <p className="mt-2 font-mono">stage: {uploadReceipt.reportDebug.failureStage}</p>
-                    {uploadReceipt.mode ? (
-                      <p className="mt-1 font-mono">mode: {uploadReceipt.mode}</p>
-                    ) : null}
-                  </details>
-                ) : null}
                 {uploadReceipt.report ? (
                   <LeaseReportView
                     report={uploadReceipt.report}

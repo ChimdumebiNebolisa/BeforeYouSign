@@ -3,6 +3,7 @@ import type { AnalysisMode } from "@/lib/analysis/pipeline/types";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 import { FIXED_REPORT_DISCLAIMER } from "@/lib/public-copy";
 import { displayReviewPriority } from "@/lib/display-labels";
+import { formatAnalysisModeLabel } from "@/lib/analysis-mode-labels";
 import { isClickableGroundedEvidence } from "@/lib/analysis/evidence-click";
 
 function safeText(value: string | null | undefined): string {
@@ -18,16 +19,7 @@ function formatEvidence(ev: { page: number; quote: string; evidenceId?: string }
 }
 
 function formatModeLabel(mode: AnalysisMode | undefined): string {
-  switch (mode) {
-    case "model_grounded":
-      return "AI-enhanced (evidence-backed)";
-    case "rules_only":
-      return "Rule-based only";
-    case "unavailable":
-      return "AI unavailable";
-    default:
-      return "Unknown";
-  }
+  return formatAnalysisModeLabel(mode);
 }
 
 function escapeMd(value: string): string {

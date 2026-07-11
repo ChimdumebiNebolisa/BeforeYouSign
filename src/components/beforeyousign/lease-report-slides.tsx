@@ -16,7 +16,6 @@ import {
   TEXAS_RENTER_CHECK_BADGE,
   TEXAS_RENTER_CHECK_EMPTY,
   TEXAS_RENTER_CHECK_NOTE,
-  TEXAS_RENTER_SOURCE_NOTE,
 } from "@/lib/public-copy";
 
 export type EvidenceSourceLabel = "sample lease" | "pasted text";
@@ -627,7 +626,6 @@ export function TexasRenterCheckSection({
                       Contextual source under review. Lease wording match only.
                     </p>
                   )}
-                  <p className="mt-2 text-[11px] text-[#757682]">{TEXAS_RENTER_SOURCE_NOTE}</p>
                 </div>
               </li>
             );

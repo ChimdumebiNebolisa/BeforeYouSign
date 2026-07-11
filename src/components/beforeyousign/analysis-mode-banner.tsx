@@ -1,6 +1,7 @@
 "use client";
 
 import type { AnalysisMode, GroundingSummary } from "@/lib/analysis/pipeline/types";
+import { analysisModeBannerTitle } from "@/lib/analysis-mode-labels";
 
 export function AnalysisModeBanner({
   mode,
@@ -24,7 +25,7 @@ export function AnalysisModeBanner({
   switch (mode) {
     case "model_grounded":
       tone = "info";
-      title = "AI-enhanced summary";
+      title = analysisModeBannerTitle(mode);
       body = "This report combines rule-based scanning with an AI summary backed by lease evidence.";
       if (groundingSummary && groundingSummary.droppedClaims > 0) {
         body += ` Some AI claims could not be matched to lease text and were omitted.`;
@@ -33,18 +34,18 @@ export function AnalysisModeBanner({
     case "rules_only":
       if (reportDebug?.failureStage) {
         tone = "warn";
-        title = "Rule-based summary";
+        title = analysisModeBannerTitle(mode);
         body =
           "AI summarization was unavailable for this run. You still have deterministic lease findings below. Retrying may help, but success is not guaranteed.";
       } else {
         tone = "neutral";
-        title = "Rule-based summary";
+        title = analysisModeBannerTitle(mode);
         body = "This report was generated from deterministic lease pattern matching without AI enhancement.";
       }
       break;
     case "unavailable":
       tone = "warn";
-      title = "AI summary unavailable";
+      title = analysisModeBannerTitle(mode);
       body = "Key lease details from pattern matching are shown below. AI summarization is not configured or failed.";
       break;
   }
