@@ -63,6 +63,10 @@ PolicyInsight reference clone: `../policy-insight-reference` (read-only).
 
 The API field `documentId` is a **content integrity key** (SHA256 prefix of normalized extracted page text). It helps the client detect stale retry cache state when pages and key diverge accidentally. It is **not** authentication, authorization, or tamper prevention — any client can recompute the key from submitted pages. The retry endpoint validates payload size, shape, and limits independently.
 
+---
+
+## Implemented in this branch
+
 1. **Evidence hardening** — `resolveQuoteToChunk` in fallback path; `buildEvidenceIndex` in API response; evidenceId-first highlight in viewer; grounding summary note in UI.
 2. **Typed analysis stages** — `AnalysisStage` union threaded through pipeline, logging, and error responses.
 3. **Retry + fallback UX** — Client-side page cache; `POST /api/analyze/retry-model`; mode banner; retry on partial AI failure.

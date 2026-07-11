@@ -12,16 +12,21 @@ Lease agreements are long and written in dense legal language. Renters often str
 
 - **PDF lease upload** with server-side text extraction (`pdf-parse`), plus **paste text** and **built-in sample leases** from `public/sample-leases/`.
 - **Structured report UI**: carousel sections for summary, red flags, money and fees, deadlines, responsibilities, questions, next steps, and “not clearly stated” when applicable.
-- **Evidence linking**: clicking report rows can scroll the **extracted text** viewer and highlight matching quotes by page.
+- **Evidence linking**: clicking report rows can scroll the **extracted text** viewer and highlight matching quotes by page (evidence ID-first when grounded).
 - **Rule-based snippet extraction** (rent, deposit, fees, notice, renewal, maintenance, utilities, vague phrases) and **deterministic risk band** with reasons.
 - **Gemini-powered narrative report** with JSON schema validation; **fallback report** built from rules when the model fails or returns invalid JSON.
+- **Model-only retry** when AI fails after extraction: client caches extracted pages and calls **`POST /api/analyze/retry-model`** without re-uploading the PDF.
+- **Analysis mode banner** (`model_grounded`, `rules_only`, `unavailable`) so users know how the report was produced.
+- **Full report Markdown export** (client-side download) plus existing question checklist export.
 - **Transparency panel** (“How this was analyzed”) showing extraction counts, snippet hits, and heuristic risk signals.
+
+See [docs/POLICYINSIGHT_EXTRACTION_AUDIT.md](docs/POLICYINSIGHT_EXTRACTION_AUDIT.md) for pattern-extraction decisions and deferred scope.
 
 ## Tech stack
 
 **Frontend:** Next.js (App Router), React, TypeScript, Tailwind CSS v4, Embla Carousel, Lucide icons, shadcn-style UI primitives (`src/components/ui/`).
 
-**Backend:** Next.js Route Handler — single endpoint `POST /api/analyze` (`src/app/api/analyze/route.ts`), Node runtime.
+**Backend:** Next.js Route Handlers — `POST /api/analyze` (full pipeline) and `POST /api/analyze/retry-model` (model-only retry from cached extracted pages) (`src/app/api/analyze/`).
 
 **AI/API:** Google Gemini via `@google/generative-ai` (`src/lib/analysis/gemini-report.ts`), structured output aligned with `src/lib/analysis/schema.ts`.
 
@@ -87,15 +92,15 @@ For this project:
 2. **Submit analysis:** The client sends **`POST /api/analyze`** — **multipart** (`file`) for PDFs or **JSON** (`leaseText`, optional `fileName`) for pasted/sample text (`landing-client.tsx`, `route.ts`).
 3. **Prepare text:** PDFs are read per page via **`extractPdfTextPages`**; pasted text becomes a single synthetic page. All text passes **`normalizeLeasePageText`** (`src/lib/pdf/`).
 4. **Deterministic pass:** **`rules.ts`** extracts snippet matches; **`scoring.ts`** computes a risk band and reasons; ambiguous phrases are flagged (`findUnclearLeasePhrases`).
-5. **AI report (when configured):** **`runStructuredLeaseAnalysis`** calls Gemini with **`buildLeaseAnalysisUserPrompt`**; responses are parsed (**`model-json.ts`**), validated (**`parseBeforeYouSignReportJson`**), and normalized (**`report-normalization.ts`**). On failure, **`buildRuleOnlyFallbackReport`** supplies a report-shaped fallback (`route.ts`).
-6. **Render results:** JSON returns **`extractedPages`**, snippet arrays, deterministic risk fields, and **`report`**. The client shows **`LeaseTextViewer`**, **`LeaseReportView`**, and **`TechnicalDetailsPanel`** (`landing-client.tsx`).
+5. **AI report (when configured):** **`runStructuredLeaseAnalysis`** calls Gemini with **`buildLeaseAnalysisUserPrompt`**; responses are parsed (**`model-json.ts`**), validated (**`parseBeforeYouSignReportJson`**), normalized (**`report-normalization.ts`**), and evidence-grounded. On failure, **`buildRuleOnlyFallbackReport`** supplies a report-shaped fallback. Users can **retry AI only** via **`POST /api/analyze/retry-model`** when extraction already succeeded.
+6. **Render results:** JSON returns **`extractedPages`**, snippet arrays, deterministic risk fields, **`mode`**, and **`report`**. The client shows **`LeaseTextViewer`**, **`LeaseReportView`**, **`AnalysisModeBanner`**, and **`TechnicalDetailsPanel`** (`landing-client.tsx`).
 
 ## Architecture
 
 Brief folder layout:
 
 ```txt
-src/app/: App Router — layout, page, favicon/app icons, POST /api/analyze route.
+src/app/: App Router — layout, page, favicon/app icons, POST /api/analyze and /api/analyze/retry-model.
 src/components/beforeyousign/: Intake, report carousel, text viewer, loading shell.
 src/components/ui/: Shared UI (e.g. Button).
 src/lib/analysis/: Regex rules, Gemini, schema, scoring, prompts, normalization.
@@ -207,6 +212,13 @@ node --check scripts/phase2-scan-smoke.mjs
 node --check scripts/smoke-test.mjs
 node --check scripts/phase1-browser-qa.mjs
 node --check scripts/phase2-browser-qa.mjs
+```
+
+Run unit tests and coverage (critical modules):
+
+```bash
+npm test
+npm run test:coverage
 ```
 
 Run static linting:
