@@ -27,6 +27,8 @@ import {
   FixedReportDisclaimer,
 } from "@/components/beforeyousign/lease-report-slides";
 import { ChecklistDownloadButton } from "@/components/beforeyousign/checklist-download-button";
+import { ReportDownloadButton } from "@/components/beforeyousign/report-download-button";
+import type { AnalysisMode } from "@/lib/analysis/pipeline/types";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 
 const RED_FLAGS_SLIDE_INDEX = 1;
@@ -289,6 +291,9 @@ export function LeaseReportView({
   selectedFindingId,
   evidenceSourceLabel,
   fileName,
+  mode,
+  deterministicRiskBand,
+  deterministicRiskReasons,
 }: {
   report: BeforeYouSignReport;
   texasRenterFindings?: TexasRenterFinding[];
@@ -296,6 +301,9 @@ export function LeaseReportView({
   selectedFindingId?: string | null;
   evidenceSourceLabel?: EvidenceSourceLabel;
   fileName?: string;
+  mode?: AnalysisMode;
+  deterministicRiskBand?: "low" | "medium" | "high";
+  deterministicRiskReasons?: string[];
 }) {
   const summaryIntro = displaySummaryIntro(report.summary);
   const agreeBullets = report.whatYoureAgreeingTo
@@ -337,7 +345,15 @@ export function LeaseReportView({
   return (
     <div className="space-y-4">
       <LocalLawBanner />
-      <div className="flex flex-wrap justify-end">
+      <div className="flex flex-wrap justify-end gap-2">
+        <ReportDownloadButton
+          report={report}
+          texasRenterFindings={texasRenterFindings}
+          fileName={fileName}
+          mode={mode}
+          deterministicRiskBand={deterministicRiskBand}
+          deterministicRiskReasons={deterministicRiskReasons}
+        />
         <ChecklistDownloadButton
           report={report}
           texasRenterFindings={texasRenterFindings}

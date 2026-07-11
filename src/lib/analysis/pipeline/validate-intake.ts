@@ -164,3 +164,158 @@ export async function parseAnalysisInput(request: Request): Promise<
     fileSizeBytes: file.size,
   };
 }
+
+function parseRetryPages(raw: unknown): { page: number; text: string }[] | null {
+  if (!Array.isArray(raw)) return null;
+  const pages: { page: number; text: string }[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") return null;
+    const page = (item as { page?: unknown }).page;
+    const text = (item as { text?: unknown }).text;
+    if (typeof page !== "number" || !Number.isFinite(page) || page < 1) return null;
+    if (typeof text !== "string") return null;
+    pages.push({ page, text: normalizeLeasePageText(text) });
+  }
+  return pages.length > 0 ? pages : null;
+}
+
+export async function parseModelRetryInput(request: Request): Promise<
+  | { ok: true; retry: import("@/lib/analysis/pipeline/types").ModelRetryInput }
+  | { ok: false; problem: AnalysisProblem }
+> {
+  const headerContentType = (request.headers.get("content-type") ?? "").toLowerCase();
+  if (!headerContentType.includes("application/json")) {
+    return {
+      ok: false,
+      problem: createAnalysisProblem(
+        "invalid_input",
+        "Model retry requires application/json body.",
+      ),
+    };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = await request.json();
+  } catch {
+    return {
+      ok: false,
+      problem: createAnalysisProblem("invalid_input", "Invalid JSON body."),
+    };
+  }
+
+  if (!parsed || typeof parsed !== "object") {
+    return {
+      ok: false,
+      problem: createAnalysisProblem("invalid_input", "Invalid retry payload."),
+    };
+  }
+
+  const documentId = (parsed as { documentId?: unknown }).documentId;
+  const pages = parseRetryPages((parsed as { pages?: unknown }).pages);
+  const fileNameField = (parsed as { fileName?: unknown }).fileName;
+  const fileSizeBytesField = (parsed as { fileSizeBytes?: unknown }).fileSizeBytes;
+  const contentTypeField = (parsed as { contentType?: unknown }).contentType;
+  const extractionField = (parsed as { extraction?: unknown }).extraction;
+
+  if (typeof documentId !== "string" || !documentId.trim()) {
+    return {
+      ok: false,
+      problem: createAnalysisProblem("invalid_input", "Missing documentId in retry payload."),
+    };
+  }
+
+  if (!pages) {
+    return {
+      ok: false,
+      problem: createAnalysisProblem("invalid_input", "Invalid pages in retry payload."),
+    };
+  }
+
+  if (pages.length > ANALYSIS_LIMITS.maxPages) {
+    return {
+      ok: false,
+      problem: createAnalysisProblem(
+        "too_many_pages",
+        `Retry payload exceeds the ${ANALYSIS_LIMITS.maxPages} page limit.`,
+        { limit: ANALYSIS_LIMITS.maxPages, actual: pages.length },
+      ),
+    };
+  }
+
+  const totalChars = pages.reduce((sum, p) => sum + p.text.length, 0);
+  if (totalChars === 0) {
+    return {
+      ok: false,
+      problem: createAnalysisProblem("extraction_empty", "Retry payload has no extractable text."),
+    };
+  }
+
+  if (totalChars > ANALYSIS_LIMITS.maxChars) {
+    return {
+      ok: false,
+      problem: createAnalysisProblem(
+        "too_many_chars",
+        `Retry payload exceeds the ${ANALYSIS_LIMITS.maxChars.toLocaleString()} character limit.`,
+        { limit: ANALYSIS_LIMITS.maxChars, actual: totalChars },
+      ),
+    };
+  }
+
+  const expectedDocumentId = hashDocumentId(pages.map((p) => p.text).join("\n"));
+  if (documentId.trim() !== expectedDocumentId) {
+    return {
+      ok: false,
+      problem: createAnalysisProblem(
+        "invalid_input",
+        "documentId does not match retry payload content.",
+      ),
+    };
+  }
+
+  const fileName =
+    typeof fileNameField === "string" && fileNameField.trim().length > 0
+      ? fileNameField.trim()
+      : "lease-retry.txt";
+
+  const fileSizeBytes =
+    typeof fileSizeBytesField === "number" && Number.isFinite(fileSizeBytesField)
+      ? fileSizeBytesField
+      : Buffer.byteLength(pages.map((p) => p.text).join("\n"), "utf8");
+
+  const contentType = typeof contentTypeField === "string" ? contentTypeField : null;
+
+  let extraction: import("@/lib/analysis/pipeline/types").DocumentExtraction;
+  if (
+    extractionField &&
+    typeof extractionField === "object" &&
+    "method" in extractionField &&
+    "pageCount" in extractionField &&
+    "totalChars" in extractionField &&
+    "quality" in extractionField &&
+    "coverageStatus" in extractionField
+  ) {
+    const ext = extractionField as import("@/lib/analysis/pipeline/types").DocumentExtraction;
+    extraction = ext;
+  } else {
+    extraction = {
+      method: "pasted_text",
+      pageCount: pages.length,
+      totalChars,
+      quality: 1,
+      coverageStatus: "complete",
+    };
+  }
+
+  return {
+    ok: true,
+    retry: {
+      documentId: documentId.trim(),
+      pages,
+      fileName,
+      fileSizeBytes,
+      contentType,
+      extraction,
+    },
+  };
+}
