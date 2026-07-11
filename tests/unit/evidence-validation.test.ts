@@ -36,6 +36,7 @@ describe("evidence validation", () => {
   it("fallback report uses stable evidence IDs when registry provided", () => {
     const report = buildRuleOnlyFallbackReport({
       documentId,
+      pages,
       ruleBasedFindings: [
         { category: "rent", page: 1, quote: "Monthly rent is $1,450." },
         { category: "fees", page: 1, quote: "Late fee of $75 after grace period." },

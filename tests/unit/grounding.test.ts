@@ -29,6 +29,7 @@ describe("groundModelCandidates", () => {
       candidate: baseCandidate,
       registry,
       documentId: "ground-test",
+      pages,
       ruleBasedFindings: [],
       deterministicRisk: { score: 2, band: "medium", reasons: [] },
     });
@@ -46,6 +47,7 @@ describe("groundModelCandidates", () => {
       },
       registry,
       documentId: "ground-test",
+      pages,
       ruleBasedFindings: [],
       deterministicRisk: { score: 1, band: "low", reasons: [] },
     });
@@ -58,6 +60,7 @@ describe("groundModelCandidates", () => {
       candidate: { ...baseCandidate, summary: "This clause is illegal." },
       registry,
       documentId: "ground-test",
+      pages,
       ruleBasedFindings: [],
       deterministicRisk: { score: 1, band: "low", reasons: [] },
     });

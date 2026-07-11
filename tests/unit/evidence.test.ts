@@ -1,11 +1,12 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
-
 import { describe, expect, it } from "vitest";
 
 import { createEvidenceRegistry, hydrateEvidence } from "@/lib/evidence/registry";
-import { segmentDocument } from "@/lib/evidence/segment";
-
+import {
+  segmentDocument,
+  findChunkForSpan,
+  resolveQuoteToChunk,
+} from "@/lib/evidence/segment";
+import { buildEvidenceIndex, lookupEvidenceHighlight } from "@/lib/evidence/index";
 describe("evidence registry", () => {
   const pages = [
     {
@@ -37,14 +38,45 @@ describe("evidence registry", () => {
     expect(hydrateEvidence(registry, "ev-unknown")).toBeNull();
   });
 
-  it("segments paragraphs into chunks when long enough", () => {
-    const repeatedPages = [
-      {
-        page: 1,
-        text: "Tenant shall maintain the premises in good condition and report maintenance issues promptly.\n\nLandlord may enter with reasonable notice of at least twenty-four hours before entry.",
-      },
-    ];
-    const chunks = segmentDocument("doc-d", repeatedPages);
-    expect(chunks.length).toBeGreaterThanOrEqual(1);
+  it("segments long paragraphs into multiple chunks", () => {
+    const longSentence = "Rent shall be paid on time. ".repeat(40).trim();
+    const chunks = segmentDocument("doc-long", [{ page: 1, text: longSentence }]);
+    expect(chunks.length).toBeGreaterThan(1);
+  });
+
+  it("finds chunk spans and evidence index lookups", () => {
+    const registry = createEvidenceRegistry("doc-e", pages);
+    const chunk = registry.chunks[0]!;
+    const found = findChunkForSpan(registry.chunks, chunk.page, chunk.startIndex, chunk.endIndex);
+    expect(found?.id).toBe(chunk.id);
+
+    const index = buildEvidenceIndex(registry);
+    expect(lookupEvidenceHighlight(index, chunk.id)?.page).toBe(1);
+    expect(lookupEvidenceHighlight(index, "missing")).toBeNull();
+    expect(lookupEvidenceHighlight(undefined, chunk.id)).toBeNull();
+  });
+
+  it("returns null when span does not match any chunk", () => {
+    const registry = createEvidenceRegistry("doc-f", pages);
+    expect(findChunkForSpan(registry.chunks, 1, 9999, 10000)).toBeNull();
+  });
+
+  it("skips segments that cannot be located in raw page text", () => {
+    const sentenceOne = `${"Alpha ".repeat(30).trim()}.`;
+    const sentenceTwo = `${"Beta ".repeat(30).trim()}.`;
+    const pageText = `${sentenceOne}\n${sentenceTwo}`;
+    const chunks = segmentDocument("doc-g", [{ page: 1, text: pageText }]);
+    const joined = `${sentenceOne} ${sentenceTwo}`;
+    expect(pageText.includes(joined)).toBe(false);
+    expect(chunks.every((chunk) => pageText.includes(chunk.text))).toBe(true);
+  });
+
+  it("resolves quotes with whitespace normalization", () => {
+    const registry = createEvidenceRegistry("doc-h", pages);
+    const chunk = registry.chunks[0]!;
+    const spacedQuote = chunk.text.replace(/\s+/g, "  ");
+    expect(resolveQuoteToChunk(registry.chunks, chunk.page, spacedQuote)?.id).toBe(chunk.id);
+    expect(resolveQuoteToChunk(registry.chunks, chunk.page, "   ")).toBeNull();
+    expect(resolveQuoteToChunk(registry.chunks, chunk.page, "short")).toBeNull();
   });
 });
