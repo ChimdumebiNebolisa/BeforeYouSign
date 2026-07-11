@@ -1,6 +1,8 @@
+import type { AnalysisStage } from "@/lib/analysis/pipeline/stages";
+
 export type SafeAnalysisEvent = {
   requestId: string;
-  stage: string;
+  stage: AnalysisStage;
   mode?: string;
   durationMs?: number;
   pageCount?: number;

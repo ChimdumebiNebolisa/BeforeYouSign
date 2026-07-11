@@ -12,7 +12,7 @@ describe("safe analysis events", () => {
     expect(() =>
       emitSafeAnalysisEvent({
         requestId: "req-1",
-        stage: "complete",
+        stage: "completed",
         pageCount: 3,
         totalChars: 1200,
         durationMs: 42,

@@ -2,7 +2,9 @@ import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import type { RuleBasedFinding } from "@/lib/analysis/rules";
 import type { DeterministicLeaseRisk } from "@/lib/analysis/scoring";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
+import type { EvidenceIndex } from "@/lib/evidence/index";
 import type { ExtractedTextPage } from "@/lib/pdf/extract-text";
+import type { AnalysisStage } from "@/lib/analysis/pipeline/stages";
 
 export type AnalysisMode = "model_grounded" | "rules_only" | "unavailable";
 
@@ -51,11 +53,22 @@ export type GroundingSummary = {
   droppedClaims: number;
 };
 
+export type ModelRetryInput = {
+  documentId: string;
+  pages: ExtractedTextPage[];
+  fileName: string;
+  fileSizeBytes: number;
+  contentType: string | null;
+  extraction: DocumentExtraction;
+};
+
 export type AnalysisSuccessResponse = {
   ok: true;
   analysisVersion: number;
   mode: AnalysisMode;
+  stage: AnalysisStage;
   requestId: string;
+  documentId: string;
   fileName: string;
   fileSizeBytes: number;
   contentType: string | null;
@@ -80,11 +93,13 @@ export type AnalysisSuccessResponse = {
   reportError: string | null;
   groundingSummary?: GroundingSummary;
   reportDebug?: { failureStage?: string } | null;
+  evidenceIndex?: EvidenceIndex;
 };
 
 export type AnalysisErrorResponse = {
   ok: false;
   requestId?: string;
+  stage?: AnalysisStage;
   error:
     | string
     | {
@@ -103,6 +118,7 @@ export type ModelAnalyzerResult = {
   mode: AnalysisMode;
   groundingSummary?: GroundingSummary;
   reportDebug?: { failureStage?: string } | null;
+  evidenceIndex?: EvidenceIndex;
 };
 
 export type ModelAnalyzer = (input: {

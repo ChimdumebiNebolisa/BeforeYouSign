@@ -7,7 +7,7 @@ export const ROLLOUT_FLAGS = {
 } as const;
 
 export function shouldUseModelContribution(): boolean {
-  return ROLLOUT_FLAGS.modelEnabled;
+  return process.env.BYS_MODEL_ENABLED !== "0";
 }
 
 export function shouldOfferAsyncJobs(): boolean {

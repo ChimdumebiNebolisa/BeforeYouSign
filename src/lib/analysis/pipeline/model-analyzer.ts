@@ -4,9 +4,20 @@ import { groundModelCandidates } from "@/lib/analysis/ground-model-candidates";
 import { parseModelReportCandidate } from "@/lib/analysis/model-candidate-schema";
 import type { ModelAnalyzer, ModelAnalyzerResult } from "@/lib/analysis/pipeline/types";
 import { createEvidenceRegistry } from "@/lib/evidence/registry";
+import { buildEvidenceIndex } from "@/lib/evidence/index";
 import { getBysAiKey } from "@/lib/env/bys-ai-key";
 
 const isDev = process.env.NODE_ENV === "development";
+
+function withEvidenceIndex(
+  registry: ReturnType<typeof createEvidenceRegistry>,
+  result: Omit<ModelAnalyzerResult, "evidenceIndex">,
+): ModelAnalyzerResult {
+  return {
+    ...result,
+    evidenceIndex: buildEvidenceIndex(registry),
+  };
+}
 
 export function createDefaultModelAnalyzer(): ModelAnalyzer {
   return async ({ document, deterministic }) => {
@@ -14,13 +25,13 @@ export function createDefaultModelAnalyzer(): ModelAnalyzer {
     const apiKey = getBysAiKey();
 
     if (!apiKey?.trim()) {
-      return {
+      return withEvidenceIndex(registry, {
         report: null,
         reportError:
           "The AI summary isn't available right now, but key lease details are still shown below.",
         mode: "unavailable",
         reportDebug: null,
-      };
+      });
     }
 
     const evidenceCatalog = registry.chunks
@@ -44,12 +55,12 @@ export function createDefaultModelAnalyzer(): ModelAnalyzer {
         evidenceRegistry: registry,
       });
 
-      return {
+      return withEvidenceIndex(registry, {
         report: fallbackReport,
         reportError: null,
         mode: "rules_only",
         reportDebug: isDev ? { failureStage: ai.failureStage } : null,
-      };
+      });
     }
 
     const candidate = parseModelReportCandidate(ai.rawParsed);
@@ -60,12 +71,12 @@ export function createDefaultModelAnalyzer(): ModelAnalyzer {
         deterministicRisk: deterministic.deterministicRisk,
         evidenceRegistry: registry,
       });
-      return {
+      return withEvidenceIndex(registry, {
         report: fallbackReport,
         reportError: null,
         mode: "rules_only",
         reportDebug: isDev ? { failureStage: "schema_validation" } : null,
-      };
+      });
     }
 
     const grounded = groundModelCandidates({
@@ -76,12 +87,12 @@ export function createDefaultModelAnalyzer(): ModelAnalyzer {
       deterministicRisk: deterministic.deterministicRisk,
     });
 
-    return {
+    return withEvidenceIndex(registry, {
       report: grounded.report,
       reportError: null,
       mode: grounded.groundingSummary.groundedClaims > 0 ? "model_grounded" : "rules_only",
       groundingSummary: grounded.groundingSummary,
       reportDebug: null,
-    };
+    });
   };
 }

@@ -17,8 +17,10 @@ export function assembleSuccessResponse(input: {
   return {
     ok: true,
     analysisVersion: 2,
+    stage: "completed",
     mode: input.model.mode,
     requestId: input.requestId,
+    documentId: input.document.documentId,
     fileName: input.fileName,
     fileSizeBytes: input.fileSizeBytes,
     contentType: input.contentType,
@@ -43,5 +45,6 @@ export function assembleSuccessResponse(input: {
     reportError: input.model.reportError,
     groundingSummary: input.model.groundingSummary,
     reportDebug: input.model.reportDebug,
+    evidenceIndex: input.model.evidenceIndex,
   };
 }

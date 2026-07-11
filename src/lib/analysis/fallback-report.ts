@@ -5,6 +5,7 @@ import type { DeterministicLeaseRisk } from "@/lib/analysis/scoring";
 import { FIXED_REPORT_DISCLAIMER } from "@/lib/public-copy";
 import type { EvidenceRegistry } from "@/lib/evidence/types";
 import { registerSpanEvidence } from "@/lib/evidence/registry";
+import { resolveQuoteToChunk } from "@/lib/evidence/segment";
 import type { GroundedEvidenceRef } from "@/lib/evidence/types";
 
 function extractCurrencyValue(text: string): string | null {
@@ -283,28 +284,63 @@ function toEvidence(
   documentId: string,
   finding: RuleBasedFinding,
 ): GroundedEvidenceRef[] {
-  const pageText = registry?.chunks.find((c) => c.page === finding.page)?.text ?? finding.quote;
-  const startIndex = pageText.indexOf(finding.quote);
-  if (startIndex >= 0 && registry) {
-    return [
-      registerSpanEvidence(registry, {
-        documentId,
-        page: finding.page,
-        startIndex,
-        endIndex: startIndex + finding.quote.length,
-        text: finding.quote,
-      }),
-    ];
+  if (registry) {
+    const chunk = resolveQuoteToChunk(registry.chunks, finding.page, finding.quote);
+    if (chunk) {
+      return [hydrateFromChunk(registry, documentId, chunk, finding.quote)];
+    }
+
+    const pageText = registry.chunks.find((c) => c.page === finding.page)?.text ?? finding.quote;
+    const startIndex = pageText.indexOf(finding.quote);
+    if (startIndex >= 0) {
+      return [
+        registerSpanEvidence(registry, {
+          documentId,
+          page: finding.page,
+          startIndex,
+          endIndex: startIndex + finding.quote.length,
+          text: finding.quote,
+        }),
+      ];
+    }
   }
+
   return [
     {
-      evidenceId: `legacy-${finding.page}-${startIndex >= 0 ? startIndex : 0}`,
+      evidenceId: `legacy-${finding.page}-0`,
       page: finding.page,
       quote: finding.quote,
-      ...(startIndex >= 0 ? { startIndex, endIndex: startIndex + finding.quote.length } : {}),
-      supportStatus: "grounded",
+      supportStatus: "unknown",
     },
   ];
+}
+
+function hydrateFromChunk(
+  registry: EvidenceRegistry,
+  documentId: string,
+  chunk: { id: string; page: number; startIndex: number; endIndex: number; text: string },
+  quote: string,
+): GroundedEvidenceRef {
+  const trimmedQuote = quote.trim();
+  const quoteStart = trimmedQuote ? chunk.text.indexOf(trimmedQuote) : -1;
+  if (quoteStart >= 0 && trimmedQuote.length > 0 && trimmedQuote.length < chunk.text.length) {
+    return registerSpanEvidence(registry, {
+      documentId,
+      page: chunk.page,
+      startIndex: chunk.startIndex + quoteStart,
+      endIndex: chunk.startIndex + quoteStart + trimmedQuote.length,
+      text: trimmedQuote,
+    });
+  }
+
+  return {
+    evidenceId: chunk.id,
+    page: chunk.page,
+    quote: chunk.text,
+    startIndex: chunk.startIndex,
+    endIndex: chunk.endIndex,
+    supportStatus: "grounded",
+  };
 }
 
 export function buildRuleOnlyFallbackReport(input: {

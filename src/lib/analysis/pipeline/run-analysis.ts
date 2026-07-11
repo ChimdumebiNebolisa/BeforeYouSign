@@ -6,6 +6,7 @@ import { shouldUseModelContribution } from "@/lib/rollout/flags";
 import type {
   AnalysisResponse,
   ModelAnalyzer,
+  ModelRetryInput,
   PdfExtractor,
 } from "@/lib/analysis/pipeline/types";
 import {
@@ -42,6 +43,7 @@ export async function runAnalysisPipeline(input: {
         reportError: null,
         mode: "rules_only",
         reportDebug: null,
+        evidenceIndex: (await import("@/lib/evidence/index")).buildEvidenceIndex(registry),
       };
     };
   }
@@ -53,6 +55,7 @@ export async function runAnalysisPipeline(input: {
       response: {
         ok: false,
         requestId,
+        stage: "validating_input",
         error: {
           code: slotProblem.code,
           message: slotProblem.message,
@@ -66,7 +69,7 @@ export async function runAnalysisPipeline(input: {
     if (!parsed.ok) {
       emitSafeAnalysisEvent({
         requestId,
-        stage: "intake",
+        stage: "validating_input",
         failureCode: parsed.problem.code,
         durationMs: Date.now() - startedAt,
       });
@@ -75,6 +78,7 @@ export async function runAnalysisPipeline(input: {
         response: {
           ok: false,
           requestId,
+          stage: "validating_input",
           error: {
             code: parsed.problem.code,
             message: parsed.problem.message,
@@ -89,7 +93,7 @@ export async function runAnalysisPipeline(input: {
     if (!documentResult.ok) {
       emitSafeAnalysisEvent({
         requestId,
-        stage: "extract",
+        stage: "extracting_text",
         failureCode: documentResult.problem.code,
         durationMs: Date.now() - startedAt,
       });
@@ -98,6 +102,7 @@ export async function runAnalysisPipeline(input: {
         response: {
           ok: false,
           requestId,
+          stage: "extracting_text",
           error: {
             code: documentResult.problem.code,
             message: documentResult.problem.message,
@@ -113,6 +118,7 @@ export async function runAnalysisPipeline(input: {
     }
 
     const deterministic = runDeterministicAnalysis(documentResult.document.pages);
+
     const model = await modelAnalyzer({
       document: documentResult.document,
       deterministic,
@@ -120,7 +126,7 @@ export async function runAnalysisPipeline(input: {
 
     emitSafeAnalysisEvent({
       requestId,
-      stage: "complete",
+      stage: "completed",
       mode: model.mode,
       pageCount: documentResult.document.pages.length,
       totalChars: documentResult.document.extraction.totalChars,
@@ -144,7 +150,7 @@ export async function runAnalysisPipeline(input: {
   } catch {
     emitSafeAnalysisEvent({
       requestId,
-      stage: "analysis_failed",
+      stage: "failed",
       failureCode: "analysis_failed",
       durationMs: Date.now() - startedAt,
     });
@@ -153,7 +159,109 @@ export async function runAnalysisPipeline(input: {
       response: {
         ok: false,
         requestId,
+        stage: "failed",
         error: "We hit an unexpected server error while processing this request. Please retry.",
+      },
+    };
+  } finally {
+    releaseClientSlot(clientKey);
+  }
+}
+
+export async function runModelRetryPipeline(input: {
+  request: Request;
+  retry: ModelRetryInput;
+  modelAnalyzer?: ModelAnalyzer;
+}): Promise<{ response: AnalysisResponse; httpStatus: number }> {
+  const requestId = createRequestId();
+  const clientKey = getClientKey(input.request);
+  const startedAt = Date.now();
+  let modelAnalyzer: ModelAnalyzer = input.modelAnalyzer ?? createDefaultModelAnalyzer();
+
+  if (!shouldUseModelContribution() && !input.modelAnalyzer) {
+    modelAnalyzer = async ({ document, deterministic }) => {
+      const { createEvidenceRegistry } = await import("@/lib/evidence/registry");
+      const { buildRuleOnlyFallbackReport } = await import("@/lib/analysis/fallback-report");
+      const { buildEvidenceIndex } = await import("@/lib/evidence/index");
+      const registry = createEvidenceRegistry(document.documentId, document.pages);
+      return {
+        report: buildRuleOnlyFallbackReport({
+          documentId: document.documentId,
+          ruleBasedFindings: deterministic.ruleBasedFindings,
+          deterministicRisk: deterministic.deterministicRisk,
+          evidenceRegistry: registry,
+        }),
+        reportError: null,
+        mode: "rules_only",
+        reportDebug: null,
+        evidenceIndex: buildEvidenceIndex(registry),
+      };
+    };
+  }
+
+  const slotProblem = acquireClientSlot(clientKey);
+  if (slotProblem) {
+    return {
+      httpStatus: slotProblem.httpStatus,
+      response: {
+        ok: false,
+        requestId,
+        stage: "validating_input",
+        error: {
+          code: slotProblem.code,
+          message: slotProblem.message,
+        },
+      },
+    };
+  }
+
+  try {
+    const document = {
+      documentId: input.retry.documentId,
+      pages: input.retry.pages,
+      extraction: input.retry.extraction,
+    };
+
+    const deterministic = runDeterministicAnalysis(document.pages);
+    const model = await modelAnalyzer({ document, deterministic });
+
+    emitSafeAnalysisEvent({
+      requestId,
+      stage: "completed",
+      mode: model.mode,
+      pageCount: document.pages.length,
+      totalChars: document.extraction.totalChars,
+      droppedClaims: model.groundingSummary?.droppedClaims,
+      groundedClaims: model.groundingSummary?.groundedClaims,
+      durationMs: Date.now() - startedAt,
+    });
+
+    return {
+      httpStatus: 200,
+      response: assembleSuccessResponse({
+        requestId,
+        fileName: input.retry.fileName,
+        fileSizeBytes: input.retry.fileSizeBytes,
+        contentType: input.retry.contentType,
+        document,
+        deterministic,
+        model,
+      }),
+    };
+  } catch {
+    emitSafeAnalysisEvent({
+      requestId,
+      stage: "failed",
+      failureCode: "analysis_failed",
+      durationMs: Date.now() - startedAt,
+    });
+    return {
+      httpStatus: 500,
+      response: {
+        ok: false,
+        requestId,
+        stage: "failed",
+        error: "We hit an unexpected server error while retrying analysis. Please try again.",
       },
     };
   } finally {
