@@ -47,19 +47,15 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
 
       <div className="relative">
         <div className="pointer-events-none absolute -inset-1 rounded-[1.75rem] bg-gradient-to-br from-[#00246a]/10 to-transparent opacity-25 blur-sm" />
-        <div
+        <button
+          type="button"
           className={[
             "relative flex min-h-[12.5rem] cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed bg-[#ffffff] p-10 text-center transition-all",
             isDragActive
               ? "border-[#00246a]/45 shadow-[0px_12px_32px_rgba(0,36,106,0.12)]"
               : "border-[#c5c5d3]/35 hover:border-[#00246a]/35",
           ].join(" ")}
-          role="button"
-          tabIndex={0}
           onClick={() => fileInputRef.current?.click()}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click();
-          }}
           onDragEnter={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -83,32 +79,29 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
             handleFile(file);
           }}
         >
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#dbe1ff] text-[#00246a] transition-transform hover:scale-105">
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#dbe1ff] text-[#00246a] transition-transform hover:scale-105">
             <Upload className="h-7 w-7" strokeWidth={2} aria-hidden />
-          </div>
-          <p className="mt-4 font-semibold text-[#191c1e]">Click to upload or drag &amp; drop</p>
-          <p className="mt-1 text-xs text-[#444651]">PDF lease document</p>
-          <button
-            type="button"
-            className="mt-5 h-11 w-full rounded-xl bys-gradient-cta text-sm font-bold text-white shadow-sm transition hover:opacity-95 active:scale-[0.99]"
-            onClick={(e) => {
-              e.stopPropagation();
-              fileInputRef.current?.click();
-            }}
-          >
+          </span>
+          <span className="mt-4 block font-semibold text-[#191c1e]">Click to upload or drag &amp; drop</span>
+          <span className="mt-1 block text-xs text-[#444651]">PDF lease document</span>
+          <span className="mt-5 flex h-11 w-full items-center justify-center rounded-xl bys-gradient-cta text-sm font-bold text-white shadow-sm transition hover:opacity-95 active:scale-[0.99]">
             Choose PDF
-          </button>
-        </div>
+          </span>
+        </button>
       </div>
 
       <p className="mt-3 text-[11px] leading-relaxed text-[#757682]">{PRIVACY_CONTINUE_LINE}</p>
       <p className="mt-2 text-[11px] leading-relaxed text-[#757682]">{UPLOAD_LIMITS_NOTE}</p>
       <p className="mt-2 text-[11px] leading-relaxed text-[#757682]">{OCR_WARNING}</p>
 
-      {errorMessage ? <p className="mt-3 text-sm font-medium text-[#ba1a1a]">{errorMessage}</p> : null}
+      {errorMessage ? (
+        <p className="mt-3 text-sm font-medium text-[#ba1a1a]" role="alert">
+          {errorMessage}
+        </p>
+      ) : null}
 
       {selectedFileName ? (
-        <p className="mt-3 text-sm text-[#444651]">
+        <p className="mt-3 text-sm text-[#444651]" role="status" aria-live="polite">
           Selected: <span className="font-semibold text-[#191c1e]">{selectedFileName}</span>
         </p>
       ) : null}

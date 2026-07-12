@@ -119,7 +119,11 @@ export function SampleLeaseCta({
               </button>
             </div>
 
+            <label htmlFor="sample-lease-preview" className="sr-only">
+              Sample lease text preview
+            </label>
             <textarea
+              id="sample-lease-preview"
               readOnly
               value={previewText}
               className="mt-4 h-56 w-full resize-none rounded-xl bg-[#f2f4f6] p-3 text-sm text-[#191c1e] outline-none ring-1 ring-[#c5c5d3]/25 focus:ring-2 focus:ring-[#00246a]/25"
