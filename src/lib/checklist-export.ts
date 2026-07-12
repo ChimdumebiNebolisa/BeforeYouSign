@@ -1,6 +1,7 @@
 import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 import { FIXED_REPORT_DISCLAIMER } from "@/lib/public-copy";
+import { displayFindingProvenance } from "@/lib/display-labels";
 
 function formatEvidence(ev: { page: number; quote: string; evidenceId?: string }): string {
   const page = `p. ${ev.page}`;
@@ -60,6 +61,7 @@ export function buildChecklistMarkdown(input: {
   if (report.potentialRedFlags.length) {
     report.potentialRedFlags.forEach((f) => {
       lines.push(`- **${f.title}**`);
+      lines.push(`  - Origin: ${displayFindingProvenance(f.provenance)}`);
       if (f.explanation) lines.push(`  - ${f.explanation}`);
       f.evidence?.forEach((ev) => lines.push(`  - Source: ${formatEvidence(ev)}`));
     });

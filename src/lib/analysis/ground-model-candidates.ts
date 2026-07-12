@@ -91,6 +91,7 @@ export function groundModelCandidates(input: {
       category: flag.category as BeforeYouSignReport["potentialRedFlags"][number]["category"],
       title: flag.title,
       severity: flag.severity,
+      provenance: "model" as const,
       explanation: flag.explanation,
       whyItMatters: flag.whyItMatters,
       evidence,

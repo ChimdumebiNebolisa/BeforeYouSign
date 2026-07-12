@@ -2,7 +2,7 @@ import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import type { AnalysisMode } from "@/lib/analysis/pipeline/types";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 import { FIXED_REPORT_DISCLAIMER } from "@/lib/public-copy";
-import { displayReviewPriority } from "@/lib/display-labels";
+import { displayFindingProvenance, displayReviewPriority } from "@/lib/display-labels";
 import { formatAnalysisModeLabel } from "@/lib/analysis-mode-labels";
 import { isClickableGroundedEvidence } from "@/lib/analysis/evidence-click";
 
@@ -121,6 +121,7 @@ export function buildReportMarkdown(input: {
   if (report.potentialRedFlags.length) {
     report.potentialRedFlags.forEach((f) => {
       lines.push(`- **${escapeMd(safeText(f.title))}** (${f.severity})`);
+      lines.push(`  - Origin: ${displayFindingProvenance(f.provenance)}`);
       if (f.explanation) lines.push(`  - ${escapeMd(safeText(f.explanation))}`);
       if (f.whyItMatters) lines.push(`  - Why it matters: ${escapeMd(safeText(f.whyItMatters))}`);
       f.evidence

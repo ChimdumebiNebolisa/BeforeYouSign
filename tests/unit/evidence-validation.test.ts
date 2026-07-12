@@ -48,6 +48,7 @@ describe("evidence validation", () => {
     const rentEvidence = report.moneyAndFees.find((row) => row.label === "Monthly rent")?.evidence?.[0];
     expect(rentEvidence?.evidenceId).toBeDefined();
     expect(rentEvidence?.evidenceId).not.toMatch(/^legacy-/);
+    expect(report.potentialRedFlags[0]?.provenance).toBe("deterministic");
   });
 
   it("rejects quote mismatch when quote not in page text", () => {

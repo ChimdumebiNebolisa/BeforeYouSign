@@ -16,6 +16,7 @@ const validReport = {
       category: "fees",
       title: "Late fee",
       severity: "minor",
+      provenance: "deterministic",
       explanation: "A late fee applies.",
       whyItMatters: "It may add cost.",
       evidence: [{ page: 1, quote: "Late fee of $50" }],
@@ -50,7 +51,8 @@ describe("parseBeforeYouSignReportJson", () => {
   });
 
   it("rejects missing summary", () => {
-    const { summary: _s, ...rest } = validReport;
+    const rest = { ...validReport } as Partial<typeof validReport>;
+    delete rest.summary;
     expect(parseBeforeYouSignReportJson(rest)).toBeNull();
   });
 
@@ -62,6 +64,14 @@ describe("parseBeforeYouSignReportJson", () => {
     const bad = {
       ...validReport,
       potentialRedFlags: [{ ...validReport.potentialRedFlags[0], category: "invalid" }],
+    };
+    expect(parseBeforeYouSignReportJson(bad)).toBeNull();
+  });
+
+  it("rejects invalid finding provenance", () => {
+    const bad = {
+      ...validReport,
+      potentialRedFlags: [{ ...validReport.potentialRedFlags[0], provenance: "guessed" }],
     };
     expect(parseBeforeYouSignReportJson(bad)).toBeNull();
   });

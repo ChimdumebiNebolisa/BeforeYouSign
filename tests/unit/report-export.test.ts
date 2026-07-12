@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { buildChecklistMarkdown } from "@/lib/checklist-export";
 import { buildReportMarkdown } from "@/lib/report-export";
 import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
@@ -130,6 +131,7 @@ describe("buildReportMarkdown", () => {
             category: "renewal",
             title: "Automatic renewal",
             severity: "moderate",
+            provenance: "model",
             explanation: "Lease renews unless you opt out.",
             whyItMatters: "You may stay longer than planned.",
             evidence: [
@@ -162,6 +164,7 @@ describe("buildReportMarkdown", () => {
     expect(md).toContain("AI unavailable");
     expect(md).toContain("ev-deadline");
     expect(md).toContain("Automatic renewal");
+    expect(md).toContain("Origin: AI grounded");
     expect(md).toContain("Why it matters:");
     expect(md).toContain("https://example.org/texas");
     expect(md).toContain("None listed in this report.");
@@ -177,5 +180,30 @@ describe("buildReportMarkdown", () => {
       texasRenterFindings: [],
     });
     expect(md).toContain("Pet policy not specified");
+  });
+});
+
+describe("buildChecklistMarkdown", () => {
+  it("exports red-flag provenance", () => {
+    const md = buildChecklistMarkdown({
+      report: {
+        ...minimalReport,
+        potentialRedFlags: [
+          {
+            id: "flag-fee",
+            category: "fees",
+            title: "Late fee",
+            severity: "moderate",
+            provenance: "deterministic",
+            explanation: "A late fee appears in the lease.",
+            whyItMatters: "It may add cost.",
+            evidence: [],
+          },
+        ],
+      },
+      texasRenterFindings: [],
+    });
+
+    expect(md).toContain("Origin: Pattern scan");
   });
 });

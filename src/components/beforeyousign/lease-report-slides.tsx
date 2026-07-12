@@ -4,7 +4,7 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 import type { BeforeYouSignReport, EvidenceRef, RiskLevel } from "@/lib/analysis/schema";
 import type { EvidenceClickArgs } from "@/lib/analysis/api-schema";
 import { isClickableGroundedEvidence } from "@/lib/analysis/evidence-click";
-import { displayReviewPriority, displaySeverity } from "@/lib/display-labels";
+import { displayFindingProvenance, displayReviewPriority, displaySeverity } from "@/lib/display-labels";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 import { SourceBadge } from "@/components/beforeyousign/source-badge";
 import {
@@ -267,6 +267,7 @@ export function RedFlagsSection({
                       {clampForScan(f.title, 100)}
                     </span>
                     {primary ? <SourceBadge label={FOUND_IN_LEASE_BADGE} /> : null}
+                    <SourceBadge label={displayFindingProvenance(f.provenance)} />
                     <span className="rounded bg-[#e0e3e5] px-1.5 py-px text-[10px] font-semibold tracking-wide text-[#444651]">
                       {displaySeverity(f.severity)}
                     </span>

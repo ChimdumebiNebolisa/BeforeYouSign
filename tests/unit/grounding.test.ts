@@ -38,6 +38,33 @@ describe("groundModelCandidates", () => {
     expect(result.groundingSummary.groundedClaims).toBeGreaterThan(0);
   });
 
+  it("marks grounded model red flags with model provenance", () => {
+    const result = groundModelCandidates({
+      candidate: {
+        ...baseCandidate,
+        moneyAndFees: [],
+        potentialRedFlags: [
+          {
+            id: "flag-late-fee",
+            category: "fees",
+            title: "Late fee needs review",
+            severity: "moderate",
+            explanation: "A late fee appears in the lease.",
+            whyItMatters: "Late fees can increase housing cost.",
+            evidenceIds: [chunkId],
+          },
+        ],
+      },
+      registry,
+      documentId: "ground-test",
+      pages,
+      ruleBasedFindings: [],
+      deterministicRisk: { score: 2, band: "medium", reasons: [] },
+    });
+
+    expect(result.report?.potentialRedFlags[0]?.provenance).toBe("model");
+  });
+
   it("drops invented evidence IDs and falls back to rules-only when nothing grounds", () => {
     const result = groundModelCandidates({
       candidate: {

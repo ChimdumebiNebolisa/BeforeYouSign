@@ -28,11 +28,14 @@ export type FindingCategory =
 
 export type FindingSeverity = "minor" | "moderate" | "critical";
 
+export type FindingProvenance = "deterministic" | "model" | "combined";
+
 export type Finding = {
   id: string;
   category: FindingCategory;
   title: string;
   severity: FindingSeverity;
+  provenance?: FindingProvenance;
   explanation: string;
   whyItMatters: string;
   evidence: EvidenceRef[];
@@ -68,6 +71,7 @@ const FINDING_CATEGORIES = new Set<FindingCategory>([
 ]);
 
 const SEVERITIES = new Set<FindingSeverity>(["minor", "moderate", "critical"]);
+const FINDING_PROVENANCE = new Set<FindingProvenance>(["deterministic", "model", "combined"]);
 
 function isNonEmptyString(v: unknown): v is string {
   return typeof v === "string" && v.trim().length > 0;
@@ -113,6 +117,7 @@ function parseFinding(v: unknown): Finding | null {
   if (!FINDING_CATEGORIES.has(o.category as FindingCategory)) return null;
   if (!isNonEmptyString(o.title)) return null;
   if (!SEVERITIES.has(o.severity as FindingSeverity)) return null;
+  if (o.provenance !== undefined && !FINDING_PROVENANCE.has(o.provenance as FindingProvenance)) return null;
   if (!isNonEmptyString(o.explanation)) return null;
   if (!isNonEmptyString(o.whyItMatters)) return null;
   if (!Array.isArray(o.evidence)) return null;
@@ -127,6 +132,7 @@ function parseFinding(v: unknown): Finding | null {
     category: o.category as FindingCategory,
     title: o.title.trim(),
     severity: o.severity as FindingSeverity,
+    ...(o.provenance ? { provenance: o.provenance as FindingProvenance } : {}),
     explanation: o.explanation.trim(),
     whyItMatters: o.whyItMatters.trim(),
     evidence,

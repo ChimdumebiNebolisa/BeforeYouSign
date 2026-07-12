@@ -478,6 +478,7 @@ export function buildRuleOnlyFallbackReport(input: {
         category: categoryMap[f.category],
         title: fallbackFlagTitle(f.category, f.quote),
         severity,
+        provenance: "deterministic" as const,
         explanation: fallbackFlagExplanation(f.category, f.quote),
         whyItMatters: fallbackFlagWhyItMatters(f.category, f.quote),
         evidence: toEvidence(input.evidenceRegistry, input.documentId, f, pageTexts),

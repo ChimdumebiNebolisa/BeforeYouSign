@@ -1,10 +1,10 @@
 # BeforeYouSign Daily Product Hardening Progress
 
-Last updated: 2026-07-11 14:30 America/Chicago
+Last updated: 2026-07-12 13:08 America/Chicago
 
 ## Current phase
 
-Phase 1: baseline and persistent progress record.
+Phase 8: finding provenance and conflict handling started.
 
 This file is the durable ledger for the scheduled daily hardening task. It must be checked against the current repository before selecting future work.
 
@@ -17,7 +17,7 @@ This file is the durable ledger for the scheduled daily hardening task. It must 
 - [x] Phase 5: Evaluation regression gates started with deterministic release gates documented in `evaluation/README.md`.
 - [x] Phase 6: Runtime model-schema hardening started with JSON parsing, candidate schema validation, banned wording checks, and fallback behavior.
 - [x] Phase 7: Evidence grounding started with evidence registry, normalization, grounding tests, and dropped-claim accounting.
-- [ ] Phase 8: Finding provenance and conflict handling.
+- [x] Phase 8: Finding provenance and conflict handling started with red-flag producer provenance for deterministic fallback and model-grounded findings.
 - [x] Phase 9: Model operational boundaries started with concurrency limits, provider retry limit config, and safe model/failure event categories.
 - [ ] Phase 10: Report-lifecycle decision.
 - [ ] Phase 11A: One-request no-recovery implementation, pending report-lifecycle decision.
@@ -198,6 +198,63 @@ No bundle-size, route bundle, PDF-preview, report-rendering, or large-report mea
 Affected in this run:
 
 - `docs/BEFOREYOUSIGN_DAILY_PROGRESS.md`
+
+### 2026-07-12: Red-flag finding provenance
+
+Selected work unit: Phase 8 vertical slice for red-flag provenance from producer to consumer.
+
+Existing state verified:
+
+- `git status --short` at start showed unrelated dirty/untracked files: `evaluation/baselines/deterministic-v1.json`, `qa-screenshots/`, `redesign/`, and `scripts/p0a-browser-qa.mjs`.
+- Repository-local `AGENTS.md` was still absent; the automation prompt's AGENTS instructions were followed.
+- `src/lib/analysis/schema.ts` had finding category, severity, evidence, and support status, but no finding provenance.
+- `src/lib/analysis/fallback-report.ts` assembled deterministic rule-only red flags without producer origin.
+- `src/lib/analysis/ground-model-candidates.ts` assembled grounded model red flags without producer origin.
+- `src/components/beforeyousign/lease-report-slides.tsx`, `src/lib/report-export.ts`, and `src/lib/checklist-export.ts` rendered/exported red flags without provenance.
+
+Implemented behavior:
+
+- Added `FindingProvenance = "deterministic" | "model" | "combined"` to the report schema, with runtime validation when present.
+- Marked rule-only fallback red flags as `deterministic`.
+- Marked grounded model red flags as `model`.
+- Added user-facing provenance labels: `Pattern scan`, `AI grounded`, `Pattern + AI`, and a legacy fallback `Origin unknown`.
+- Displayed provenance badges in the report's terms-to-review UI.
+- Included provenance in full report Markdown export and question-checklist Markdown export.
+- Added regression tests for schema validation, fallback producer provenance, model producer provenance, and both export paths.
+
+Self-review findings:
+
+- First pass missed the checklist export consumer; it was updated to include the same red-flag origin line as full report export.
+- The schema keeps provenance optional for legacy report JSON compatibility, but all newly assembled fallback/model red flags now include provenance.
+- No process-local persistence, recovery, deletion, legal references, intake limits, model prompt shape, or evidence matching semantics were changed.
+
+Blast radius:
+
+- Affected: runtime report schema, deterministic fallback report assembly, grounded model report assembly, red-flag UI rendering, Markdown exports, focused unit tests.
+- Not affected: PDF intake, text intake, extraction limits, normalization, deterministic rule matching, scoring, Gemini request prompt/schema, evidence registry, report persistence, recovery endpoints, deletion behavior, CI workflows, legal-reference data, security headers.
+
+Verification:
+
+- Baseline focused command before edits: `npm test -- tests/unit/grounding.test.ts tests/unit/report-export.test.ts tests/unit/schema.test.ts` -> exit 0; 3 files passed, 16 tests passed.
+- Focused post-change command: `npm test -- tests/unit/grounding.test.ts tests/unit/report-export.test.ts tests/unit/schema.test.ts tests/unit/evidence-validation.test.ts` -> exit 0; 4 files passed, 24 tests passed.
+- Broad command: `npm test` -> exit 0; 21 files passed, 138 tests passed.
+- Broad command: `npm run typecheck` -> exit 0.
+- Broad command: `npm run lint` -> exit 0 with 2 pre-existing warnings outside this work unit: `coverage/block-navigation.js` unused eslint-disable and `src/app/api/analyze/route.ts` unused `parseAnalysisErrorMessage`.
+- Final focused command after cleanup: `npm test -- tests/unit/schema.test.ts tests/unit/grounding.test.ts tests/unit/report-export.test.ts tests/unit/evidence-validation.test.ts` -> exit 0; 4 files passed, 24 tests passed.
+- Final command: `npm run typecheck` -> exit 0.
+- Final command: `npm run lint` -> exit 0 with the same 2 pre-existing warnings outside this work unit.
+- Production build: `npm run build` -> exit 0; Next.js 16.2.0 compiled successfully and generated 8 static pages.
+
+Public claims verified:
+
+- Introduced UI/export labels `Pattern scan`, `AI grounded`, and `Pattern + AI`.
+- Verified by producer tests that deterministic fallback red flags use `deterministic` and grounded model red flags use `model`; export tests verify the displayed labels.
+- No legal, privacy, retention, security-header, accessibility, or model-quality claims were introduced or changed.
+
+GitHub and deployment status:
+
+- Branch: `main`.
+- Commit/push/deploy: not yet performed in this entry because unrelated pre-existing dirty files remain in the working tree and must be excluded carefully if publication is selected.
 
 Inspected in this run:
 
