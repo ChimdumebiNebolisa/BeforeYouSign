@@ -29,7 +29,7 @@ PolicyInsight reference clone: `../policy-insight-reference` (read-only).
 | Sample leases | `public/sample-leases/`, `public/samples/` |
 | Gemini retry (schema strip) | `src/lib/analysis/gemini-report.ts` |
 | Error taxonomy (runtime) | `AnalysisProblemCode` in `limits.ts` |
-| OCR / async hooks (stubs) | `src/lib/ocr/`, `src/lib/jobs/` |
+| OCR hook (deferred) | `src/lib/ocr/` |
 | Vitest unit + integration tests | `tests/unit/`, `tests/integration/` |
 
 ---
@@ -48,9 +48,9 @@ PolicyInsight reference clone: `../policy-insight-reference` (read-only).
 | Evidence sidebar + citation chips | Report slides + quote highlight | Medium | None | Low | Medium | **Adapt** | evidenceId-first highlight in lease text viewer |
 | Integration test discipline | 13 unit + 2 integration tests | High | None | Low | Medium | **Implement** | API route tests + lease fixtures |
 | PostgreSQL + Flyway | None | Low for MVP | High | Higher retention | High | **Reject** | Not needed for lease review without accounts |
-| Persistent async jobs | In-memory stub (`BYS_ASYNC_ENABLED`) | Low | High | Medium | High | **Defer** | Sync pipeline sufficient |
+| Persistent async jobs | Not implemented | Low | High | Medium | High | **Out of scope** | Sync pipeline is sufficient for the no-database MVP |
 | Owner cookies | None | Low | Medium | Medium | High | **Defer** | No account model |
-| Expiring share links | Recovery stub (unwired) | Low | Medium | Higher | High | **Defer** | Out of renter MVP scope |
+| Expiring share links | None | Low | Medium | Higher | High | **Defer** | Out of renter MVP scope |
 | Grounded Q&A | None | Low | Medium | Medium | High | **Defer** | Not lease-review critical path |
 | Rate limiting (in-memory 10/min) | `acquireClientSlot` (concurrency=1) | Low | Low | Low | Low | **Defer** | Existing slot guard adequate |
 | Scheduled retention cleanup | None | Low | Medium | Positive if wrong | Medium | **Defer** | No server-side document storage |
@@ -77,7 +77,7 @@ The API field `documentId` is a **content integrity key** (SHA256 prefix of norm
 
 ## Infrastructure deliberately avoided
 
-PostgreSQL, Flyway, H2, Testcontainers, Spring Boot, Java, persistent jobs, external queues, user accounts, share links, Q&A, scheduled cleanup, stored document history, wiring unused recovery/async stubs.
+PostgreSQL, Flyway, H2, Testcontainers, Spring Boot, Java, persistent jobs, external queues, user accounts, share links, Q&A, scheduled cleanup, stored document history, and report recovery.
 
 ---
 

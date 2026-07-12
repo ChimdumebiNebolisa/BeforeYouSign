@@ -50,6 +50,8 @@ describe("runAnalysisPipeline", () => {
       expect(response.mode).toBe("rules_only");
       expect(response.extractedPages.length).toBe(1);
       expect(response.document.extraction.method).toBe("pasted_text");
+      expect("recoveryToken" in response).toBe(false);
+      expect("jobId" in response).toBe(false);
     }
   });
 
