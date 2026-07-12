@@ -313,7 +313,7 @@ Implementation completed:
 - `4e64f16` `architecture: remove dormant process-local recovery and async job paths` — removed process-local recovery/async routes, stores, workers, and flags; kept synchronous analysis as the supported lifecycle.
 - `0c52703` `security: add tested baseline headers and CSP` — added the tested same-origin CSP and baseline browser security headers.
 - `62b9a50` `accessibility: harden intake and report controls` — fixed nested PDF intake controls, added tab/dialog/form/status semantics, added keyboard E2E coverage, and declared `@playwright/test`.
-- Final CI/documentation commit: pending until this record is committed.
+- `510aa84` `ci: verify production-build browser flow` — added production-build Playwright CI and reconciled public/config documentation.
 
 Verification results for the final local gate:
 
@@ -331,5 +331,5 @@ Publication state for this run:
 
 - Working branch: `agent/one-shot-hardening`, pushed to `origin/agent/one-shot-hardening`.
 - Commits `34a95e4`, `4e64f16`, `0c52703`, and `62b9a50` were each pushed and fast-forward merged into `origin/main`.
-- The CI/documentation commit containing this record remains to be created and published.
+- The CI/documentation commit containing this record is `510aa84` and is pushed and merged into `origin/main`.
 - No deployment was performed; production deployment verification remains an explicit deferred item.
