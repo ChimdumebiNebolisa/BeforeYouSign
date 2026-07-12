@@ -1,6 +1,6 @@
 # BeforeYouSign Daily Product Hardening Progress
 
-Last updated: 2026-07-12 13:08 America/Chicago
+Last updated: 2026-07-12 13:10 America/Chicago
 
 ## Current phase
 
@@ -254,7 +254,11 @@ Public claims verified:
 GitHub and deployment status:
 
 - Branch: `main`.
-- Commit/push/deploy: not yet performed in this entry because unrelated pre-existing dirty files remain in the working tree and must be excluded carefully if publication is selected.
+- Code commit: `3b07c0c` (`Add report finding provenance`) pushed to `origin/main`.
+- PR: not used; direct `main` push was allowed by the automation override.
+- Vercel project: `before-you-sign` (`prj_DzQUvXeIbeQeDK1HCg3g7D1rAsol`) in team `team_Hbamk0DrxWvUVBm3MGmRW9T0`.
+- Deployment from code commit: `dpl_ChnLdEVuQ3fdFr9pSVavE9E823Jm`, target `production`, state `READY`, URL `https://before-you-sign-8ylwfrbf4-chimdumebinebolisagmailcoms-projects.vercel.app`.
+- Production aliases reported by Vercel: `https://before-you-sign-one.vercel.app`, `https://before-you-sign-chimdumebinebolisagmailcoms-projects.vercel.app`, and `https://before-you-sign-git-main-chimdumebinebolisagmailcoms-projects.vercel.app`.
 
 Inspected in this run:
 
