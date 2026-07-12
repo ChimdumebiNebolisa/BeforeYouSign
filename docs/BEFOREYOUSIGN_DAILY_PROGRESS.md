@@ -4,7 +4,11 @@ Last updated: 2026-07-12 13:10 America/Chicago
 
 ## Current phase
 
-Phase 8: finding provenance and conflict handling started.
+One-shot hardening run: report lifecycle selected; security, accessibility, CI, and documentation work in progress.
+
+The daily single-work-unit policy has been superseded for this run by
+`docs/BEFOREYOUSIGN_ONE_SHOT_IMPLEMENTATION_TASK.md`, which preserves small
+verified commits and immediate push/merge boundaries.
 
 This file is the durable ledger for the scheduled daily hardening task. It must be checked against the current repository before selecting future work.
 
@@ -19,9 +23,9 @@ This file is the durable ledger for the scheduled daily hardening task. It must 
 - [x] Phase 7: Evidence grounding started with evidence registry, normalization, grounding tests, and dropped-claim accounting.
 - [x] Phase 8: Finding provenance and conflict handling started with red-flag producer provenance for deterministic fallback and model-grounded findings.
 - [x] Phase 9: Model operational boundaries started with concurrency limits, provider retry limit config, and safe model/failure event categories.
-- [ ] Phase 10: Report-lifecycle decision.
+- [x] Phase 10: Report-lifecycle decision: one-request synchronous analysis with no report recovery selected.
 - [ ] Phase 11A: One-request no-recovery implementation, pending report-lifecycle decision.
-- [ ] Phase 11B: Short-lived persistent recovery, pending report-lifecycle decision.
+- [x] Phase 11B: Short-lived persistent recovery not selected; no database or persistent report store is in scope.
 - [x] Phase 12: Report schema versioning started with `analysisVersion: 2` in API success responses.
 - [x] Phase 13: Privacy and logging hardening started with safe analysis event sanitization.
 - [x] Phase 14: Rate limits and concurrency controls started with per-client in-flight request limiting.
