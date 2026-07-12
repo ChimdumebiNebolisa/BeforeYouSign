@@ -1,6 +1,6 @@
 # BeforeYouSign Daily Product Hardening Progress
 
-Last updated: 2026-07-12 13:10 America/Chicago
+Last updated: 2026-07-12 16:40 America/Chicago
 
 ## Current phase
 
@@ -24,19 +24,19 @@ This file is the durable ledger for the scheduled daily hardening task. It must 
 - [x] Phase 8: Finding provenance and conflict handling started with red-flag producer provenance for deterministic fallback and model-grounded findings.
 - [x] Phase 9: Model operational boundaries started with concurrency limits, provider retry limit config, and safe model/failure event categories.
 - [x] Phase 10: Report-lifecycle decision: one-request synchronous analysis with no report recovery selected.
-- [ ] Phase 11A: One-request no-recovery implementation, pending report-lifecycle decision.
+- [x] Phase 11A: One-request no-recovery implementation; dormant process-local recovery and async paths removed.
 - [x] Phase 11B: Short-lived persistent recovery not selected; no database or persistent report store is in scope.
 - [x] Phase 12: Report schema versioning started with `analysisVersion: 2` in API success responses.
 - [x] Phase 13: Privacy and logging hardening started with safe analysis event sanitization.
 - [x] Phase 14: Rate limits and concurrency controls started with per-client in-flight request limiting.
-- [ ] Phase 15: CSP and security headers.
-- [ ] Phase 16: Cleanup guarantees.
-- [x] Phase 17: Frontend E2E coverage started with `tests/e2e/smoke.spec.ts`; not yet confirmed as production-build CI coverage.
-- [ ] Phase 18: Accessibility hardening.
+- [x] Phase 15: CSP and security headers with unit-tested Next.js header policy.
+- [x] Phase 16: Cleanup guarantees; no temporary files or server-side report/job stores are used by the supported lifecycle.
+- [x] Phase 17: Frontend E2E coverage runs against the production build in CI.
+- [x] Phase 18: Accessibility hardening for intake tabs, PDF intake, text controls, dialogs, and live statuses.
 - [ ] Phase 19: Frontend performance.
 - [x] Phase 20: Privacy-safe observability started with bounded safe analysis event fields.
 - [x] Phase 21: Legal-reference verification started with Texas reference metadata tests and `npm run verify:legal`.
-- [ ] Phase 22: Documentation reconciliation.
+- [x] Phase 22: Documentation reconciled with the synchronous no-recovery lifecycle and CI gates.
 
 ## Completed work units
 
@@ -59,34 +59,26 @@ Blast radius:
 
 ## Current in-progress work unit
 
-None.
+One-shot hardening run is complete; final publication record is appended below after the last commit is merged.
 
 ## Report-lifecycle decision status
 
-Unresolved and blocked on the required user decision.
-
-Recommendation: choose one-request analysis with no report recovery unless there is a concrete user need for returning to a previous report after refresh or sharing. It is the smallest privacy-preserving model and matches the README's intended no-database MVP.
+Resolved: one-request analysis with no report recovery.
 
 Current implementation facts:
 
 - Synchronous `POST /api/analyze` returns the analysis response directly.
-- `BYS_RECOVERY_ENABLED=1` exposes `GET` and `DELETE /api/reports/[recoveryToken]`.
-- Recovery tokens are high entropy, but reports are stored in a process-local `Map` with a 24-hour TTL.
-- `BYS_ASYNC_ENABLED=1` exposes process-local async job routes with a 30-minute TTL.
-- Process-local recovery and jobs are not reliable across serverless instances, restarts, or horizontal scaling.
-
-Blocking question for a future run: should BeforeYouSign use one-request analysis with no report recovery, or explicit short-lived persistent report recovery?
+- The only supported report path is synchronous `POST /api/analyze`, which returns the analysis response directly.
+- Process-local recovery and async job routes, stores, and flags were removed because they were not reliable across serverless instances, restarts, or horizontal scaling.
+- Results remain in browser state and are intentionally lost on refresh.
 
 ## Deferred items
 
-- Report-lifecycle implementation is deferred until the product decision is recorded.
-- CSP policy is deferred until required scripts, styles, workers, PDF preview resources, fonts, and provider connections are inventoried.
 - Live Gemini behavior is not verified locally without provider credentials and should not be required for deterministic CI.
 - Production deployment verification is deferred until a verified deploy step is selected.
 
 ## Blockers
 
-- Report lifecycle: product decision required.
 - External model behavior: no live provider call was run in this baseline audit.
 - Production behavior: no Vercel deployment or production logs were inspected in this baseline audit.
 
@@ -310,3 +302,34 @@ Legal-reference scope remains Texas renter references as implemented in `src/lib
 - Push: pending.
 - PR: not used; direct commit to `main` is allowed by the current automation override if verification passes and unrelated changes are preserved.
 - Deployment: not performed in this baseline documentation run.
+
+## 2026-07-12: One-shot hardening completion record
+
+Selected task: execute the remaining roadmap hardening in one run with small commits, detailed messages, and immediate push/fast-forward merge into `main`.
+
+Implementation completed:
+
+- `34a95e4` `docs: replace daily roadmap with one-shot hardening task` — added the one-shot task and recorded the no-recovery decision.
+- `4e64f16` `architecture: remove dormant process-local recovery and async job paths` — removed process-local recovery/async routes, stores, workers, and flags; kept synchronous analysis as the supported lifecycle.
+- `0c52703` `security: add tested baseline headers and CSP` — added the tested same-origin CSP and baseline browser security headers.
+- `62b9a50` `accessibility: harden intake and report controls` — fixed nested PDF intake controls, added tab/dialog/form/status semantics, added keyboard E2E coverage, and declared `@playwright/test`.
+- Final CI/documentation commit: pending until this record is committed.
+
+Verification results for the final local gate:
+
+- `npm test` -> exit 0; 22 files passed, 141 tests passed.
+- `npm run test:coverage` -> exit 0; 22 files passed, 141 tests passed; 98.09% statements, 96.61% branches, 100% functions, 98.09% lines.
+- `npm run typecheck` -> exit 0.
+- `npm run lint` -> exit 0 with two pre-existing warnings: generated `coverage/block-navigation.js` unused eslint-disable and unused `parseAnalysisErrorMessage` in `src/app/api/analyze/route.ts`.
+- `npm run evaluate` -> exit 0; 1 fixture, average grounding rate 1, unsupported finding rate 0.
+- `npm run verify:legal` -> exit 0; 10 unique IDs and metadata checks passed.
+- `npm run build` -> exit 0; production build generated only the supported routes `/`, `/api/analyze`, and `/api/analyze/retry-model` plus static icons.
+- `npm run test:e2e` against an explicitly owned production server on port 3100 -> exit 0; 2 tests passed.
+- The local E2E command initially exposed the missing `@playwright/test` dependency and a stale port-3000 listener; the dependency was added, the stale listener was not modified, and the final check used an owned port-3100 server.
+
+Publication state for this run:
+
+- Working branch: `agent/one-shot-hardening`, pushed to `origin/agent/one-shot-hardening`.
+- Commits `34a95e4`, `4e64f16`, `0c52703`, and `62b9a50` were each pushed and fast-forward merged into `origin/main`.
+- The CI/documentation commit containing this record remains to be created and published.
+- No deployment was performed; production deployment verification remains an explicit deferred item.

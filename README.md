@@ -64,6 +64,8 @@ Environment variables used:
 ```md
 BYS_AI_KEY: Google AI API key for Gemini (server-side only; never use NEXT_PUBLIC_).
 BYS_GEMINI_MODEL: Optional model id; defaults to gemini-2.5-flash if unset.
+BYS_AI_TIMEOUT_MS: Optional server-side model timeout in milliseconds.
+BYS_MODEL_ENABLED: Set to 0 to exercise deterministic fallback behavior locally.
 ```
 
 Optional for development:
@@ -205,7 +207,7 @@ flowchart LR
 
 ## Verification
 
-Pull requests run the **QA script syntax** GitHub Actions workflow, which installs dependencies and verifies the committed QA scripts parse successfully:
+Pull requests and pushes to `main` run CI for lint, typecheck, unit tests, coverage, deterministic evaluation, legal references, a production build, and Playwright browser tests against that production build. The separate QA syntax workflow also verifies the committed QA scripts parse successfully:
 
 ```bash
 node --check scripts/phase2-scan-smoke.mjs
@@ -219,6 +221,10 @@ Run unit tests and coverage (critical modules):
 ```bash
 npm test
 npm run test:coverage
+npm run evaluate
+npm run verify:legal
+npm run build
+npm run test:e2e
 ```
 
 Run static linting:
@@ -256,4 +262,4 @@ The browser QA scripts use Playwright and write screenshots under `qa-screenshot
 - **Single synchronous HTTP request** — very large PDFs or slow model responses may hit hosting timeouts (`maxDuration` on the route is capped for serverless-style deployments).
 - **PDF text extraction is not OCR** — scanned image-only PDFs may yield little or no extractable text.
 - **Evidence highlighting** uses substring matching (`indexOf` on the quote); minor mismatches between model quotes and extracted text can prevent a highlight.
-- **Automated `npm test` suite** is not present in this repo; use the **QA script syntax** workflow, **`npm run lint`**, **`npm run smoke:scan`**, and the Playwright QA scripts for repeatable checks.
+- **No persistent report recovery or background jobs** — analysis is a single synchronous request and results remain in browser state only.

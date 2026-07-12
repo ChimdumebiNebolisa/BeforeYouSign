@@ -44,6 +44,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Production-build browser tests
+        run: npm run test:e2e
+
       - name: Validate QA scripts parse
         run: |
           node --check scripts/phase2-scan-smoke.mjs
