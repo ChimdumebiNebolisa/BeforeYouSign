@@ -39,6 +39,21 @@ describe("findDepositSnippets", () => {
     expect(hits.length).toBeGreaterThan(0);
     expect(hits.some((h) => /security deposit/i.test(h.quote))).toBe(true);
   });
+
+  it("finds a deposit set as one month's rent", () => {
+    const hits = findDepositSnippets([
+      {
+        page: 1,
+        text: "The security deposit equals one month's rent and is due before move-in.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]).toMatchObject({
+      page: 1,
+      quote: "security deposit equals one month's rent and is due before move-in",
+    });
+  });
 });
 
 describe("findFeeSnippets", () => {
@@ -47,6 +62,22 @@ describe("findFeeSnippets", () => {
     expect(hits.length).toBeGreaterThan(0);
     expect(hits.some((h) => /late fee/i.test(h.quote))).toBe(true);
   });
+
+  it("treats recurring pet rent as a pet fee rather than base rent", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Pet rent of $35 per approved pet per month is due with the monthly rent.",
+      },
+    ];
+
+    expect(findFeeSnippets(pages)).toHaveLength(1);
+    expect(findFeeSnippets(pages)[0]).toMatchObject({
+      page: 1,
+      quote: "Pet rent of $35 per approved pet per month is due with the monthly rent",
+    });
+    expect(findRentSnippets(pages)).toEqual([]);
+  });
 });
 
 describe("findNoticeSnippets", () => {
@@ -54,6 +85,36 @@ describe("findNoticeSnippets", () => {
     const hits = findNoticeSnippets(standardPages);
     expect(hits.length).toBeGreaterThan(0);
     expect(hits.some((h) => /60 days/i.test(h.quote))).toBe(true);
+  });
+
+  it("finds a move-out deadline written with words and parenthetical numerals", () => {
+    const hits = findNoticeSnippets([
+      {
+        page: 1,
+        text: "Tenant shall provide at least sixty (60) days prior written notice of intent to vacate.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]).toMatchObject({
+      page: 1,
+      quote: "sixty (60) days prior written notice of intent to vacate",
+    });
+  });
+
+  it("finds a parenthetical deadline that follows written notice", () => {
+    const hits = findNoticeSnippets([
+      {
+        page: 1,
+        text: "Tenant must provide written notice at least thirty (30) calendar days before the end of the lease term.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]).toMatchObject({
+      page: 1,
+      quote: "written notice at least thirty (30) calendar days",
+    });
   });
 });
 
@@ -86,6 +147,21 @@ describe("findUnclearLeasePhrases", () => {
     const hits = findUnclearLeasePhrases(standardPages);
     expect(hits.length).toBeGreaterThan(0);
     expect(hits.some((h) => /discretion/i.test(h.quote))).toBe(true);
+  });
+
+  it("finds fees imposed at management's sole discretion", () => {
+    const hits = findUnclearLeasePhrases([
+      {
+        page: 1,
+        text: "Management may impose additional administrative fees at its sole discretion.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]).toMatchObject({
+      page: 1,
+      quote: "its sole discretion",
+    });
   });
 
   it("returns empty for clear text", () => {

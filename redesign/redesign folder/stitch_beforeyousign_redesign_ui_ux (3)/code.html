@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lease Analysis Report - BeforeYouSign</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#f8f9ff",
+                      "on-tertiary-fixed": "#221534",
+                      "surface-bright": "#f8f9ff",
+                      "on-tertiary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "on-secondary-container": "#6f650a",
+                      "error": "#ba1a1a",
+                      "on-background": "#0b1c30",
+                      "error-container": "#ffdad6",
+                      "on-primary": "#ffffff",
+                      "tertiary-fixed": "#eddcff",
+                      "surface-variant": "#d3e4fe",
+                      "surface-container-low": "#eff4ff",
+                      "on-primary-container": "#86a0cd",
+                      "surface-tint": "#455f88",
+                      "surface-dim": "#cbdbf5",
+                      "surface-container": "#e5eeff",
+                      "on-secondary": "#ffffff",
+                      "secondary-fixed": "#f2e580",
+                      "surface-container-highest": "#d3e4fe",
+                      "tertiary": "#271a39",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "secondary": "#695f02",
+                      "surface-container-high": "#dce9ff",
+                      "secondary-fixed-dim": "#d5c867",
+                      "primary": "#002045",
+                      "on-primary-fixed-variant": "#2d476f",
+                      "on-tertiary-fixed-variant": "#4f4062",
+                      "inverse-primary": "#adc7f7",
+                      "primary-container": "#1a365d",
+                      "outline-variant": "#c4c6cf",
+                      "on-primary-fixed": "#001b3c",
+                      "tertiary-container": "#3d2f50",
+                      "on-secondary-fixed": "#201c00",
+                      "on-surface": "#0b1c30",
+                      "on-tertiary-container": "#a997be",
+                      "tertiary-fixed-dim": "#d2bfe8",
+                      "on-error": "#ffffff",
+                      "background": "#f8f9ff",
+                      "outline": "#74777f",
+                      "on-surface-variant": "#43474e",
+                      "primary-fixed-dim": "#adc7f7",
+                      "secondary-container": "#f2e580",
+                      "primary-fixed": "#d6e3ff",
+                      "on-secondary-fixed-variant": "#4f4800",
+                      "inverse-surface": "#213145"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "card-padding": "2rem",
+                      "annotation-offset": "1rem",
+                      "section-gap": "5rem",
+                      "gutter": "1.5rem",
+                      "container-max": "1120px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "note-text": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "note-text": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "450"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md text-body-md antialiased pb-24 md:pb-0">
+<!-- Top Navigation (Mobile) -->
+<header class="bg-surface dark:bg-primary-container text-primary dark:text-primary-fixed border-b border-outline-variant dark:border-primary flex justify-between items-center w-full px-6 py-4 max-w-container-max mx-auto md:hidden sticky top-0 z-50">
+<div class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed">
+            BeforeYouSign
+        </div>
+<button class="text-primary p-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</header>
+<main class="max-w-container-max mx-auto px-4 py-6 md:hidden">
+<!-- Header Section -->
+<div class="mb-8 text-center">
+<h1 class="text-headline-md font-headline-md text-primary mb-2">Lease Analysis</h1>
+<p class="text-body-md font-body-md text-on-surface-variant">Draft Analysis</p>
+</div>
+<!-- Document Toggle -->
+<div class="flex justify-center mb-8">
+<div class="bg-surface-container-high rounded-full p-1 inline-flex">
+<button class="px-6 py-2 rounded-full bg-primary-container text-on-primary-container text-label-md font-label-md font-bold shadow-sm">Report</button>
+<button class="px-6 py-2 rounded-full text-on-surface-variant text-label-md font-label-md font-medium">Original Lease</button>
+</div>
+</div>
+<!-- Summary Card -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 mb-6 shadow-sm">
+<div class="flex items-center gap-3 mb-4">
+<div class="bg-primary-container text-on-primary-container p-2 rounded-lg">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+</div>
+<h2 class="text-headline-md font-headline-md text-primary">Summary</h2>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant mb-6">
+                This lease appears to be a standard Texas Association of Realtors (TAR) template, but it includes several custom addendums. There are a few clauses you should review carefully before signing.
+            </p>
+<div class="flex gap-4">
+<div class="bg-surface-container p-4 rounded-lg flex-1 text-center border border-outline-variant/50">
+<div class="text-headline-md font-headline-md text-primary mb-1">3</div>
+<div class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider text-xs">High Priority</div>
+</div>
+<div class="bg-surface-container p-4 rounded-lg flex-1 text-center border border-outline-variant/50">
+<div class="text-headline-md font-headline-md text-primary mb-1">5</div>
+<div class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider text-xs">Medium Priority</div>
+</div>
+</div>
+</div>
+<!-- Terms to Review Section -->
+<h3 class="text-body-lg font-body-lg font-bold text-primary mb-4 px-2">Terms to Review</h3>
+<!-- Analysis Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-5 mb-4 shadow-sm relative overflow-hidden">
+<!-- Review Priority Badge -->
+<div class="absolute top-0 right-0 bg-secondary-container text-on-secondary-container px-3 py-1 rounded-bl-lg text-xs font-bold uppercase tracking-wider border-l border-b border-outline-variant/30">
+                High Priority
+            </div>
+<div class="flex items-start gap-3 mb-3 pr-24">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">priority_high</span>
+<h4 class="text-body-md font-body-md font-bold text-primary">Early Termination Fee</h4>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg mb-4 border border-outline-variant/50">
+<p class="text-body-md font-body-md text-on-surface-variant">
+<span class="font-bold text-primary">Plain English:</span> You will be charged a penalty of two months' rent if you break the lease early, regardless of the reason.
+                </p>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-outline-variant/50">
+<span class="text-label-md font-label-md text-on-surface-variant">Clause 14.B</span>
+<button class="text-primary text-label-md font-label-md font-bold hover:underline">View in Lease</button>
+</div>
+</div>
+<!-- Analysis Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-5 mb-4 shadow-sm relative overflow-hidden">
+<!-- Review Priority Badge -->
+<div class="absolute top-0 right-0 bg-surface-variant text-on-surface-variant px-3 py-1 rounded-bl-lg text-xs font-bold uppercase tracking-wider border-l border-b border-outline-variant/30">
+                Medium Priority
+            </div>
+<div class="flex items-start gap-3 mb-3 pr-24">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">build</span>
+<h4 class="text-body-md font-body-md font-bold text-primary">Maintenance Deductible</h4>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg mb-4 border border-outline-variant/50">
+<p class="text-body-md font-body-md text-on-surface-variant">
+<span class="font-bold text-primary">Plain English:</span> You are responsible for the first $100 of any repair cost, even if you didn't cause the damage. This is unusual for Texas standard leases.
+                </p>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-outline-variant/50">
+<span class="text-label-md font-label-md text-on-surface-variant">Clause 18.D(1)</span>
+<button class="text-primary text-label-md font-label-md font-bold hover:underline">View in Lease</button>
+</div>
+</div>
+<!-- Texas Rights Section -->
+<h3 class="text-body-lg font-body-lg font-bold text-primary mb-4 px-2 mt-8">Texas Renter Checks</h3>
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-5 mb-4 shadow-sm">
+<div class="flex items-start gap-3 mb-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">gavel</span>
+<h4 class="text-body-md font-body-md font-bold text-primary">Security Deposit Return</h4>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant mb-4 pl-9">
+                Texas law requires landlords to return security deposits within 30 days. Your lease incorrectly states 60 days.
+            </p>
+<div class="pl-9">
+<button class="bg-surface text-primary border border-primary px-4 py-2 rounded-full text-label-md font-label-md font-bold">See Texas Property Code § 92.103</button>
+</div>
+</div>
+</main>
+<!-- Fixed Bottom CTA (Mobile) -->
+<div class="fixed bottom-0 left-0 right-0 bg-surface-container-lowest border-t border-outline-variant p-4 md:hidden z-40 pb-safe">
+<button class="w-full bg-primary-container text-on-primary-container rounded-full py-3 text-label-md font-label-md font-bold shadow-sm hover:shadow-md transition-shadow">
+            Export Report
+        </button>
+<p class="text-[10px] text-center text-on-surface-variant mt-2 px-4 leading-tight">
+            BeforeYouSign provides AI-powered analysis for educational purposes. It does not provide legal advice.
+        </p>
+</div>
+</body></html>

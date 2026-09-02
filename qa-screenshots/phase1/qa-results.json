@@ -1,0 +1,208 @@
+{
+  "findings": [
+    {
+      "label": "Hero headline: \"Understand your lease before you sign.\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Subheadline: Texas residential lease copy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Support note: Texas leases only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Section: See what it finds",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Section: How it works",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Section: What it checks",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Section: Texas renter check",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Section: What it does not do",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Section: FAQ",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Footer: BeforeYouSign",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Nav: BeforeYouSign logo visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Nav: no section links in header",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Nav: no Texas badge in header",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Nav: no Review a lease button in header",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Nav: no hamburger menu",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Hero \"Review a lease\" reveals intake area",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Nav: BeforeYouSign returns to landing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "\"Run sample lease\" switches to sample tab",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Paste Text tab shows textarea",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Sample tab shows run button",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Upload PDF tab shows upload zone",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "landing desktop: no banned terms",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Sample lease reaches intake preview",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Report carousel renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Report shows \"Review priority\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Report shows \"Terms to review\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "No numeric score in report UI",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "report desktop: no banned terms",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Technical details opens",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Technical: no numeric score",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Evidence click highlights lease text",
+      "ok": true,
+      "detail": "mark elements: 1"
+    },
+    {
+      "label": "Paste text reaches intake preview",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "PDF upload reaches intake preview",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Mobile hero headline",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Mobile: brand-only navbar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Mobile: no horizontal overflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Mobile report renders Review priority",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "mobile: no banned terms",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "snippets": [
+    {
+      "label": "landing-desktop",
+      "text": "BeforeYouSign\nUnderstand your lease before you sign.\n\nUpload or paste a Texas residential lease to find key costs, deadlines, terms to review, and questions to ask.\n\nReview a lease\nRun sample lease\n\nⓘ\nTexas leases only for now. City rules are not checked. Educational only, not legal advice.\n\nReview a lease\n\nUpload a PDF, paste text, or run the sample lease.\n\nUpload PDF\nPaste Text\nSample\n\nClick to upload or drag & drop\n\nPDF lease document\n\nChoose PDF\n\nBy continuing, you submit lease text for one-time analysis. Do not upload documents you are not comfortable processing through this tool.\n\nScanned image-only PDFs may not extract correctly. Paste the text if the report looks incomplete.\n\nBeforeYouSign is for educational lease review, not legal advice. We do not use a database or save your repo"
+    },
+    {
+      "label": "report-desktop",
+      "text": "BeforeYouSign\n\nLEASE REVIEW\n\nLease intake\n\nsample-lease.txt\n\n5,299 CHARACTERS\n\nPREVIEW\n\nFictional sample lease excerpt for product demonstration only. This is not legal advice and is not a real lease form. 1. Parties and Property This residential lease excerpt is between Harbor & Elm Homes, LLC, called Land…\n\nBack to landing\nContinue to analysis\n\nsample-lease.txt\n\n1 PAGE\n\nPAGE 1\n\nFictional sample lease excerpt for product demonstration only. This is not legal advice and is not a real lease form.\n\n1. Parties and Property\n\nThis residential lease excerpt is between Harbor & Elm Homes, LLC, called Landlord in this sample, and Jordan Reed, called Tenant in this sample. The dwelling is the apartment at 214 Willow Lane, Unit 3B, Brookfield Heights, Fictional State 00000. The apartment includes or"
+    },
+    {
+      "label": "landing-mobile",
+      "text": "BeforeYouSign\nUnderstand your lease before you sign.\n\nUpload or paste a Texas residential lease to find key costs, deadlines, terms to review, and questions to ask.\n\nReview a lease\nRun sample lease\n\nⓘ\nTexas leases only for now. City rules are not checked. Educational only, not legal advice.\n\nReview a lease\n\nUpload a PDF, paste text, or run the sample lease.\n\nUpload PDF\nPaste Text\nSample\n\nClick to upload or drag & drop\n\nPDF lease document\n\nChoose PDF\n\nBy continuing, you submit lease text for one-time analysis. Do not upload documents you are not comfortable processing through this tool.\n\nScanned image-only PDFs may not extract correctly. Paste the text if the report looks incomplete.\n\nBeforeYouSign is for educational lease review, not legal advice. We do not use a database or save your repo"
+    }
+  ]
+}

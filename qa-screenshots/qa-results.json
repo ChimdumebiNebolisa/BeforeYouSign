@@ -1,0 +1,118 @@
+{
+  "findings": [
+    {
+      "label": "Hero contains \"highlight renter-facing terms\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Hero does NOT contain \"flag issues\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Feature card \"Spot terms to review\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Privacy block near upload",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Privacy continue line on upload CTA",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "landing page: no banned terms",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Report shows visible \"Review priority\" badge",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Report shows \"Terms to review\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Local law banner",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Fixed disclaimer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Severity uses mapped labels only",
+      "ok": false,
+      "detail": ""
+    },
+    {
+      "label": "Mapped severity present when flags exist",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "report page: no banned terms",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Technical: Pattern scan label",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Technical: no numeric score",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Evidence click highlights lease text",
+      "ok": true,
+      "detail": "mark elements: 1"
+    },
+    {
+      "label": "Paste text reaches intake",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "PDF upload reaches intake preview",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Mobile report renders visible Review priority",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "mobile report: no banned terms",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "snippets": [
+    {
+      "label": "landing",
+      "text": "BEFOREYOUSIGN\n\nLease analysis\n\nUnderstand your lease before you sign\n\nUpload or paste your residential lease to highlight renter-facing terms like fees, deadlines, renewal rules, and responsibilities before you sign.\n\nFind costs\n\nRent, deposits, and recurring charges called out clearly.\n\nSpot terms to review\n\nClauses that may be unclear or costly to review.\n\nCheck deadlines\n\nEnd dates, renewal windows, and notice requirements.\n\nPrepare questions\n\nNegotiation prompts you can bring to the landlord"
+    },
+    {
+      "label": "report",
+      "text": "BEFOREYOUSIGN\n\nLease analysis\n\nLEASE REVIEW\n\nLease intake\n\nsample-lease.txt\n\n5,299 CHARACTERS\n\nPREVIEW\n\nFictional sample lease excerpt for product demonstration only. This is not legal advice and is not a real lease form. 1. Parties and Property This residential lease excerpt is between Harbor & Elm Homes, LLC, called Land…\n\nBack to landing\nContinue to analysis\n\nsample-lease.txt\n\n1 PAGE\n\nPAGE 1\n\nFictional sample lease excerpt for product demonstration only. This is not legal advice and is not a "
+    },
+    {
+      "label": "technical-details",
+      "text": "›HOW THIS WAS ANALYZED\n\nSOURCE FILE\n\nName\nsample-lease.txt\nSize\n5,287 bytes\nType\ntext/plain\n\nTEXT EXTRACTION\n\n1 page indexed\n\nFIRST PAGE PREVIEW\n\nFictional sample lease excerpt for product demonstration only. This is not legal advice and is not a real lease form. 1. Parties and Property This residential lease excerpt is between Harbor & Elm Homes, LLC, called Landlord in this sample, and Jordan Reed, called Tenant in this sample. The dwelling is the apartment at…\n\nCLAUSE MATCHES DETECTED\n\nCATEGO"
+    }
+  ]
+}

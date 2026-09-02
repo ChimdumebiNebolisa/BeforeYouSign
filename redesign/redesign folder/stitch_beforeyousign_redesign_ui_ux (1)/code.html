@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BeforeYouSign - Lease Analysis Report</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f8f9ff",
+                        "on-tertiary-fixed": "#221534",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#6f650a",
+                        "error": "#ba1a1a",
+                        "on-background": "#0b1c30",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#eddcff",
+                        "surface-variant": "#d3e4fe",
+                        "surface-container-low": "#eff4ff",
+                        "on-primary-container": "#86a0cd",
+                        "surface-tint": "#455f88",
+                        "surface-dim": "#cbdbf5",
+                        "surface-container": "#e5eeff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#f2e580",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#271a39",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "secondary": "#695f02",
+                        "surface-container-high": "#dce9ff",
+                        "secondary-fixed-dim": "#d5c867",
+                        "primary": "#002045",
+                        "on-primary-fixed-variant": "#2d476f",
+                        "on-tertiary-fixed-variant": "#4f4062",
+                        "inverse-primary": "#adc7f7",
+                        "primary-container": "#1a365d",
+                        "outline-variant": "#c4c6cf",
+                        "on-primary-fixed": "#001b3c",
+                        "tertiary-container": "#3d2f50",
+                        "on-secondary-fixed": "#201c00",
+                        "on-surface": "#0b1c30",
+                        "on-tertiary-container": "#a997be",
+                        "tertiary-fixed-dim": "#d2bfe8",
+                        "on-error": "#ffffff",
+                        "background": "#f8f9ff",
+                        "outline": "#74777f",
+                        "on-surface-variant": "#43474e",
+                        "primary-fixed-dim": "#adc7f7",
+                        "secondary-container": "#f2e580",
+                        "primary-fixed": "#d6e3ff",
+                        "on-secondary-fixed-variant": "#4f4800",
+                        "inverse-surface": "#213145"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-padding": "2rem",
+                        "annotation-offset": "1rem",
+                        "section-gap": "5rem",
+                        "gutter": "1.5rem",
+                        "container-max": "1120px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "note-text": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "note-text": ["14px", { "lineHeight": "1.4", "fontWeight": "450" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Custom scrollbar for document view to maintain neatness */
+        .doc-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .doc-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+            border-radius: 4px;
+        }
+        .doc-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .doc-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Subtle highlighting animation */
+        @keyframes pulse-highlight {
+            0% { background-color: rgba(242, 229, 128, 0.2); }
+            50% { background-color: rgba(242, 229, 128, 0.5); }
+            100% { background-color: rgba(242, 229, 128, 0.2); }
+        }
+        .active-highlight {
+            animation: pulse-highlight 2s infinite;
+            border-radius: 4px;
+            padding: 2px 4px;
+            margin: -2px -4px;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col">
+<!-- Warning Banner -->
+<div class="bg-secondary-container text-on-secondary-container py-2 px-4 text-center text-label-md font-label-md sticky top-0 z-50 shadow-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm icon-fill">warning</span>
+        Texas leases only. City rules are not checked.
+    </div>
+<!-- TopNavBar (Shared Component) -->
+<header class="bg-surface border-b border-outline-variant full-width sticky top-8 z-40">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-container-max mx-auto">
+<a class="flex items-center gap-2 group" href="#">
+<div class="w-8 h-8 rounded bg-primary-container text-on-primary flex items-center justify-center group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined icon-fill">gavel</span>
+</div>
+<span class="text-headline-md font-headline-md font-bold text-primary">BeforeYouSign</span>
+</a>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-label-md" href="#">How It Works</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-label-md" href="#">Guides</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-label-md" href="#">Texas Law</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="hidden lg:inline text-on-surface-variant text-label-md font-label-md">Texas leases only</span>
+<button class="bg-primary-container text-on-primary hover:bg-primary-fixed hover:text-on-primary-fixed px-6 py-2 rounded-full text-label-md font-label-md transition-all shadow-sm hover:shadow-md duration-200">
+                    Review a lease
+                </button>
+</div>
+</div>
+</header>
+<!-- Main Layout: Sidebar + Document Canvas -->
+<main class="flex-grow flex flex-col md:flex-row relative">
+<!-- Document Viewer Column (Left) -->
+<section class="w-full md:w-3/5 lg:w-2/3 bg-surface-container-lowest p-6 md:p-12 doc-scroll overflow-y-auto" style="height: calc(100vh - 120px);">
+<div class="max-w-3xl mx-auto bg-white shadow-[0_4px_24px_rgba(0,0,0,0.02)] rounded-lg p-8 md:p-16 border border-surface-container shadow-sm min-h-full">
+<h1 class="text-headline-lg font-headline-lg text-on-surface mb-8 border-b border-outline-variant pb-4">Residential Lease Agreement</h1>
+<div class="space-y-6 text-on-surface-variant text-body-md font-body-md leading-relaxed">
+<p>This Residential Lease Agreement ("Agreement") is made and entered into this 1st day of August, 2024, by and between Texas Property Management LLC ("Landlord") and Jane Doe ("Tenant").</p>
+<h3 class="text-label-md font-label-md font-bold text-on-surface mt-8 mb-2">1. PROPERTY</h3>
+<p>Landlord hereby leases to Tenant, and Tenant hereby leases from Landlord, the premises located at 123 Longhorn Lane, Austin, TX 78701 (the "Premises").</p>
+<h3 class="text-label-md font-label-md font-bold text-on-surface mt-8 mb-2">2. TERM</h3>
+<p>The term of this lease shall be for 12 months, commencing on September 1, 2024, and ending on August 31, 2025.</p>
+<h3 class="text-label-md font-label-md font-bold text-on-surface mt-8 mb-2">3. RENT &amp; LATE FEES</h3>
+<p>Tenant agrees to pay Landlord as base rent the sum of $1,800 per month, due and payable on the 1st day of each month. <span class="bg-tertiary-fixed bg-opacity-30 rounded px-1 transition-colors duration-300" id="clause-late-fee">If rent is not received by the 3rd of the month, a late fee of $100 plus $20 per day thereafter will be assessed.</span></p>
+<h3 class="text-label-md font-label-md font-bold text-on-surface mt-8 mb-2">4. SECURITY DEPOSIT</h3>
+<p>Upon execution of this Agreement, Tenant shall deposit with Landlord the sum of $2,000 as a security deposit. <span class="bg-secondary-fixed bg-opacity-40 rounded px-1 active-highlight" id="clause-deposit">Landlord may deduct from the security deposit any costs for professional carpet cleaning, repainting, and administrative turnover fees upon move-out, regardless of the condition of the Premises.</span></p>
+<h3 class="text-label-md font-label-md font-bold text-on-surface mt-8 mb-2">5. MAINTENANCE &amp; REPAIRS</h3>
+<p>Tenant shall keep the Premises in a clean and good condition. <span class="bg-primary-fixed bg-opacity-30 rounded px-1 transition-colors duration-300" id="clause-repairs">Tenant is responsible for the first $150 of any repair requested, including plumbing, HVAC, and electrical issues, regardless of fault.</span></p>
+<h3 class="text-label-md font-label-md font-bold text-on-surface mt-8 mb-2">6. ENTRY BY LANDLORD</h3>
+<p>Landlord may enter the Premises for inspection, repair, or to show the property to prospective tenants. <span class="bg-surface-variant bg-opacity-50 rounded px-1 transition-colors duration-300" id="clause-entry">Landlord will attempt to provide notice but reserves the right to enter without notice during normal business hours.</span></p>
+<div class="h-32"></div> <!-- Spacer for scrolling -->
+</div>
+</div>
+</section>
+<!-- Analysis Sidebar (Right) -->
+<aside class="w-full md:w-2/5 lg:w-1/3 bg-surface border-l border-outline-variant doc-scroll overflow-y-auto shadow-[-4px_0_24px_rgba(0,0,0,0.02)]" style="height: calc(100vh - 120px);">
+<!-- Sidebar Header -->
+<div class="p-6 border-b border-outline-variant sticky top-0 bg-surface/95 backdrop-blur z-10">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-primary text-3xl">analytics</span>
+<div>
+<h2 class="text-headline-md font-headline-md text-on-surface">Lease Analysis</h2>
+<p class="text-label-md font-label-md text-on-surface-variant">Draft Analysis</p>
+</div>
+</div>
+<div class="mt-4 flex items-center justify-between">
+<div class="flex items-center gap-2 bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded-full text-label-md font-label-md w-fit">
+<span class="material-symbols-outlined text-sm icon-fill">priority_high</span>
+                        Review Priority: Medium
+                    </div>
+<button class="text-primary hover:bg-surface-container px-3 py-1.5 rounded-full text-label-md font-label-md transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">download</span> Export
+                    </button>
+</div>
+</div>
+<div class="p-6 space-y-8">
+<!-- Terms to Review Section -->
+<section>
+<h3 class="text-label-md font-label-md font-bold text-on-surface-variant mb-4 flex items-center gap-2 uppercase tracking-wider">
+<span class="material-symbols-outlined text-sm">find_in_page</span> Terms to Review
+                    </h3>
+<div class="space-y-4">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary-fixed"></div>
+<div class="flex justify-between items-start mb-2">
+<span class="bg-secondary-fixed text-on-secondary-fixed-variant px-2 py-0.5 rounded text-[12px] font-bold uppercase tracking-wide">Deposit Risk</span>
+<span class="material-symbols-outlined text-outline text-sm group-hover:text-primary transition-colors">visibility</span>
+</div>
+<p class="text-body-md font-body-md font-medium text-on-surface mb-2">This affects your deposit.</p>
+<p class="text-note-text font-note-text text-on-surface-variant">The lease states they can deduct 'administrative turnover fees' and standard painting costs. Under Texas law, deposits generally cannot be used for normal wear and tear.</p>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary-fixed-dim"></div>
+<div class="flex justify-between items-start mb-2">
+<span class="bg-primary-fixed text-on-primary-fixed-variant px-2 py-0.5 rounded text-[12px] font-bold uppercase tracking-wide">Maintenance Cost</span>
+<span class="material-symbols-outlined text-outline text-sm group-hover:text-primary transition-colors">visibility</span>
+</div>
+<p class="text-body-md font-body-md font-medium text-on-surface mb-2">You might pay for things you didn't break.</p>
+<p class="text-note-text font-note-text text-on-surface-variant">Clause 5 makes you responsible for the first $150 of ANY repair. This is unusual and shifts a lot of normal upkeep cost onto you.</p>
+</div>
+</div>
+</section>
+<!-- Texas Renter Check Section -->
+<section>
+<h3 class="text-label-md font-label-md font-bold text-on-surface-variant mb-4 flex items-center gap-2 uppercase tracking-wider">
+<span class="material-symbols-outlined text-sm">gavel</span> Texas Renter Check
+                    </h3>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
+<div class="flex items-start gap-3 mb-3">
+<span class="material-symbols-outlined text-error icon-fill mt-0.5">error</span>
+<div>
+<p class="text-body-md font-body-md font-medium text-on-surface">Late fees might exceed legal limits.</p>
+<p class="text-note-text font-note-text text-on-surface-variant mt-1">Texas Property Code restricts late fees unless they are a reasonable estimate of damages. $100 + $20/day on an $1800 rent could be challenged if excessive.</p>
+</div>
+</div>
+<div class="w-full h-px bg-outline-variant my-3"></div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary icon-fill mt-0.5">info</span>
+<div>
+<p class="text-body-md font-body-md font-medium text-on-surface">Landlord Entry Notice.</p>
+<p class="text-note-text font-note-text text-on-surface-variant mt-1">Texas law doesn't specify an exact notice period, but leases typically grant 24 hours. This lease allows entry "without notice," which is aggressive.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Questions to Ask (Sticky Notes Style) -->
+<section>
+<h3 class="text-label-md font-label-md font-bold text-on-surface-variant mb-4 flex items-center gap-2 uppercase tracking-wider">
+<span class="material-symbols-outlined text-sm">forum</span> Questions to Ask
+                    </h3>
+<div class="grid grid-cols-1 gap-4">
+<!-- Sticky Note 1 -->
+<div class="bg-[#FEF08A] rounded-lg p-4 shadow-[2px_4px_12px_rgba(202,138,4,0.15)] transform rotate-1 hover:rotate-0 transition-transform cursor-pointer border border-[#FDE047]">
+<div class="flex items-center gap-2 mb-2 text-[#854D0E]">
+<span class="material-symbols-outlined text-[16px]">push_pin</span>
+<span class="text-[12px] font-bold uppercase tracking-wider">Negotiation Script</span>
+</div>
+<p class="text-note-text font-note-text text-[#422006] leading-relaxed">
+                                "Hi, regarding Clause 4, could we clarify that the deposit won't be used for standard turnover painting if there's no actual damage beyond normal wear and tear?"
+                            </p>
+</div>
+<!-- Sticky Note 2 -->
+<div class="bg-[#E9D5FF] rounded-lg p-4 shadow-[2px_4px_12px_rgba(147,51,234,0.1)] transform -rotate-1 hover:rotate-0 transition-transform cursor-pointer border border-[#D8B4FE]">
+<div class="flex items-center gap-2 mb-2 text-[#6B21A8]">
+<span class="material-symbols-outlined text-[16px]">push_pin</span>
+<span class="text-[12px] font-bold uppercase tracking-wider">Negotiation Script</span>
+</div>
+<p class="text-note-text font-note-text text-[#3B0764] leading-relaxed">
+                                "For Clause 5, I'm comfortable paying for repairs if I cause damage, but could we remove the $150 fee for structural or system failures (like HVAC) that are standard landlord responsibilities?"
+                            </p>
+</div>
+</div>
+</section>
+<!-- Missing or Unclear Section -->
+<section class="pb-8">
+<h3 class="text-label-md font-label-md font-bold text-on-surface-variant mb-4 flex items-center gap-2 uppercase tracking-wider">
+<span class="material-symbols-outlined text-sm">search_off</span> Missing or Unclear
+                    </h3>
+<div class="bg-surface-container-low rounded-xl p-4 border border-dashed border-outline-variant">
+<ul class="space-y-3">
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-outline text-[18px] mt-0.5">help</span>
+<span class="text-note-text font-note-text text-on-surface-variant">No mention of who pays for specific utilities (Water, Trash, Electric). Ask for this to be explicitly written in.</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-outline text-[18px] mt-0.5">help</span>
+<span class="text-note-text font-note-text text-on-surface-variant">Pest control responsibilities are not defined.</span>
+</li>
+</ul>
+</div>
+</section>
+</div>
+</aside>
+</main>
+<!-- Fixed Disclaimer Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant py-3 px-6 text-center z-50">
+<p class="text-[12px] font-note-text text-on-surface-variant flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">school</span>
+            Educational only. Not legal advice. City rules are not checked. 
+        </p>
+</footer>
+<script>
+        // Simple script to demonstrate interaction between sidebar cards and document highlights
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.group.cursor-pointer');
+            
+            cards.forEach((card, index) => {
+                card.addEventListener('mouseenter', () => {
+                    // Just a visual demo: in a real app, IDs would map properly
+                    const highlightId = index === 0 ? 'clause-deposit' : 'clause-repairs';
+                    const highlightEl = document.getElementById(highlightId);
+                    if(highlightEl) {
+                        highlightEl.classList.add('bg-opacity-70', 'shadow-sm');
+                        highlightEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    const highlightId = index === 0 ? 'clause-deposit' : 'clause-repairs';
+                    const highlightEl = document.getElementById(highlightId);
+                    if(highlightEl) {
+                        highlightEl.classList.remove('bg-opacity-70', 'shadow-sm');
+                    }
+                });
+            });
+        });
+    </script>
+</body></html>

@@ -14,9 +14,26 @@ function extractCurrencyValue(text: string): string | null {
   return match ? match[0] : null;
 }
 
-function extractDayWindow(text: string): string | null {
-  const match = text.match(/\b\d{1,3}\s*(?:calendar\s+)?days?\b/i);
-  return match ? match[0] : null;
+function extractFeeValue(text: string): string | null {
+  const greaterOf = text.match(
+    /\bgreater\s+of\s+(?:\$[\d,]+(?:\.\d{2})?\s*,?\s*or\s+\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly)\s+){0,2}rent|\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly)\s+){0,2}rent\s*,?\s*or\s+\$[\d,]+(?:\.\d{2})?)\b/i,
+  );
+  if (greaterOf) return greaterOf[0];
+
+  const percentageOfRent = text.match(
+    /\b\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly|past-due|unpaid)\s+){0,3}(?:rent|balance|amount\s+due)\b/i,
+  );
+  return percentageOfRent ? percentageOfRent[0] : extractCurrencyValue(text);
+}
+
+function extractDeadlineValue(text: string): string | null {
+  const dayWindow = text.match(/\b(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?\s*(?:calendar\s+)?days?\b/i);
+  if (dayWindow) return dayWindow[0];
+
+  const date = text.match(
+    /\b(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?\b/i,
+  );
+  return date ? date[0] : null;
 }
 
 function normalizeQuoteKey(text: string): string {
@@ -397,7 +414,7 @@ export function buildRuleOnlyFallbackReport(input: {
   for (const feeFinding of byCategory.fees.slice(0, 4)) {
     moneyAndFees.push({
       label: feeLabelFromQuote(feeFinding.quote),
-      value: extractCurrencyValue(feeFinding.quote) ?? "See lease clause",
+      value: extractFeeValue(feeFinding.quote) ?? "See lease clause",
       evidence: toEvidence(input.evidenceRegistry, input.documentId, feeFinding, pageTexts),
     });
   }
@@ -406,7 +423,7 @@ export function buildRuleOnlyFallbackReport(input: {
   for (const noticeFinding of byCategory.notice.slice(0, 2)) {
     deadlinesAndNotice.push({
       label: noticeLabelFromQuote(noticeFinding.quote),
-      value: extractDayWindow(noticeFinding.quote) ?? "Review notice clause",
+      value: extractDeadlineValue(noticeFinding.quote) ?? "Review notice clause",
       evidence: toEvidence(input.evidenceRegistry, input.documentId, noticeFinding, pageTexts),
     });
   }

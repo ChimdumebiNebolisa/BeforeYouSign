@@ -65,6 +65,7 @@ function dedupeSnippets(items: RentSnippet[]): RentSnippet[] {
 export function findDepositSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\bsecurity\s+deposit\b[^.\n]{0,180}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /\bsecurity\s+deposit\b[^.\n]{0,180}\b(?:one(?:\s*\(\s*1\s*\))?|1)\s+month'?s?\s+rent\b[^.\n]{0,120}/gi,
     /\bdeposit\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}\b(?:as\s+(?:a\s+)?)?(?:security\s+)?deposit\b/gi,
   ];
@@ -99,7 +100,9 @@ export function findFeeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
     /\bmarketing\s+fee\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\bpackage(?:\s+acceptance)?\s+fee\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?(?:\s*(?:per|\/)\s*package)?\b/gi,
     /\breserved\s+parking(?:\s+stall)?\s+fee\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?(?:\s*(?:per|\/)\s*(?:month|mo|vehicle))?\b/gi,
-    /\b(?:late|administrative|application|processing|pet|parking|cleaning|move-?out|monthly)\s+fees?\b[^.\n]{0,160}\$[\d,]+(?:\.\d{2})?(?:\s*(?:per|\/)\s*(?:month|mo|day|night|package|pet|vehicle))?\b/gi,
+    /\bpet[-\s]+rent\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}/gi,
+    /\blate\s+charge\b[^.\n]{0,160}(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,120}/gi,
+    /\b(?:late|administrative|application|processing|pet|parking|cleaning|move-?out|monthly)\s+fees?\b[^.\n]{0,160}(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,120}/gi,
     /\b(?:non-?refundable|one-?time)\s+[^.\n]{0,80}\bfees?\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}\b(?:late|administrative|pet|parking|cleaning)\s+fees?\b/gi,
     /\bfees?\s+of\s+\$[\d,]+(?:\.\d{2})?\b/gi,
@@ -127,8 +130,9 @@ export function findFeeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
 
 export function findNoticeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
-    /\b\d{1,3}\s*(?:calendar\s+)?days?'?\s+(?:written\s+)?notice\b[^.\n]{0,120}/gi,
-    /\bwritten\s+notice\b[^.\n]{0,160}\b(?:at\s+least\s+)?\d{1,3}\s*days?\b/gi,
+    /\b(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?\s*(?:calendar\s+)?days?'?\s+(?:prior\s+)?(?:written\s+)?notice\b[^.\n]{0,120}/gi,
+    /\bwritten\s+notice\b[^.\n]{0,160}\b(?:at\s+least\s+)?(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?\s*(?:calendar\s+)?days?\b/gi,
+    /\b(?:written\s+)?notice\b[^.\n]{0,160}\b(?:no\s+later\s+than|on\s+or\s+before|by)\s+(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?\b/gi,
     /\bnotice\s+period\b[^.\n]{0,160}/gi,
     /\b(?:terminate|termination)\b[^.\n]{0,120}\b\d{1,3}\s*days?'?\s+(?:written\s+)?notice\b/gi,
   ];
@@ -238,7 +242,7 @@ export function findUtilitiesSnippets(pages: ExtractedTextPage[]): RentSnippet[]
 
 export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
-    /\brent\b[^.\n]{0,200}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /(?<!pet[\s-])\brent\b[^.\n]{0,200}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,200}\b(per\s+month|monthly|\/mo|each\s+month)\b/gi,
   ];
 
@@ -254,6 +258,7 @@ export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
       while ((match = pattern.exec(text)) !== null) {
         const quote = match[0].replace(/\s+/g, " ").trim();
         if (quote.length < 8) continue;
+        if (/\bpet[-\s]+rent\b|\bper\s+(?:approved\s+)?pets?\b/i.test(quote)) continue;
         matches.push({ page: page.page, quote });
       }
     }
@@ -271,6 +276,7 @@ export function findUnclearLeasePhrases(pages: ExtractedTextPage[]): RentSnippet
     /\bto\s+be\s+determined\b[^.\n]{0,120}/gi,
     /\bfees?\s+may\s+apply\b[^.\n]{0,120}/gi,
     /\bat\s+(?:the\s+)?landlord'?s?\s+discretion\b[^.\n]{0,120}/gi,
+    /\b(?:its|their)\s+sole\s+discretion\b[^.\n]{0,120}/gi,
     /\bsubject\s+to\s+change\b[^.\n]{0,120}/gi,
   ];
 

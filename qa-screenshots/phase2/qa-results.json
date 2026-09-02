@@ -1,0 +1,79 @@
+{
+  "findings": [
+    {
+      "label": "Texas renter check section visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Section note present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Security deposit topic",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Why it matters copy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Source title present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Source section label",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Statewide source note",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Checklist download button",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Review priority still present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Terms to review still present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "No numeric score",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "No banned wording",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Texas card evidence highlight",
+      "ok": true,
+      "detail": "before=0 after=3"
+    },
+    {
+      "label": "Technical details opens",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Mobile Texas section",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}
