@@ -161,7 +161,7 @@ export function findRenewalSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\bautomatic\s+renewal\b[^.\n]{0,200}/gi,
     /\bmonth-?to-?month\b[^.\n]{0,200}/gi,
-    /\brenew(?:s|al|ed)?\b[^.\n]{0,200}\b(?:term|lease|agreement)\b/gi,
+    /\b(?:auto-?)?renew(?:s|al|ed)?\b[^.\n]{0,200}\b(?:terms?|lease|agreement)\b/gi,
     /\b(?:extends?|extension)\b[^.\n]{0,160}\b(?:automatically|unless)\b/gi,
   ];
 

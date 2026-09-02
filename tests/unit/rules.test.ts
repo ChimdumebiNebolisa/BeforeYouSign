@@ -124,6 +124,21 @@ describe("findRenewalSnippets", () => {
     expect(hits.length).toBeGreaterThan(0);
     expect(hits.some((h) => /automatic renewal/i.test(h.quote))).toBe(true);
   });
+
+  it("finds auto-renewal for successive plural terms", () => {
+    const hits = findRenewalSnippets([
+      {
+        page: 1,
+        text: "This Lease will auto-renew for successive one-year terms unless either party gives written notice of non-renewal.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]).toMatchObject({
+      page: 1,
+      quote: "auto-renew for successive one-year terms",
+    });
+  });
 });
 
 describe("findMaintenanceSnippets", () => {
