@@ -51,7 +51,7 @@ export function computeDeterministicLeaseRisk(input: {
 
   const earlyTerminatePenalty =
     /\bearly\s+terminat/i.test(lower) &&
-    /\b(?:penalty|fee|forfeit|remainder\s+of\s+(?:the\s+)?rent)\b/i.test(lower);
+    /\b(?:penalty|fee|forfeit|liquidated\s+damages|remainder\s+of\s+(?:the\s+)?rent)\b/i.test(lower);
   if (earlyTerminatePenalty) {
     score += 2;
     reasons.push("Ending the lease early may trigger extra charges.");

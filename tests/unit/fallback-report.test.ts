@@ -95,4 +95,29 @@ describe("buildRuleOnlyFallbackReport", () => {
       }),
     );
   });
+
+  it("extracts liquidated damages set as months of rent for early termination", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Early termination requires Tenant to pay liquidated damages equal to two months' rent.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(analysis.deterministicRisk.reasons).toContain("Ending the lease early may trigger extra charges.");
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Early termination fee",
+        value: "two months' rent",
+      }),
+    );
+  });
 });

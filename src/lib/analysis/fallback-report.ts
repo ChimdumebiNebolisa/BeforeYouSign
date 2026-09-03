@@ -23,7 +23,12 @@ function extractFeeValue(text: string): string | null {
   const percentageOfRent = text.match(
     /\b\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly|past-due|unpaid)\s+){0,3}(?:rent|balance|amount\s+due)\b/i,
   );
-  return percentageOfRent ? percentageOfRent[0] : extractCurrencyValue(text);
+  if (percentageOfRent) return percentageOfRent[0];
+
+  const monthsOfRent = text.match(
+    /\b(?:(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)(?:\s*\(\s*\d{1,2}\s*\))?|\d{1,2})\s+months?'?\s+rent\b/i,
+  );
+  return monthsOfRent ? monthsOfRent[0] : extractCurrencyValue(text);
 }
 
 function extractDeadlineValue(text: string): string | null {
