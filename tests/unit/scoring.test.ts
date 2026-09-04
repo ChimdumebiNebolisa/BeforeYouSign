@@ -64,4 +64,25 @@ describe("computeDeterministicLeaseRisk", () => {
     });
     expect(risk.reasons.some((r) => /renew/i.test(r))).toBe(true);
   });
+
+  it("flags auto-renewal wording in the renewal risk score", () => {
+    const text = "This Lease will auto-renew for successive one-year terms unless either party gives written notice of non-renewal.";
+    const renewal = findRenewalSnippets([{ page: 1, text }]);
+    const findings = buildRuleBasedFindings({
+      rent: [],
+      deposit: [],
+      fees: [],
+      notice: [],
+      renewal,
+      maintenance: [],
+      utilities: [],
+    });
+    const risk = computeDeterministicLeaseRisk({
+      fullText: text,
+      findings,
+      unclearPhrases: [],
+    });
+
+    expect(risk.reasons).toContain("This lease may renew automatically unless notice is given.");
+  });
 });

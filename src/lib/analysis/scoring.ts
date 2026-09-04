@@ -23,7 +23,7 @@ export function computeDeterministicLeaseRisk(input: {
   const reasons: string[] = [];
 
   const renewalAuto = input.findings.some(
-    (f) => f.category === "renewal" && /\bautomatic\b/i.test(f.quote),
+    (f) => f.category === "renewal" && /\b(?:automatic|auto[\s-]?renew(?:al)?)\b/i.test(f.quote),
   );
   if (renewalAuto) {
     score += 2;
