@@ -80,7 +80,7 @@ export function computeDeterministicLeaseRisk(input: {
   }
 
   const entryBroad =
-    /\blandlord\b[^.\n]{0,160}\benter\b[^.\n]{0,160}\b(?:without|at\s+any\s+time)\b/i.test(text);
+    /\blandlord\b[^.\n]{0,160}\b(?:enter|entry|access)\b[^.\n]{0,160}\b(?:without|at\s+any\s+time)\b/i.test(text);
   if (entryBroad) {
     score += 1;
     reasons.push("Landlord entry language may be broad.");

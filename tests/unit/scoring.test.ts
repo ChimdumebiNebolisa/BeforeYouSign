@@ -85,4 +85,14 @@ describe("computeDeterministicLeaseRisk", () => {
 
     expect(risk.reasons).toContain("This lease may renew automatically unless notice is given.");
   });
+
+  it("flags broad landlord access without notice", () => {
+    const risk = computeDeterministicLeaseRisk({
+      fullText: "Landlord may access the Premises at any reasonable time without prior notice.",
+      findings: [],
+      unclearPhrases: [],
+    });
+
+    expect(risk.reasons).toContain("Landlord entry language may be broad.");
+  });
 });
