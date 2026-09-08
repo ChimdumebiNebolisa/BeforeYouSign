@@ -120,4 +120,28 @@ describe("buildRuleOnlyFallbackReport", () => {
       }),
     );
   });
+
+  it("extracts percentage-based holdover rent", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Holdover rent: Tenant shall pay 150% of the monthly rent for each month Tenant remains after the lease term ends.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Holdover rent",
+        value: "150% of the monthly rent",
+      }),
+    );
+  });
 });
