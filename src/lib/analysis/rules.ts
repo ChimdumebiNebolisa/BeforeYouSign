@@ -132,8 +132,8 @@ export function findFeeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
 
 export function findNoticeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
-    /\b(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?\s*(?:calendar\s+)?days?'?\s+(?:prior\s+)?(?:written\s+)?notice\b[^.\n]{0,120}/gi,
-    /\bwritten\s+notice\b[^.\n]{0,160}\b(?:at\s+least\s+)?(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?\s*(?:calendar\s+)?days?\b/gi,
+    /\b(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?\s*(?:calendar\s+)?(?:days?|hours?)'?\s+(?:prior\s+)?(?:written\s+)?notice\b[^.\n]{0,120}/gi,
+    /\bwritten\s+notice\b[^.\n]{0,160}\b(?:at\s+least\s+)?(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?\s*(?:calendar\s+)?(?:days?|hours?)\b/gi,
     /\b(?:written\s+)?notice\b[^.\n]{0,160}\b(?:no\s+later\s+than|on\s+or\s+before|by)\s+(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?\b/gi,
     /\bnotice\s+period\b[^.\n]{0,160}/gi,
     /\b(?:terminate|termination)\b[^.\n]{0,120}\b\d{1,3}\s*days?'?\s+(?:written\s+)?notice\b/gi,
