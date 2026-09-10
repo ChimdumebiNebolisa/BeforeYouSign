@@ -179,6 +179,21 @@ describe("findUnclearLeasePhrases", () => {
     });
   });
 
+  it("finds fees with amounts determined by management", () => {
+    const hits = findUnclearLeasePhrases([
+      {
+        page: 1,
+        text: "Management may impose additional fees in amounts determined by Management from time to time.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]).toMatchObject({
+      page: 1,
+      quote: "fees in amounts determined by Management from time to time",
+    });
+  });
+
   it("returns empty for clear text", () => {
     expect(findUnclearLeasePhrases([{ page: 1, text: "Rent is $1,200 due on the 1st." }])).toEqual([]);
   });
