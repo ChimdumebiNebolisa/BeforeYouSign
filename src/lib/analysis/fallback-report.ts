@@ -25,6 +25,11 @@ function extractFeeValue(text: string): string | null {
   );
   if (percentageOfRent) return percentageOfRent[0];
 
+  const percentageRate = text.match(
+    /\b\d+(?:\.\d+)?\s*%(?:\s+per\s+(?:annum|year|month))?/i,
+  );
+  if (percentageRate) return percentageRate[0];
+
   const monthsOfRent = text.match(
     /\b(?:(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)(?:\s*\(\s*\d{1,2}\s*\))?|\d{1,2})\s+months?'?\s+rent\b/i,
   );

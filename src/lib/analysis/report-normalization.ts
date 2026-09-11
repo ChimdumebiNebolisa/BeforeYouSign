@@ -56,6 +56,9 @@ export function classifyLeaseMoneyLabel(text: string): string | null {
   if (/\bearly\s+(?:termination|move-?out)\b|\bbreak(?:ing)?\s+(?:the\s+)?lease\b/.test(q)) {
     return "Early termination fee";
   }
+  if (/\binterest\b/.test(q) && /\b(?:past[-\s]due|overdue|delinquent|unpaid)\s+rent\b/.test(q)) {
+    return "Past-due interest";
+  }
   if (/\breturned payment\b|\bnsf\b|\brejected\b|\breversed\b/.test(q)) {
     return "Returned payment fee";
   }

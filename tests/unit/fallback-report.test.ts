@@ -120,6 +120,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts annual interest on past-due rent", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Past-due rent accrues interest at 18% per annum until paid.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Past-due interest",
+        value: "18% per annum",
+      }),
+    );
+  });
+
   it("extracts liquidated damages set as months of rent for early termination", () => {
     const pages = [
       {

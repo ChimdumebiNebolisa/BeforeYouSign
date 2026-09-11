@@ -104,6 +104,7 @@ export function findFeeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
     /\bpet[-\s]+rent\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}/gi,
     /\bholdover\s+rent\b[^.\n]{0,160}(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,120}/gi,
     /\blate\s+charge\b[^.\n]{0,160}(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,120}/gi,
+    /\b(?:past[-\s]due|overdue|delinquent|unpaid)\s+rent\b[^.\n]{0,160}\binterest\b[^.\n]{0,120}\d+(?:\.\d+)?\s*%[^.\n]{0,120}/gi,
     /\b(?:late|administrative|application|processing|pet|parking|cleaning|move-?out|monthly)\s+fees?\b[^.\n]{0,160}(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,120}/gi,
     /\b(?:non-?refundable|one-?time)\s+[^.\n]{0,80}\bfees?\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}\b(?:late|administrative|pet|parking|cleaning)\s+fees?\b/gi,
