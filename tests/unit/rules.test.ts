@@ -116,6 +116,18 @@ describe("findNoticeSnippets", () => {
       quote: "written notice at least thirty (30) calendar days",
     });
   });
+
+  it("finds hyphenated hourly notice with a typographic apostrophe", () => {
+    const hits = findNoticeSnippets([
+      {
+        page: 1,
+        text: "Landlord must provide at least 24-hours’ written notice before entering the Premises.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("24-hours’ written notice");
+  });
 });
 
 describe("findRenewalSnippets", () => {
