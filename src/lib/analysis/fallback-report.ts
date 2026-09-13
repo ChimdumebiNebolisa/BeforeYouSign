@@ -16,7 +16,7 @@ function extractCurrencyValue(text: string): string | null {
 
 function extractFeeValue(text: string): string | null {
   const greaterOf = text.match(
-    /\bgreater\s+of\s+(?:\$[\d,]+(?:\.\d{2})?\s*,?\s*or\s+\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly)\s+){0,2}rent|\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly)\s+){0,2}rent\s*,?\s*or\s+\$[\d,]+(?:\.\d{2})?)\b/i,
+    /\b(?:greater|lesser)\s+of\s+(?:\$[\d,]+(?:\.\d{2})?\s*,?\s*or\s+\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly)\s+){0,2}rent|\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly)\s+){0,2}rent\s*,?\s*or\s+\$[\d,]+(?:\.\d{2})?)\b/i,
   );
   if (greaterOf) return greaterOf[0];
 

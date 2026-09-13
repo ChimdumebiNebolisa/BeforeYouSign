@@ -96,6 +96,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("preserves both parts of a lesser-of late charge", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Late charge: the lesser of $75 or 5% of the monthly rent will be charged if rent is more than five days late.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Late fee",
+        value: "lesser of $75 or 5% of the monthly rent",
+      }),
+    );
+  });
+
   it("extracts a percentage-only late fee", () => {
     const pages = [
       {
