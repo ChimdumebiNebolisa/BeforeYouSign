@@ -30,6 +30,7 @@ function resultText(value: unknown): string {
 export function CallAgentClient() {
   const [phone, setPhone] = useState("");
   const [questionsText, setQuestionsText] = useState(DEFAULT_QUESTIONS.join("\n"));
+  const [liveMode, setLiveMode] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [isCalling, setIsCalling] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
@@ -50,15 +51,20 @@ export function CallAgentClient() {
       const response = await fetch("/api/call-landlord", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, questions, confirmed }),
+        body: JSON.stringify({
+          phone,
+          questions,
+          confirmed: liveMode ? confirmed : false,
+          dryRun: !liveMode,
+        }),
       });
       const data = (await response.json()) as CallResult & { error?: string };
       if (!response.ok) {
-        throw new Error(data.error || "Unable to start the CALL-E phone task.");
+        throw new Error(data.error || "Unable to prepare the CALL-E phone task.");
       }
       setResult(data);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Unable to start the CALL-E phone task.");
+      setError(cause instanceof Error ? cause.message : "Unable to prepare the CALL-E phone task.");
     } finally {
       setIsCalling(false);
     }
@@ -84,6 +90,8 @@ export function CallAgentClient() {
     }
   };
 
+  const liveReady = !liveMode || confirmed;
+
   return (
     <div className="mx-auto w-full max-w-4xl px-4 font-sans">
       <main className="bys-float-shadow rounded-[2rem] bg-white p-5 sm:p-8">
@@ -94,7 +102,7 @@ export function CallAgentClient() {
               Resolve lease questions by phone
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#5c5e68]">
-              BeforeYouSign can turn unresolved lease questions into a real CALL-E phone task. The agent identifies itself as an automated assistant, asks only factual clarification questions, and returns the call outcome for review.
+              BeforeYouSign turns unresolved lease questions into a CALL-E phone task. Preview mode is the default and has no real-world side effect. Live mode requires a separate explicit confirmation before a call is dispatched.
             </p>
           </div>
           <Link
@@ -106,12 +114,38 @@ export function CallAgentClient() {
         </div>
 
         <section className="mt-8 grid gap-6 rounded-2xl border border-[#c5c5d3]/30 bg-[#f8fafb] p-5 sm:p-6">
+          <div className="grid gap-2">
+            <p className="text-sm font-semibold text-[#27292f]">Dispatch mode</p>
+            <div className="grid grid-cols-2 gap-2 rounded-xl bg-white p-1 ring-1 ring-[#c5c5d3]/50">
+              <button
+                type="button"
+                onClick={() => {
+                  setLiveMode(false);
+                  setConfirmed(false);
+                }}
+                className={`rounded-lg px-3 py-2 text-sm font-semibold ${!liveMode ? "bg-[#191c1e] text-white" : "text-[#5c5e68] hover:bg-[#f2f4f6]"}`}
+              >
+                Preview only
+              </button>
+              <button
+                type="button"
+                onClick={() => setLiveMode(true)}
+                className={`rounded-lg px-3 py-2 text-sm font-semibold ${liveMode ? "bg-[#191c1e] text-white" : "text-[#5c5e68] hover:bg-[#f2f4f6]"}`}
+              >
+                Live CALL-E call
+              </button>
+            </div>
+            <p className="text-xs text-[#757682]">
+              {liveMode ? "Live mode can make an actual outbound phone call." : "Preview mode shows the exact task without contacting anyone."}
+            </p>
+          </div>
+
           <label className="grid gap-2 text-sm font-semibold text-[#27292f]">
             Leasing office phone number
             <input
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
-              placeholder="+19035551234"
+              placeholder="+12025550123"
               inputMode="tel"
               className="h-11 rounded-xl border border-[#c5c5d3]/60 bg-white px-3 font-normal outline-none ring-primary/20 focus:ring-2"
             />
@@ -129,27 +163,37 @@ export function CallAgentClient() {
             <span className="text-xs font-normal text-[#757682]">One question per line. Up to eight questions are sent to CALL-E.</span>
           </label>
 
-          <label className="flex items-start gap-3 rounded-xl border border-[#d7d9df] bg-white p-4 text-sm leading-relaxed text-[#444651]">
-            <input
-              type="checkbox"
-              checked={confirmed}
-              onChange={(event) => setConfirmed(event.target.checked)}
-              className="mt-1 h-4 w-4"
-            />
-            <span>
-              I want BeforeYouSign to place a real outbound phone call to this number and I am authorized to request this call. I understand the agent will ask factual lease questions only and will not negotiate or provide legal advice.
-            </span>
-          </label>
+          {liveMode ? (
+            <label className="flex items-start gap-3 rounded-xl border border-[#f5c56b] bg-[#fffaf0] p-4 text-sm leading-relaxed text-[#444651]">
+              <input
+                type="checkbox"
+                checked={confirmed}
+                onChange={(event) => setConfirmed(event.target.checked)}
+                className="mt-1 h-4 w-4"
+              />
+              <span>
+                I want BeforeYouSign to place a real outbound phone call to this number and I am authorized to request this call. I understand the agent will identify itself as automated, ask factual lease questions only, and will not negotiate or provide legal advice.
+              </span>
+            </label>
+          ) : null}
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <Button
               className="h-11 rounded-xl bys-gradient-cta px-6 text-white"
               onClick={() => void startCall()}
-              disabled={isCalling || !confirmed || !phone.trim() || questions.length === 0}
+              disabled={isCalling || !liveReady || !phone.trim() || questions.length === 0}
             >
-              {isCalling ? "Starting call..." : "Call the leasing office"}
+              {isCalling
+                ? liveMode
+                  ? "Starting call..."
+                  : "Preparing preview..."
+                : liveMode
+                  ? "Call the leasing office"
+                  : "Preview CALL-E task"}
             </Button>
-            <p className="text-xs text-[#757682]">This action can cause an actual phone to ring.</p>
+            <p className="text-xs text-[#757682]">
+              {liveMode ? "A live dispatch can cause an actual phone to ring." : "No phone call is placed in preview mode."}
+            </p>
           </div>
         </section>
 
