@@ -48,6 +48,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts a slash-date non-renewal deadline", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "To avoid automatic renewal, Tenant must deliver written notice by 03/01/2027.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.noticeSnippets).toHaveLength(1);
+    expect(report.deadlinesAndNotice).toContainEqual(
+      expect.objectContaining({
+        label: "Notice requirement",
+        value: "03/01/2027",
+      }),
+    );
+  });
+
   it("extracts a written-notice deadline stated in hours", () => {
     const pages = [
       {

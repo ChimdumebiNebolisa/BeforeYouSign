@@ -41,7 +41,7 @@ function extractDeadlineValue(text: string): string | null {
   if (dayWindow) return dayWindow[0];
 
   const date = text.match(
-    /\b(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?\b/i,
+    /\b(?:(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?|(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[12]\d|3[01])\/\d{2,4})\b/i,
   );
   return date ? date[0] : null;
 }
