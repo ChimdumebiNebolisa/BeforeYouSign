@@ -9,6 +9,7 @@ type CreateCallBody = {
   phone?: unknown;
   questions?: unknown;
   confirmed?: unknown;
+  dryRun?: unknown;
 };
 
 function getConfig() {
@@ -74,19 +75,44 @@ function normalizeCallResult(data: unknown) {
 }
 
 export async function POST(request: NextRequest) {
-  const { apiKey, baseUrl } = getConfig();
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "CALL-E is not configured. Add CALLE_API_KEY on the server before placing calls." },
-      { status: 503 },
-    );
-  }
-
   let body: CreateCallBody;
   try {
     body = (await request.json()) as CreateCallBody;
   } catch {
     return NextResponse.json({ error: "Invalid JSON request." }, { status: 400 });
+  }
+
+  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+  if (!E164_PHONE.test(phone)) {
+    return NextResponse.json(
+      { error: "Enter a valid E.164 phone number, for example +12025550123." },
+      { status: 400 },
+    );
+  }
+
+  const questions = cleanQuestions(body.questions);
+  if (questions.length === 0) {
+    return NextResponse.json({ error: "Add at least one lease clarification question." }, { status: 400 });
+  }
+
+  const task = buildTask(phone, questions);
+  const dryRun = body.dryRun !== false;
+  if (dryRun) {
+    return NextResponse.json({
+      callId: null,
+      status: "preview",
+      taskCompleted: null,
+      summary: "Dry run only. No phone call was placed.",
+      structuredResult: {
+        phone,
+        questions,
+        task,
+        sideEffect: "none",
+        nextStep: "Enable live calling and explicitly confirm before dispatching to CALL-E.",
+      },
+      evidence: [],
+      recipients: [],
+    });
   }
 
   if (body.confirmed !== true) {
@@ -96,17 +122,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
-  if (!E164_PHONE.test(phone)) {
+  const { apiKey, baseUrl } = getConfig();
+  if (!apiKey) {
     return NextResponse.json(
-      { error: "Enter a valid E.164 phone number, for example +19035551234." },
-      { status: 400 },
+      { error: "CALL-E is not configured. Add CALLE_API_KEY on the server before placing calls." },
+      { status: 503 },
     );
-  }
-
-  const questions = cleanQuestions(body.questions);
-  if (questions.length === 0) {
-    return NextResponse.json({ error: "Add at least one lease clarification question." }, { status: 400 });
   }
 
   const providerResponse = await fetch(`${baseUrl}/v1/calls`, {
@@ -117,7 +138,7 @@ export async function POST(request: NextRequest) {
       "Idempotency-Key": `beforeyousign_${randomUUID()}`,
     },
     body: JSON.stringify({
-      task: buildTask(phone, questions),
+      task,
       recipients: [
         {
           phones: [phone],
