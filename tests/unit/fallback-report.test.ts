@@ -168,6 +168,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts a percentage-based payment convenience fee", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "A 3% convenience fee will be charged for rent payments made by credit card.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Payment convenience fee",
+        value: "3%",
+      }),
+    );
+  });
+
   it("extracts annual interest on past-due rent", () => {
     const pages = [
       {

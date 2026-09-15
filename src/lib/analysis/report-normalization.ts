@@ -71,6 +71,9 @@ export function classifyLeaseMoneyLabel(text: string): string | null {
   if (/\bapplication\b/.test(q)) {
     return "Application fee";
   }
+  if (/\bconvenience\s+fee\b/.test(q)) {
+    return "Payment convenience fee";
+  }
   if (/\bprocessing\b/.test(q)) {
     return "Processing fee";
   }
