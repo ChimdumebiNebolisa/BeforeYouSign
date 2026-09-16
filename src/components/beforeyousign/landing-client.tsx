@@ -19,7 +19,6 @@ import { LandingWhatItChecks } from "@/components/beforeyousign/landing-what-it-
 import { LandingLimitations } from "@/components/beforeyousign/landing-limitations";
 import { LandingFaq } from "@/components/beforeyousign/landing-faq";
 import { LandingFooter } from "@/components/beforeyousign/landing-footer";
-import { AnalysisModeBanner } from "@/components/beforeyousign/analysis-mode-banner";
 import { FixedReportDisclaimer, LocalLawBanner } from "@/components/beforeyousign/lease-report-slides";
 import type { EvidenceIndex } from "@/lib/evidence/index";
 import { OCR_WARNING } from "@/lib/public-copy";
@@ -28,15 +27,6 @@ type IntakeState =
   | { kind: "upload"; file: File }
   | { kind: "sample"; text: string }
   | { kind: "paste"; text: string };
-
-type ModelRetryCache = {
-  documentId: string;
-  pages: { page: number; text: string }[];
-  fileName: string;
-  fileSizeBytes: number;
-  contentType: string | null;
-  extraction: AnalysisSuccessResponse["document"]["extraction"];
-};
 
 export function LandingClient() {
   const [intake, setIntake] = useState<IntakeState | null>(null);
@@ -61,17 +51,14 @@ export function LandingClient() {
     deterministicRiskReasons?: string[];
     report?: BeforeYouSignReport | null;
     reportError?: string | null;
-    reportDebug?: { failureStage?: string } | null;
-    analysisVersion?: number;
+     analysisVersion?: number;
     mode?: AnalysisSuccessResponse["mode"];
     requestId?: string;
     groundingSummary?: AnalysisSuccessResponse["groundingSummary"];
     evidenceIndex?: EvidenceIndex;
     document?: AnalysisSuccessResponse["document"];
   } | null>(null);
-  const [modelRetryCache, setModelRetryCache] = useState<ModelRetryCache | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRetryingModel, setIsRetryingModel] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [viewerTargetPage, setViewerTargetPage] = useState<number | null>(null);
   const [viewerHighlight, setViewerHighlight] = useState<EvidenceClickArgs | null>(null);
@@ -86,7 +73,6 @@ export function LandingClient() {
   useEffect(() => {
     const handleGoHome = () => {
       setUploadReceipt(null);
-      setModelRetryCache(null);
       setIsSubmitting(false);
       setErrorMessage(null);
       setViewerTargetPage(null);
@@ -118,7 +104,6 @@ export function LandingClient() {
 
   const resetIntakeUi = () => {
     setUploadReceipt(null);
-    setModelRetryCache(null);
     setIsSubmitting(false);
     setErrorMessage(null);
     setViewerTargetPage(null);
@@ -130,30 +115,16 @@ export function LandingClient() {
   const applyAnalysisResponse = useCallback((data: AnalysisSuccessResponse & {
     report?: unknown;
     reportError?: string | null;
-    reportDebug?: { failureStage?: string };
   }) => {
     const report =
       data.report === undefined || data.report === null
         ? null
         : parseBeforeYouSignReportJson(data.report);
 
-    if (data.extractedPages?.length && data.document?.extraction && data.documentId) {
-      setModelRetryCache({
-        documentId: data.documentId,
-        pages: data.extractedPages,
-        fileName: data.fileName,
-        fileSizeBytes: data.fileSizeBytes,
-        contentType: data.contentType,
-        extraction: data.document.extraction,
-      });
-    }
-
     setUploadReceipt({
       ...data,
       report,
       reportError: typeof data.reportError === "string" ? data.reportError : null,
-      reportDebug:
-        data.reportDebug && typeof data.reportDebug === "object" ? data.reportDebug : null,
     });
   }, []);
 
@@ -208,11 +179,7 @@ export function LandingClient() {
         throw new Error(message);
       }
 
-      const data = (await res.json()) as AnalysisSuccessResponse & {
-        report?: unknown;
-        reportError?: string | null;
-        reportDebug?: { failureStage?: string };
-      };
+      const data = (await res.json()) as AnalysisSuccessResponse & { report?: unknown; reportError?: string | null };
 
       applyAnalysisResponse(data);
     } catch (e) {
@@ -221,59 +188,6 @@ export function LandingClient() {
       setIsSubmitting(false);
     }
   }, [intake, applyAnalysisResponse]);
-
-  const runModelRetry = useCallback(async () => {
-    if (!modelRetryCache) return;
-    try {
-      setIsRetryingModel(true);
-      setErrorMessage(null);
-
-      const res = await fetch("/api/analyze/retry-model", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          documentId: modelRetryCache.documentId,
-          pages: modelRetryCache.pages,
-          fileName: modelRetryCache.fileName,
-          fileSizeBytes: modelRetryCache.fileSizeBytes,
-          contentType: modelRetryCache.contentType,
-          extraction: modelRetryCache.extraction,
-        }),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        let message = formatAnalysisError(text, res.status);
-        try {
-          const errJson = JSON.parse(text) as { error?: unknown };
-          if (typeof errJson.error === "string" && errJson.error) {
-            message = errJson.error;
-          } else if (
-            errJson.error &&
-            typeof errJson.error === "object" &&
-            "message" in errJson.error &&
-            typeof (errJson.error as { message: unknown }).message === "string"
-          ) {
-            message = (errJson.error as { message: string }).message;
-          }
-        } catch {
-          // use raw body
-        }
-        throw new Error(message);
-      }
-
-      const data = (await res.json()) as AnalysisSuccessResponse & {
-        report?: unknown;
-        reportError?: string | null;
-        reportDebug?: { failureStage?: string };
-      };
-      applyAnalysisResponse(data);
-    } catch (e) {
-      setErrorMessage(e instanceof Error ? e.message : "Failed to retry AI analysis.");
-    } finally {
-      setIsRetryingModel(false);
-    }
-  }, [modelRetryCache, applyAnalysisResponse]);
 
   if (intake && isSubmitting) {
     return <AnalysisInProgressView intake={intake} />;
@@ -396,13 +310,6 @@ export function LandingClient() {
                     }}
                   />
                 ) : null}
-                <AnalysisModeBanner
-                  mode={uploadReceipt.mode}
-                  reportDebug={uploadReceipt.reportDebug}
-                  groundingSummary={uploadReceipt.groundingSummary}
-                  onRetryModel={modelRetryCache ? () => void runModelRetry() : undefined}
-                  isRetrying={isRetryingModel}
-                />
                 <TechnicalDetailsPanel receipt={uploadReceipt} />
                 <LocalLawBanner />
                 {uploadReceipt.report ? <FixedReportDisclaimer report={uploadReceipt.report} /> : null}
