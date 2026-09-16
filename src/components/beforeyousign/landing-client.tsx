@@ -20,6 +20,7 @@ import { LandingLimitations } from "@/components/beforeyousign/landing-limitatio
 import { LandingFaq } from "@/components/beforeyousign/landing-faq";
 import { LandingFooter } from "@/components/beforeyousign/landing-footer";
 import { AnalysisModeBanner } from "@/components/beforeyousign/analysis-mode-banner";
+import { FixedReportDisclaimer, LocalLawBanner } from "@/components/beforeyousign/lease-report-slides";
 import type { EvidenceIndex } from "@/lib/evidence/index";
 import { OCR_WARNING } from "@/lib/public-copy";
 
@@ -309,17 +310,19 @@ export function LandingClient() {
             >
               Back to landing
             </Button>
-            <Button
-              className="h-11 rounded-xl bys-gradient-cta px-6 text-white shadow-sm hover:opacity-95"
-              onClick={() => void runLeaseAnalysis()}
-              disabled={isSubmitting}
-            >
-              {isSubmitting
-                ? intake.kind === "upload"
-                  ? "Sending PDF..."
-                  : "Analyzing text..."
-                : "Continue to analysis"}
-            </Button>
+            {!uploadReceipt ? (
+              <Button
+                className="h-11 rounded-xl bys-gradient-cta px-6 text-white shadow-sm hover:opacity-95"
+                onClick={() => void runLeaseAnalysis()}
+                disabled={isSubmitting}
+              >
+                {isSubmitting
+                  ? intake.kind === "upload"
+                    ? "Sending PDF..."
+                    : "Analyzing text..."
+                  : "Continue to analysis"}
+              </Button>
+            ) : null}
           </div>
 
           {uploadReceipt ? (
@@ -345,7 +348,7 @@ export function LandingClient() {
               })()}
             <div className="mt-2 flex min-w-0 flex-col gap-8 lg:flex-row lg:items-start">
               {uploadReceipt.extractedPages && uploadReceipt.extractedPages.length > 0 ? (
-                <div className="w-full min-w-0 lg:sticky lg:top-32 lg:w-[46%] lg:max-w-[46%] lg:shrink-0">
+                <div className="w-full min-w-0 lg:sticky lg:top-32 lg:w-[52%] lg:max-w-[52%] lg:shrink-0">
                   <LeaseTextViewer
                     pages={uploadReceipt.extractedPages}
                     scrollToPage={viewerTargetPage}
@@ -363,15 +366,6 @@ export function LandingClient() {
                 </div>
               ) : null}
               <div className="min-w-0 flex-1 space-y-6">
-                <AnalysisModeBanner
-                  mode={uploadReceipt.mode}
-                  reportDebug={uploadReceipt.reportDebug}
-                  groundingSummary={uploadReceipt.groundingSummary}
-                  onRetryModel={modelRetryCache ? () => void runModelRetry() : undefined}
-                  isRetrying={isRetryingModel}
-                />
-                <TechnicalDetailsPanel receipt={uploadReceipt} />
-
                 {uploadReceipt.reportError ? (
                   <div className="rounded-xl bg-[#fff7ed] p-4 text-sm text-[#9a3412]">{uploadReceipt.reportError}</div>
                 ) : null}
@@ -402,6 +396,16 @@ export function LandingClient() {
                     }}
                   />
                 ) : null}
+                <AnalysisModeBanner
+                  mode={uploadReceipt.mode}
+                  reportDebug={uploadReceipt.reportDebug}
+                  groundingSummary={uploadReceipt.groundingSummary}
+                  onRetryModel={modelRetryCache ? () => void runModelRetry() : undefined}
+                  isRetrying={isRetryingModel}
+                />
+                <TechnicalDetailsPanel receipt={uploadReceipt} />
+                <LocalLawBanner />
+                {uploadReceipt.report ? <FixedReportDisclaimer report={uploadReceipt.report} /> : null}
               </div>
             </div>
             </>
@@ -476,7 +480,7 @@ export function LandingClient() {
             />
           </div>
 
-          <div className="flex justify-center lg:col-span-5 lg:justify-end">
+          <div className="flex justify-center lg:col-span-5 lg:justify-center">
             <div className="w-full max-w-[480px]">
               <LandingIntakeCard
                 onStartUpload={startUpload}

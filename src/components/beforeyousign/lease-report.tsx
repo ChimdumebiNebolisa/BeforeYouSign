@@ -23,8 +23,6 @@ import {
   SCAN_LINE_CHARS,
   SummarySection,
   TexasRenterCheckSection,
-  LocalLawBanner,
-  FixedReportDisclaimer,
 } from "@/components/beforeyousign/lease-report-slides";
 import { ChecklistDownloadButton } from "@/components/beforeyousign/checklist-download-button";
 import { ReportDownloadButton } from "@/components/beforeyousign/report-download-button";
@@ -344,8 +342,8 @@ export function LeaseReportView({
 
   return (
     <div className="space-y-4">
-      <LocalLawBanner />
-      <div className="flex flex-wrap justify-end gap-2">
+      <LeaseReportCarousel {...shared} />
+      <div className="flex flex-wrap justify-end gap-2 border-t border-[#e6e8ea]/80 pt-4">
         <ReportDownloadButton
           report={report}
           texasRenterFindings={texasRenterFindings}
@@ -360,8 +358,6 @@ export function LeaseReportView({
           fileName={fileName}
         />
       </div>
-      <LeaseReportCarousel {...shared} />
-      <FixedReportDisclaimer report={report} />
     </div>
   );
 }
