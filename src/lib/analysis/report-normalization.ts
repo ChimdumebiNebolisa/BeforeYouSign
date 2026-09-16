@@ -59,7 +59,7 @@ export function classifyLeaseMoneyLabel(text: string): string | null {
   if (/\binterest\b/.test(q) && /\b(?:past[-\s]due|overdue|delinquent|unpaid)\s+rent\b/.test(q)) {
     return "Past-due interest";
   }
-  if (/\breturned payment\b|\bnsf\b|\brejected\b|\breversed\b/.test(q)) {
+  if (/\breturned payment\b|\bnsf\b|\binsufficient funds\b|\brejected\b|\breversed\b/.test(q)) {
     return "Returned payment fee";
   }
   if (/\butility\b[^.]{0,80}\b(?:billing|processing|fee|charge)\b|\b(?:billing|processing)\b[^.]{0,80}\butility\b/.test(q)) {

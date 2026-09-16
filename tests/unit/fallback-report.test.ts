@@ -192,6 +192,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts a returned-payment fee stated as insufficient funds", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "A $35 fee will be charged for each payment returned due to insufficient funds.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Returned payment fee",
+        value: "$35",
+      }),
+    );
+  });
+
   it("extracts annual interest on past-due rent", () => {
     const pages = [
       {
