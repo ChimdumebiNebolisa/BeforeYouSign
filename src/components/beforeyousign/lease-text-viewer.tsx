@@ -330,6 +330,20 @@ function LeasePageBlock({
         {displayLines.map((line, i) => {
           if (line.hidden) return null;
 
+          if (line.kind === "body" && isFictionalDisclaimer(line.text)) {
+            return (
+              <aside
+                key={`${line.start}-${i}`}
+                className="rounded-lg border border-[#dbe1ff] bg-[#f5f7ff] px-3 py-2.5 text-[11px] leading-relaxed text-[#505f76]"
+              >
+                <span className="font-semibold uppercase tracking-[0.1em] text-[#00246a]">Document note</span>
+                <span className="mt-1 block">
+                  {renderHighlightedText({ text: line.text, start: line.start, match, evidenceLinked })}
+                </span>
+              </aside>
+            );
+          }
+
           if (line.kind === "heading") {
             return (
               <p

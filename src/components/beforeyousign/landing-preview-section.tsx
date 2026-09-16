@@ -54,7 +54,7 @@ export function LandingPreviewSection() {
           <div className="bys-sticky-note-yellow absolute -right-4 top-6 z-10 hidden w-max max-w-[12.5rem] rotate-2 rounded-md py-2.5 pr-10 pl-3 text-[13px] leading-snug text-[#0b1c30] sm:block">
             {STICKY_NOTES[0]}
           </div>
-          <div className="bys-sticky-note-purple absolute -left-4 top-[40%] z-10 hidden w-max -translate-y-1/2 -rotate-1 whitespace-nowrap rounded-md py-2.5 pr-3 pl-10 text-[13px] leading-snug text-[#0b1c30] sm:block">
+          <div className="bys-sticky-note-purple absolute -left-4 top-[34%] z-10 hidden w-max -translate-y-1/2 -rotate-1 whitespace-nowrap rounded-md py-2.5 pr-3 pl-10 text-[13px] leading-snug text-[#0b1c30] sm:block">
             {STICKY_NOTES[1]}
           </div>
           <div className="bys-sticky-note-blue absolute -left-3 bottom-24 z-10 hidden w-max max-w-[12.5rem] rotate-1 rounded-md py-2.5 pr-3 pl-10 text-[13px] leading-snug text-[#0b1c30] sm:block">

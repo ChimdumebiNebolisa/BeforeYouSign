@@ -2,6 +2,7 @@
 
 import type { AnalysisMode, GroundingSummary } from "@/lib/analysis/pipeline/types";
 import { analysisModeBannerTitle } from "@/lib/analysis-mode-labels";
+import { Eye } from "lucide-react";
 
 export function AnalysisModeBanner({
   mode,
@@ -60,19 +61,28 @@ export function AnalysisModeBanner({
   const showRetry = mode === "rules_only" && reportDebug?.failureStage && onRetryModel;
 
   return (
-    <div className={`rounded-xl border px-4 py-3 text-sm leading-relaxed ${classes}`}>
-      <p className="font-[family-name:var(--font-headline)] text-sm font-bold">{title}</p>
-      <p className="mt-1">{body}</p>
-      {showRetry ? (
-        <button
-          type="button"
-          disabled={isRetrying}
-          onClick={onRetryModel}
-          className="mt-3 inline-flex h-9 items-center rounded-lg border border-current/20 bg-white/60 px-3 text-xs font-semibold hover:bg-white/90 disabled:opacity-50"
-        >
-          {isRetrying ? "Retrying AI summary…" : "Retry AI summary"}
-        </button>
-      ) : null}
-    </div>
+    <details className="group text-[#444651]">
+      <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg border border-[#e0e3e8]/80 bg-[#fafbfc] px-3 py-2 text-[11px] font-semibold text-[#505f76] transition hover:bg-[#f7f9fb] [&::-webkit-details-marker]:hidden">
+        <Eye className="h-3.5 w-3.5 text-[#00246a]" strokeWidth={1.8} aria-hidden />
+        <span>{title}</span>
+        <span className="font-normal text-[#9ca3af]">View details</span>
+        <span className="ml-auto text-[#757682] transition-transform group-open:rotate-180" aria-hidden>
+          ▾
+        </span>
+      </summary>
+      <div className={`mt-2 rounded-lg border px-3 py-2.5 text-xs leading-relaxed ${classes}`}>
+        <p>{body}</p>
+        {showRetry ? (
+          <button
+            type="button"
+            disabled={isRetrying}
+            onClick={onRetryModel}
+            className="mt-3 inline-flex h-9 items-center rounded-lg border border-current/20 bg-white/60 px-3 text-xs font-semibold hover:bg-white/90 disabled:opacity-50"
+          >
+            {isRetrying ? "Retrying AI summary…" : "Retry AI summary"}
+          </button>
+        ) : null}
+      </div>
+    </details>
   );
 }
