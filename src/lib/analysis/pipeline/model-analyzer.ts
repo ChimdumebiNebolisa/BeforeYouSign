@@ -1,5 +1,4 @@
 import { runStructuredLeaseAnalysis } from "@/lib/analysis/gemini-report";
-import { runStructuredOpenAiLeaseAnalysis } from "@/lib/analysis/openai-report";
 import { buildRuleOnlyFallbackReport } from "@/lib/analysis/fallback-report";
 import { groundModelCandidates } from "@/lib/analysis/ground-model-candidates";
 import { parseModelReportCandidate } from "@/lib/analysis/model-candidate-schema";
@@ -7,16 +6,8 @@ import type { ModelAnalyzer, ModelAnalyzerResult } from "@/lib/analysis/pipeline
 import { createEvidenceRegistry } from "@/lib/evidence/registry";
 import { buildEvidenceIndex } from "@/lib/evidence/index";
 import { getBysAiKey } from "@/lib/env/bys-ai-key";
-import { getBysOpenAiKey } from "@/lib/env/bys-openai-key";
 
 const isDev = process.env.NODE_ENV === "development";
-
-function getAnalysisProvider(): "openai" | "gemini" {
-  const configured = process.env.BYS_ANALYSIS_PROVIDER?.trim().toLowerCase();
-  if (configured === "gemini") return "gemini";
-  if (configured === "openai") return "openai";
-  return getBysOpenAiKey()?.trim() ? "openai" : "gemini";
-}
 
 function withEvidenceIndex(
   registry: ReturnType<typeof createEvidenceRegistry>,
@@ -31,8 +22,7 @@ function withEvidenceIndex(
 export function createDefaultModelAnalyzer(): ModelAnalyzer {
   return async ({ document, deterministic }) => {
     const registry = createEvidenceRegistry(document.documentId, document.pages);
-    const provider = getAnalysisProvider();
-    const apiKey = provider === "openai" ? getBysOpenAiKey() : getBysAiKey();
+    const apiKey = getBysAiKey();
 
     if (!apiKey?.trim()) {
       return withEvidenceIndex(registry, {
@@ -48,23 +38,14 @@ export function createDefaultModelAnalyzer(): ModelAnalyzer {
       .slice(0, 200)
       .map((chunk) => ({ id: chunk.id, page: chunk.page, text: chunk.text }));
 
-    const ai = provider === "openai"
-      ? await runStructuredOpenAiLeaseAnalysis({
-          apiKey: apiKey.trim(),
-          leaseText: deterministic.fullLeaseText,
-          ruleBasedFindings: deterministic.ruleBasedFindings,
-          deterministicRisk: deterministic.deterministicRisk,
-          texasRenterFindings: deterministic.texasRenterFindings,
-          evidenceCatalog,
-        })
-      : await runStructuredLeaseAnalysis({
-          apiKey: apiKey.trim(),
-          leaseText: deterministic.fullLeaseText,
-          ruleBasedFindings: deterministic.ruleBasedFindings,
-          deterministicRisk: deterministic.deterministicRisk,
-          texasRenterFindings: deterministic.texasRenterFindings,
-          evidenceCatalog,
-        });
+    const ai = await runStructuredLeaseAnalysis({
+      apiKey: apiKey.trim(),
+      leaseText: deterministic.fullLeaseText,
+      ruleBasedFindings: deterministic.ruleBasedFindings,
+      deterministicRisk: deterministic.deterministicRisk,
+      texasRenterFindings: deterministic.texasRenterFindings,
+      evidenceCatalog,
+    });
 
     if (!ai.ok) {
       const fallbackReport = buildRuleOnlyFallbackReport({
