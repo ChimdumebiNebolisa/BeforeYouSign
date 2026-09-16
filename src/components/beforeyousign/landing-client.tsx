@@ -43,7 +43,6 @@ export function LandingClient() {
   const [pasteOpenNonce, setPasteOpenNonce] = useState(0);
   const [uploadReceipt, setUploadReceipt] = useState<{
     fileName: string;
-    documentId?: string;
     fileSizeBytes: number;
     contentType: string | null;
     extractedPages?: { page: number; text: string }[];
@@ -378,12 +377,6 @@ export function LandingClient() {
                     mode={uploadReceipt.mode}
                     deterministicRiskBand={uploadReceipt.deterministicRiskBand}
                     deterministicRiskReasons={uploadReceipt.deterministicRiskReasons}
-                    documentId={uploadReceipt.documentId}
-                    extractionLimitations={
-                      uploadReceipt.document?.extraction.coverageStatus === "complete"
-                        ? []
-                        : ["The analyzed document extraction was not complete; an unanswered call cannot prove the whole lease lacks a term."]
-                    }
                     selectedFindingId={selectedFindingId}
                     evidenceSourceLabel={
                       intake.kind === "sample" ? "sample lease" : intake.kind === "paste" ? "pasted text" : undefined

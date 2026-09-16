@@ -28,7 +28,6 @@ import { ChecklistDownloadButton } from "@/components/beforeyousign/checklist-do
 import { ReportDownloadButton } from "@/components/beforeyousign/report-download-button";
 import type { AnalysisMode } from "@/lib/analysis/pipeline/types";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
-import { buildAgendaFromReport } from "@/lib/practice/agenda";
 
 const RED_FLAGS_SLIDE_INDEX = 1;
 const TEXAS_RENTER_SLIDE_INDEX = 6;
@@ -293,8 +292,6 @@ export function LeaseReportView({
   mode,
   deterministicRiskBand,
   deterministicRiskReasons,
-  documentId,
-  extractionLimitations = [],
 }: {
   report: BeforeYouSignReport;
   texasRenterFindings?: TexasRenterFinding[];
@@ -305,8 +302,6 @@ export function LeaseReportView({
   mode?: AnalysisMode;
   deterministicRiskBand?: "low" | "medium" | "high";
   deterministicRiskReasons?: string[];
-  documentId?: string;
-  extractionLimitations?: string[];
 }) {
   const summaryIntro = displaySummaryIntro(report.summary);
   const agreeBullets = report.whatYoureAgreeingTo
@@ -325,21 +320,6 @@ export function LeaseReportView({
   }, [report.questionsToAsk, showAllQuestions]);
 
   const extraQuestionCount = Math.max(0, report.questionsToAsk.length - INITIAL_QUESTIONS);
-
-  const preparePractice = () => {
-    const agenda = buildAgendaFromReport({
-      report,
-      document: {
-        documentId: documentId ?? `document-${(fileName ?? "lease").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`,
-        fileName: fileName ?? "analyzed-lease",
-        revision: `${documentId ?? fileName ?? "lease"}-analysis`,
-        extractionLimitations,
-      },
-      pagesAvailable: Boolean(documentId),
-    });
-    window.sessionStorage.setItem("bys:agenda", JSON.stringify(agenda));
-    window.location.assign("/practice");
-  };
 
   const shared = {
     report,
@@ -364,7 +344,6 @@ export function LeaseReportView({
     <div className="space-y-4">
       <LeaseReportCarousel {...shared} />
       <div className="flex flex-wrap justify-end gap-2 border-t border-[#e6e8ea]/80 pt-4">
-        <button type="button" onClick={preparePractice} className="rounded-xl bg-[#191c1e] px-4 py-2 text-xs font-semibold text-white hover:opacity-90">Practice these questions</button>
         <ReportDownloadButton
           report={report}
           texasRenterFindings={texasRenterFindings}

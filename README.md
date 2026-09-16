@@ -2,7 +2,7 @@
 
 ## What this is
 
-**BeforeYouSign** is a Next.js web app that helps renters review **residential lease** documents before signing. Users upload a PDF lease, paste plain text, or load sample lease fixtures. The server extracts text (when needed), runs **regex-based clause detection** and **deterministic risk scoring**, and can use the configured analysis provider to produce a **structured JSON report** (summary, fees, deadlines, red flags, suggested questions). Results display in the browser with evidence quotes tied to page-level extracted text.
+**BeforeYouSign** is a Next.js web app that helps renters review **residential lease** documents before signing. Users upload a PDF lease, paste plain text, or load sample lease fixtures. The server extracts text (when needed), runs **regex-based clause detection** and **deterministic risk scoring**, and optionally calls **Google Gemini** to produce a **structured JSON report** (summary, fees, deadlines, red flags, suggested questions). Results display in the browser with evidence quotes tied to page-level extracted text.
 
 ## Problem it solves
 
@@ -14,12 +14,10 @@ Lease agreements are long and written in dense legal language. Renters often str
 - **Structured report UI**: carousel sections for summary, red flags, money and fees, deadlines, responsibilities, questions, next steps, and “not clearly stated” when applicable.
 - **Evidence linking**: clicking report rows can scroll the **extracted text** viewer and highlight matching quotes by page (evidence ID-first when grounded).
 - **Rule-based snippet extraction** (rent, deposit, fees, notice, renewal, maintenance, utilities, vague phrases) and **deterministic risk band** with reasons.
-- **Provider-assisted narrative report** with JSON schema validation; **fallback report** built from rules when the model fails or returns invalid JSON.
+- **Gemini-powered narrative report** with JSON schema validation; **fallback report** built from rules when the model fails or returns invalid JSON.
 - **Model-only retry** when AI fails after extraction: client caches extracted pages and calls **`POST /api/analyze/retry-model`** without re-uploading the PDF.
 - **Analysis mode banner** (`model_grounded`, `rules_only`, `unavailable`) so users know how the report was produced.
 - **Full report Markdown export** (client-side download) plus existing question checklist export.
-- **Optional question rehearsal** at `/practice`: an explicitly labeled fictional leasing-office role-play with transcript review and user-selected follow-up question transfer. It never contacts a leasing office or verifies lease terms.
-- **Direct question path**: users can review and export evidence-linked questions without starting a practice session or using a voice provider.
 - **Transparency panel** (“How this was analyzed”) showing extraction counts, snippet hits, and heuristic risk signals.
 
 See [docs/POLICYINSIGHT_EXTRACTION_AUDIT.md](docs/POLICYINSIGHT_EXTRACTION_AUDIT.md) for pattern-extraction decisions and deferred scope.
@@ -30,7 +28,7 @@ See [docs/POLICYINSIGHT_EXTRACTION_AUDIT.md](docs/POLICYINSIGHT_EXTRACTION_AUDIT
 
 **Backend:** Next.js Route Handlers — `POST /api/analyze` (full pipeline) and `POST /api/analyze/retry-model` (model-only retry from cached extracted pages) (`src/app/api/analyze/`).
 
-**AI/API:** Google Gemini or OpenAI for lease analysis, plus optional server-mediated OpenAI Realtime practice and structured review. Standard provider keys remain server-side.
+**AI/API:** Google Gemini via `@google/generative-ai` (`src/lib/analysis/gemini-report.ts`), structured output aligned with `src/lib/analysis/schema.ts`.
 
 **Other tools:** `pdf-parse` + `pdf-lib` (`src/lib/pdf/`), ESLint (`npm run lint`), Playwright QA smoke scripts.
 
@@ -96,9 +94,8 @@ For this project:
 2. **Submit analysis:** The client sends **`POST /api/analyze`** — **multipart** (`file`) for PDFs or **JSON** (`leaseText`, optional `fileName`) for pasted/sample text (`landing-client.tsx`, `route.ts`).
 3. **Prepare text:** PDFs are read per page via **`extractPdfTextPages`**; pasted text becomes a single synthetic page. All text passes **`normalizeLeasePageText`** (`src/lib/pdf/`).
 4. **Deterministic pass:** **`rules.ts`** extracts snippet matches; **`scoring.ts`** computes a risk band and reasons; ambiguous phrases are flagged (`findUnclearLeasePhrases`).
-5. **AI report (when configured):** **`runStructuredLeaseAnalysis`** uses the configured analysis provider; responses are parsed (**`model-json.ts`**), validated (**`parseBeforeYouSignReportJson`**), normalized (**`report-normalization.ts`**), and evidence-grounded. On failure, **`buildRuleOnlyFallbackReport`** supplies a report-shaped fallback. Users can **retry AI only** via **`POST /api/analyze/retry-model`** when extraction already succeeded.
+5. **AI report (when configured):** **`runStructuredLeaseAnalysis`** calls Gemini with **`buildLeaseAnalysisUserPrompt`**; responses are parsed (**`model-json.ts`**), validated (**`parseBeforeYouSignReportJson`**), normalized (**`report-normalization.ts`**), and evidence-grounded. On failure, **`buildRuleOnlyFallbackReport`** supplies a report-shaped fallback. Users can **retry AI only** via **`POST /api/analyze/retry-model`** when extraction already succeeded.
 6. **Render results:** JSON returns **`extractedPages`**, snippet arrays, deterministic risk fields, **`mode`**, and **`report`**. The client shows **`LeaseTextViewer`**, **`LeaseReportView`**, **`AnalysisModeBanner`**, and **`TechnicalDetailsPanel`** (`landing-client.tsx`).
-7. **Optional practice:** selected questions and approved minimum context flow to `/practice`. A user-entered operator code, `BYS_PRACTICE_ENABLED`, bounded configuration, and server-only OpenAI credentials protect session and review requests. Missing practice credentials leave analysis, exports, and the synthetic sample available.
 
 ## Architecture
 
@@ -106,9 +103,7 @@ Brief folder layout:
 
 ```txt
 src/app/: App Router — layout, page, favicon/app icons, POST /api/analyze and /api/analyze/retry-model.
-src/components/beforeyousign/: Intake, report carousel, text viewer, practice workspace, loading shell.
-src/lib/practice/: Evidence-linked practice agendas, session state, review validation, and fictional sample fixtures.
-src/app/api/practice/: Server-mediated practice session and review endpoints.
+src/components/beforeyousign/: Intake, report carousel, text viewer, loading shell.
 src/components/ui/: Shared UI (e.g. Button).
 src/lib/analysis/: Regex rules, Gemini, schema, scoring, prompts, normalization.
 src/lib/pdf/: PDF extraction (pdf-parse) and text normalization.
@@ -120,7 +115,7 @@ System overview:
 ```txt
 Frontend: React client components; single-page lease intake and results.
 Backend: Next.js Route Handler (Node) — one analyze endpoint; no separate API server.
-External services: configured lease-analysis provider, plus optional OpenAI practice/review when deliberately enabled.
+External services: Google Gemini API (when BYS_AI_KEY is set).
 Deployment: Standard Next.js production build (npm run build && npm run start); host per your platform (e.g. Vercel-compatible).
 ```
 
