@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export function LandingNav() {
   const goHome = () => {
     window.dispatchEvent(new CustomEvent("bys:go-home"));
@@ -15,6 +17,12 @@ export function LandingNav() {
         >
           BeforeYouSign
         </button>
+        <Link
+          href="/practice"
+          className="rounded-xl bg-[#191c1e] px-3 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-85 sm:px-4 sm:text-sm"
+        >
+          Practice questions
+        </Link>
       </nav>
     </header>
   );
