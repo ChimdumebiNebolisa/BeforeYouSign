@@ -11,6 +11,7 @@ import { getBysGeminiModel } from "@/lib/env/bys-gemini-model";
 import { ANALYSIS_LIMITS } from "@/lib/analysis/limits";
 
 const DEFAULT_AI_TIMEOUT_MS = process.env.VERCEL ? 8_500 : 20_000;
+const MAX_AI_TIMEOUT_MS = 30_000;
 
 function getAiTimeoutMs(): number {
   const raw = process.env.BYS_AI_TIMEOUT_MS;
@@ -19,29 +20,7 @@ function getAiTimeoutMs(): number {
   if (!Number.isFinite(parsed) || parsed <= 0) {
     return DEFAULT_AI_TIMEOUT_MS;
   }
-  return Math.floor(parsed);
-}
-
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
-  if (timeoutMs <= 0) {
-    return promise;
-  }
-
-  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
-  try {
-    return await Promise.race([
-      promise,
-      new Promise<T>((_, reject) => {
-        timeoutHandle = setTimeout(() => {
-          reject(new Error(`Gemini request timed out after ${timeoutMs}ms.`));
-        }, timeoutMs);
-      }),
-    ]);
-  } finally {
-    if (timeoutHandle) {
-      clearTimeout(timeoutHandle);
-    }
-  }
+  return Math.min(Math.floor(parsed), MAX_AI_TIMEOUT_MS);
 }
 
 function collectModelText(response: EnhancedGenerateContentResponse): string {
@@ -116,7 +95,7 @@ export async function runStructuredLeaseAnalysis(input: {
 
   let rawText = "";
   try {
-    const result = await withTimeout(modelWithSchema.generateContent(prompt), aiTimeoutMs);
+    const result = await modelWithSchema.generateContent(prompt, { timeout: aiTimeoutMs });
     rawText = collectModelText(result.response);
   } catch (e) {
     if (shouldRetryGenerationWithoutSchema(e)) {
@@ -126,7 +105,7 @@ export async function runStructuredLeaseAnalysis(input: {
         generationConfig: baseConfig,
       });
       try {
-        const result = await withTimeout(modelPlain.generateContent(prompt), aiTimeoutMs);
+        const result = await modelPlain.generateContent(prompt, { timeout: aiTimeoutMs });
         rawText = collectModelText(result.response);
       } catch {
         return { ok: false, userMessage: USER_SAFE_AI_REPORT_UNAVAILABLE, failureStage: "network" };

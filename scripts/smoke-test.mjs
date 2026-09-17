@@ -1,6 +1,6 @@
 import { chromium } from "playwright";
 
-const BASE = "http://localhost:3000";
+const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 
 const BANNED = [
   /\brisk score\b/i,
@@ -48,10 +48,10 @@ async function run() {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 
   await page.goto(BASE, { waitUntil: "networkidle" });
-  note("Landing loads", page.url().includes("localhost:3000"));
+  note("Landing loads", page.url().includes(new URL(BASE).host));
   const landingBody = await page.locator("body").innerText();
-  note("Landing Texas renter section", /Texas renter check/i.test(landingBody));
-  note("Landing OCR warning", /Scanned image-only PDFs may not extract correctly/i.test(landingBody));
+  note("Landing Texas lease scope", /Texas residential lease/i.test(landingBody));
+  note("Landing scanned-PDF limitation", /Scanned image-only PDFs are not supported yet/i.test(landingBody));
   checkBanned(landingBody, "landing");
 
   await page.getByRole("tab", { name: "Sample" }).click();
@@ -63,6 +63,7 @@ async function run() {
   const reportBody = await page.locator("body").innerText();
   note("Report appears", /Review priority/i.test(reportBody));
   note("Texas renter check in report", /Texas renter check/i.test(reportBody));
+  note("Analysis mode is disclosed", /AI-enhanced summary|Rule-based summary|AI summary unavailable/i.test(reportBody));
   note("Checklist download button", await page.getByRole("button", { name: "Download question checklist" }).isVisible());
   checkBanned(reportBody, "report");
 

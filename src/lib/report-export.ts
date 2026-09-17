@@ -13,8 +13,8 @@ function safeText(value: string | null | undefined): string {
 
 function formatEvidence(ev: { page: number; quote: string; evidenceId?: string }): string {
   const page = `p. ${ev.page}`;
-  const id = ev.evidenceId ? ` [${ev.evidenceId}]` : "";
-  const quote = safeText(ev.quote).replace(/\s+/g, " ").trim().slice(0, 160);
+  const id = ev.evidenceId ? ` [${escapeMd(ev.evidenceId)}]` : "";
+  const quote = escapeMd(safeText(ev.quote).replace(/\s+/g, " ").trim().slice(0, 160));
   return `${page}${id}: "${quote}"`;
 }
 
@@ -155,9 +155,13 @@ export function buildReportMarkdown(input: {
       lines.push(`- **${escapeMd(safeText(f.topicLabel))}**`);
       lines.push(`  - ${escapeMd(safeText(f.questionToAsk))}`);
       lines.push(
-        `  - Lease quote (p. ${f.page}): "${safeText(f.leaseQuote).replace(/\s+/g, " ").trim().slice(0, 160)}"`,
+        `  - Lease quote (p. ${f.page}): "${escapeMd(safeText(f.leaseQuote).replace(/\s+/g, " ").trim().slice(0, 160))}"`,
       );
-      if (f.sourceUrl) lines.push(`  - Source: ${f.sourceTitle ?? f.sourceUrl}`);
+      if (f.sourceUrl) lines.push(`  - Source: ${escapeMd(f.sourceTitle ?? f.sourceUrl)}`);
+      if (f.sourceReviewedAt) {
+        lines.push(`  - Source last reviewed: ${escapeMd(f.sourceReviewedAt)}`);
+      }
+      if (f.sourceFreshnessWarning) lines.push(`  - Source note: ${escapeMd(f.sourceFreshnessWarning)}`);
     });
   } else {
     lines.push("- No Texas renter check topics were matched in this lease.");

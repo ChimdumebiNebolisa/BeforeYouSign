@@ -33,16 +33,79 @@ const BANNED_WORDS = [
   /\bshould not sign\b/i,
 ];
 
+const FINDING_CATEGORIES = new Set([
+  "fees",
+  "renewal",
+  "notice",
+  "maintenance",
+  "utilities",
+  "guests",
+  "pets",
+  "subletting",
+  "termination",
+  "entry",
+  "other",
+]);
+
 export function containsBannedWording(text: string): boolean {
   const normalized = text.replace(/\binvalid\w*/gi, "");
   return BANNED_WORDS.some((pattern) => pattern.test(normalized));
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function isEvidenceRow(value: unknown): value is { label: string; value: string; evidenceIds?: string[] } {
+  return (
+    isRecord(value) &&
+    typeof value.label === "string" &&
+    typeof value.value === "string" &&
+    (value.evidenceIds === undefined || isStringArray(value.evidenceIds))
+  );
+}
+
 export function parseModelReportCandidate(raw: unknown): ModelReportCandidate | null {
-  if (!raw || typeof raw !== "object") return null;
+  if (!isRecord(raw)) return null;
   const o = raw as Record<string, unknown>;
-  if (typeof o.summary !== "string") return null;
-  if (!Array.isArray(o.moneyAndFees) || !Array.isArray(o.potentialRedFlags)) return null;
+
+  if (
+    typeof o.summary !== "string" ||
+    !isStringArray(o.whatYoureAgreeingTo) ||
+    !["low", "medium", "high"].includes(String(o.riskLevel)) ||
+    typeof o.riskReason !== "string" ||
+    !Array.isArray(o.moneyAndFees) ||
+    !o.moneyAndFees.every(isEvidenceRow) ||
+    !Array.isArray(o.deadlinesAndNotice) ||
+    !o.deadlinesAndNotice.every(isEvidenceRow) ||
+    !isStringArray(o.responsibilities) ||
+    !Array.isArray(o.potentialRedFlags) ||
+    !o.potentialRedFlags.every((flag) => {
+      if (!isRecord(flag)) return false;
+      return (
+        typeof flag.id === "string" &&
+        typeof flag.category === "string" &&
+        FINDING_CATEGORIES.has(flag.category) &&
+        typeof flag.title === "string" &&
+        ["minor", "moderate", "critical"].includes(String(flag.severity)) &&
+        typeof flag.explanation === "string" &&
+        typeof flag.whyItMatters === "string" &&
+        isStringArray(flag.evidenceIds) &&
+        flag.evidenceIds.length > 0
+      );
+    }) ||
+    !isStringArray(o.questionsToAsk) ||
+    !isStringArray(o.nextSteps) ||
+    !isStringArray(o.missingOrUnclear) ||
+    typeof o.disclaimer !== "string"
+  ) {
+    return null;
+  }
+
   return o as unknown as ModelReportCandidate;
 }
 

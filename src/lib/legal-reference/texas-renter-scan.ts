@@ -1,7 +1,9 @@
 import type { ExtractedTextPage } from "@/lib/pdf/extract-text";
 import {
   getTexasRenterTopicRecord,
+  getTexasReferenceFreshness,
   isTexasContextEnabled,
+  type TexasReferenceFreshness,
   type TexasRenterTopic,
   type TexasSourceType,
 } from "@/lib/legal-reference/texas-renter-references";
@@ -22,6 +24,9 @@ export type TexasRenterFinding = {
   sourceType?: TexasSourceType;
   sourceSectionLabel?: string;
   plainEnglishSummary?: string;
+  sourceReviewedAt?: string;
+  sourceFreshness?: TexasReferenceFreshness;
+  sourceFreshnessWarning?: string;
   contextAvailable: boolean;
 };
 
@@ -186,6 +191,13 @@ export function scanTexasRenterTopics(pages: ExtractedTextPage[]): TexasRenterFi
 
     const record = getTexasRenterTopicRecord(match.topic);
     const contextAvailable = isTexasContextEnabled(record);
+    const sourceFreshness = getTexasReferenceFreshness(record);
+    const sourceFreshnessWarning =
+      sourceFreshness === "current"
+        ? undefined
+        : sourceFreshness === "stale"
+          ? `This source was last reviewed on ${record.reviewedAt} and may need to be checked for updates.`
+          : "The source review date could not be verified. Check the linked source before relying on it.";
     const id = `texas-${match.topic}-${match.page}-${findings.length + 1}`;
 
     findings.push({
@@ -207,6 +219,9 @@ export function scanTexasRenterTopics(pages: ExtractedTextPage[]): TexasRenterFi
             sourceType: record.sourceType,
             sourceSectionLabel: record.sourceSectionLabel,
             plainEnglishSummary: record.plainEnglishSummary,
+            sourceReviewedAt: record.reviewedAt,
+            sourceFreshness,
+            ...(sourceFreshnessWarning ? { sourceFreshnessWarning } : {}),
           }
         : {}),
       contextAvailable,

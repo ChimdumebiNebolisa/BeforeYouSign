@@ -6,7 +6,7 @@ Deterministic evaluation runs offline in CI. Model evaluation is budgeted separa
 
 - `evaluation/fixtures/synthetic/` — synthetic leases only (safe for git)
 - `evaluation/fixtures/public/` — public-domain or permissively licensed samples
-- `evaluation/fixtures/adversarial/` — prompt-injection and grounding attack cases
+- `evaluation/fixtures/synthetic/` — includes prompt-injection and ambiguous-language cases
 
 ## Annotation contract
 
@@ -14,7 +14,8 @@ See `evaluation/schema/annotation.schema.json`. Factual extraction labels are se
 
 ## Commands
 
-- `npm run evaluate` — deterministic rules-only evaluation, writes `evaluation/baselines/deterministic-v1.json`
+- `npm run evaluate` — deterministic rules-only evaluation; compares against the committed baseline without writing it
+- Update the baseline only through an explicit reviewed change to `evaluation/baselines/deterministic-v1.json`
 - `npm test` — unit/property tests including grounding and evidence registry
 
 ## Release gates

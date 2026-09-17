@@ -4,9 +4,13 @@ import type { ModelRetryInput } from "@/lib/analysis/pipeline/types";
 import { assessExtractionQuality, toDocumentExtraction } from "@/lib/pdf/extraction-quality";
 import { normalizeLeasePageText } from "@/lib/pdf/normalize";
 import type { ExtractedTextPage } from "@/lib/pdf/extract-text";
+import {
+  isRequestBodyTooLargeError,
+  readRequestTextWithinLimit,
+} from "@/lib/analysis/pipeline/validate-intake";
 
 /** Maximum JSON body size accepted by the model-retry endpoint. */
-export const MAX_MODEL_RETRY_JSON_BYTES = 512 * 1024;
+export const MAX_MODEL_RETRY_JSON_BYTES = ANALYSIS_LIMITS.maxJsonBodyBytes;
 
 const UNTRUSTED_PAYLOAD_KEYS = new Set([
   "evidenceIndex",
@@ -232,39 +236,23 @@ export async function parseModelRetryRequest(request: Request): Promise<
     };
   }
 
-  const contentLength = request.headers.get("content-length");
-  if (contentLength) {
-    const length = Number.parseInt(contentLength, 10);
-    if (Number.isFinite(length) && length > MAX_MODEL_RETRY_JSON_BYTES) {
+  let rawBody: string;
+  try {
+    rawBody = await readRequestTextWithinLimit(request, MAX_MODEL_RETRY_JSON_BYTES);
+  } catch (error) {
+    if (isRequestBodyTooLargeError(error)) {
       return {
         ok: false,
         problem: createAnalysisProblem(
           "payload_too_large",
           "Retry request body is too large.",
-          { limit: MAX_MODEL_RETRY_JSON_BYTES, actual: length },
+          { limit: error.limit, actual: error.actual },
         ),
       };
     }
-  }
-
-  let rawBody: string;
-  try {
-    rawBody = await request.text();
-  } catch {
     return {
       ok: false,
       problem: createAnalysisProblem("invalid_input", "Unable to read retry request body."),
-    };
-  }
-
-  if (Buffer.byteLength(rawBody, "utf8") > MAX_MODEL_RETRY_JSON_BYTES) {
-    return {
-      ok: false,
-      problem: createAnalysisProblem(
-        "payload_too_large",
-        "Retry request body is too large.",
-        { limit: MAX_MODEL_RETRY_JSON_BYTES, actual: Buffer.byteLength(rawBody, "utf8") },
-      ),
     };
   }
 

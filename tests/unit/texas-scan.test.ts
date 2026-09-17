@@ -23,6 +23,8 @@ describe("scanTexasRenterTopics", () => {
     expect(deposit?.contextAvailable).toBe(true);
     expect(deposit?.sourceUrl).toMatch(/^https:\/\//);
     expect(deposit?.sourceTitle?.length).toBeGreaterThan(0);
+    expect(deposit?.sourceReviewedAt).toBe("2026-06-10");
+    expect(["current", "stale", "unknown"]).toContain(deposit?.sourceFreshness);
     expect(deposit?.questionToAsk.length).toBeGreaterThan(0);
   });
 

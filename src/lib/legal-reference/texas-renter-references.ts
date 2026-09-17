@@ -11,6 +11,10 @@ export type TexasSourceType =
   | "legal_aid_resource"
   | "public_agency_resource";
 
+export type TexasReferenceFreshness = "current" | "stale" | "unknown";
+
+export const LEGAL_REFERENCE_MAX_AGE_DAYS = 180;
+
 /** Curated topic record — static links only; never scraped at runtime. */
 export type TexasRenterTopicRecord = {
   id: string;
@@ -194,12 +198,26 @@ export function getTexasRenterTopicRecord(topic: TexasRenterTopic): TexasRenterT
 }
 
 export function isTexasContextEnabled(record: TexasRenterTopicRecord): boolean {
-  if (!record.contextEnabled) return false;
+  return record.contextEnabled;
+}
+
+export function getTexasReferenceFreshness(
+  record: TexasRenterTopicRecord,
+  now = Date.now(),
+): TexasReferenceFreshness {
+  if (!record.contextEnabled) return "unknown";
+
   if (record.effectiveThrough) {
     const through = Date.parse(record.effectiveThrough);
-    if (!Number.isNaN(through) && through < Date.now()) return false;
+    if (Number.isNaN(through)) return "unknown";
+    if (through < now) return "stale";
   }
-  return true;
+
+  const reviewedAt = Date.parse(record.reviewedAt);
+  if (Number.isNaN(reviewedAt) || reviewedAt > now) return "unknown";
+
+  const maxAgeMs = LEGAL_REFERENCE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+  return now - reviewedAt > maxAgeMs ? "stale" : "current";
 }
 
 /** @deprecated Use topicLabel on findings or getTexasRenterTopicRecord(). */

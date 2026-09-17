@@ -19,19 +19,34 @@ function withEvidenceIndex(
   };
 }
 
+function buildDeterministicFallback(
+  document: Parameters<ModelAnalyzer>[0]["document"],
+  deterministic: Parameters<ModelAnalyzer>[0]["deterministic"],
+): ModelAnalyzerResult {
+  const registry = createEvidenceRegistry(document.documentId, document.pages);
+  return withEvidenceIndex(registry, {
+    report: buildRuleOnlyFallbackReport({
+      documentId: document.documentId,
+      pages: document.pages,
+      ruleBasedFindings: deterministic.ruleBasedFindings,
+      deterministicRisk: deterministic.deterministicRisk,
+      evidenceRegistry: registry,
+    }),
+    reportError: null,
+    mode: "rules_only",
+    groundingSummary: { materialClaims: 0, groundedClaims: 0, droppedClaims: 0 },
+    reportDebug: null,
+  });
+}
+
 export function createDefaultModelAnalyzer(): ModelAnalyzer {
   return async ({ document, deterministic }) => {
     const registry = createEvidenceRegistry(document.documentId, document.pages);
     const apiKey = getBysAiKey();
 
     if (!apiKey?.trim()) {
-      return withEvidenceIndex(registry, {
-        report: null,
-        reportError:
-          "The AI summary isn't available right now, but key lease details are still shown below.",
-        mode: "unavailable",
-        reportDebug: null,
-      });
+      const fallback = buildDeterministicFallback(document, deterministic);
+      return { ...fallback, mode: "unavailable" };
     }
 
     const evidenceCatalog = registry.chunks
@@ -48,37 +63,23 @@ export function createDefaultModelAnalyzer(): ModelAnalyzer {
     });
 
     if (!ai.ok) {
-      const fallbackReport = buildRuleOnlyFallbackReport({
-        documentId: document.documentId,
-        pages: document.pages,
-        ruleBasedFindings: deterministic.ruleBasedFindings,
-        deterministicRisk: deterministic.deterministicRisk,
-        evidenceRegistry: registry,
-      });
+      const fallbackReport = buildDeterministicFallback(document, deterministic);
 
-      return withEvidenceIndex(registry, {
-        report: fallbackReport,
-        reportError: null,
+      return {
+        ...fallbackReport,
         mode: "rules_only",
         reportDebug: isDev ? { failureStage: ai.failureStage } : null,
-      });
+      };
     }
 
     const candidate = parseModelReportCandidate(ai.rawParsed);
     if (!candidate) {
-      const fallbackReport = buildRuleOnlyFallbackReport({
-        documentId: document.documentId,
-        pages: document.pages,
-        ruleBasedFindings: deterministic.ruleBasedFindings,
-        deterministicRisk: deterministic.deterministicRisk,
-        evidenceRegistry: registry,
-      });
-      return withEvidenceIndex(registry, {
-        report: fallbackReport,
-        reportError: null,
+      const fallback = buildDeterministicFallback(document, deterministic);
+      return {
+        ...fallback,
         mode: "rules_only",
         reportDebug: isDev ? { failureStage: "schema_validation" } : null,
-      });
+      };
     }
 
     const grounded = groundModelCandidates({

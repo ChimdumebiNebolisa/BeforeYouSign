@@ -8,6 +8,38 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Standard fictional residential lease excerpt"
+    },
+    {
+      "id": "synthetic-fee-heavy",
+      "path": "synthetic/fee-heavy.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Fictional lease with multiple fee clauses"
+    },
+    {
+      "id": "synthetic-notice-renewal",
+      "path": "synthetic/notice-renewal.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Fictional lease with notice and renewal clauses"
+    },
+    {
+      "id": "synthetic-prompt-injection",
+      "path": "synthetic/prompt-injection.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "adversarial",
+      "description": "Synthetic adversarial lease text containing prompt-injection instructions"
+    },
+    {
+      "id": "synthetic-ambiguous-language",
+      "path": "synthetic/ambiguous-language.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Fictional lease with ambiguous clauses"
     }
   ]
 }

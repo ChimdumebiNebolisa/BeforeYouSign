@@ -47,7 +47,8 @@ export function AnalysisModeBanner({
     case "unavailable":
       tone = "warn";
       title = analysisModeBannerTitle(mode);
-      body = "Key lease details from pattern matching are shown below. AI summarization is not configured or failed.";
+      body =
+        "A complete deterministic lease report is shown below. Gemini AI enhancement is not configured for this environment.";
       break;
   }
 

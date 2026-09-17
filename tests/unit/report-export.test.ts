@@ -97,11 +97,14 @@ describe("buildReportMarkdown", () => {
           leaseQuote: "Deposit shall be returned within 30 days.",
           sourceUrl: "https://example.com",
           sourceTitle: "Example source",
+          sourceReviewedAt: "2026-08-01",
+          sourceFreshness: "current",
         }),
       ],
     });
     expect(md).toContain("Security deposits");
     expect(md).toContain("Example source");
+    expect(md).toContain("Source last reviewed: 2026-08-01");
     expect(md).not.toContain("ungrounded");
   });
 
@@ -205,5 +208,30 @@ describe("buildChecklistMarkdown", () => {
     });
 
     expect(md).toContain("Origin: Pattern scan");
+  });
+
+  it("escapes user-controlled checklist content", () => {
+    const md = buildChecklistMarkdown({
+      report: {
+        ...minimalReport,
+        questionsToAsk: ["Ask *why* and `how` [before signing]"],
+        moneyAndFees: [{ label: "Fee *label*", value: "Amount [unknown]" }],
+      },
+      texasRenterFindings: [
+        texasFinding({
+          id: "tx-markdown",
+          topic: "securityDeposit",
+          topicLabel: "Deposit *topic*",
+          questionToAsk: "Ask about [deductions]",
+          leaseQuote: "Use `quoted` language.",
+        }),
+      ],
+      fileName: "lease_[draft].md",
+    });
+
+    expect(md).toContain("Ask \\*why\\* and \\`how\\` \\[before signing\\]");
+    expect(md).toContain("Fee \\*label\\*");
+    expect(md).toContain("Use \\`quoted\\` language.");
+    expect(md).not.toContain("**Deposit *topic***");
   });
 });

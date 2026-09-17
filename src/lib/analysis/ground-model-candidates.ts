@@ -35,7 +35,7 @@ export function groundModelCandidates(input: {
   ruleBasedFindings: RuleBasedFinding[];
   deterministicRisk: DeterministicLeaseRisk;
 }): {
-  report: BeforeYouSignReport | null;
+  report: BeforeYouSignReport;
   groundingSummary: GroundingSummary;
 } {
   let materialClaims = 0;
@@ -114,7 +114,8 @@ export function groundModelCandidates(input: {
   const report = normalizeReportForCredibility({
     summary: input.candidate.summary,
     whatYoureAgreeingTo: input.candidate.whatYoureAgreeingTo,
-    riskLevel: input.candidate.riskLevel,
+    // The model may explain the priority, but the deterministic risk band is authoritative.
+    riskLevel: input.deterministicRisk.band,
     riskReason: input.candidate.riskReason,
     moneyAndFees,
     deadlinesAndNotice,

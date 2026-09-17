@@ -42,11 +42,63 @@ if (/landlordEntry[\s\S]*?#92\.008(?!1)/.test(source)) {
   fail("landlordEntry still points to §92.008 (interruption of utilities)");
 }
 
-const requiredFields = ["jurisdiction", "reviewedAt", "sourceUrl", "sourceTitle", "sourceSectionLabel"];
+const requiredFields = [
+  "jurisdiction",
+  "reviewedAt",
+  "effectiveThrough",
+  "sourceUrl",
+  "sourceTitle",
+  "sourceType",
+  "sourceSectionLabel",
+];
 for (const field of requiredFields) {
-  if (!source.includes(`${field}:`)) {
-    fail(`Missing field pattern: ${field}`);
+  const count = [...source.matchAll(new RegExp(`\\b${field}:\\s*(?:"|null)`, "g"))].length;
+  if (count !== idMatches.length) {
+    fail(`Every legal reference must define ${field} (${count}/${idMatches.length})`);
   }
+}
+
+const sourceUrls = [...source.matchAll(/sourceUrl:\s*"([^"]+)"/g)].map((m) => m[1]);
+if (
+  sourceUrls.length !== idMatches.length ||
+  sourceUrls.some((value) => {
+    try {
+      const url = new URL(value);
+      return url.protocol !== "https:" || !url.hostname;
+    } catch {
+      return true;
+    }
+  })
+) {
+  fail("Every legal reference must define a valid HTTPS sourceUrl");
+} else {
+  pass(`Valid source URLs (${sourceUrls.length})`);
+}
+
+const reviewedDates = [...source.matchAll(/reviewedAt:\s*"([^"]+)"/g)].map((m) => m[1]);
+if (reviewedDates.length !== idMatches.length || reviewedDates.some((value) => Number.isNaN(Date.parse(value)))) {
+  fail("Every legal reference must have a parseable reviewedAt date");
+} else {
+  pass(`Parseable review dates (${reviewedDates.length})`);
+}
+
+const effectiveThroughValues = [...source.matchAll(/effectiveThrough:\s*(null|"([^"]+)")/g)].map((m) =>
+  m[1] === "null" ? null : m[2],
+);
+if (
+  effectiveThroughValues.length !== idMatches.length ||
+  effectiveThroughValues.some((value) => value !== null && Number.isNaN(Date.parse(value)))
+) {
+  fail("Every legal reference must have null or a parseable effectiveThrough date");
+} else {
+  pass(`Valid effective-through metadata (${effectiveThroughValues.length})`);
+}
+
+const publicCopy = readFileSync(path.join(process.cwd(), "src/lib/public-copy.ts"), "utf8");
+if (!/Educational information only\. Not legal advice\./.test(publicCopy)) {
+  fail("Public copy must retain the legal disclaimer");
+} else {
+  pass("Legal disclaimer present in public copy");
 }
 
 if (failed === 0) {

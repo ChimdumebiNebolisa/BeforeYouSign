@@ -1,13 +1,18 @@
 export const ANALYSIS_LIMITS = {
+  maxJsonBodyBytes: 1024 * 1024,
+  maxMultipartOverheadBytes: 512 * 1024,
   maxPdfBytes: 10 * 1024 * 1024,
   maxPages: 100,
   maxChars: 120_000,
   maxEvidenceChunks: 500,
   maxModelInputChunks: 200,
   maxConcurrentPerClient: 1,
+  maxRequestsPerRateWindow: 10,
+  rateWindowMs: 10 * 60 * 1000,
+  maxRateLimitEntries: 10_000,
   maxProviderRetries: 1,
   lowExtractionCharThreshold: 400,
-  ocrQualityThreshold: 0.35,
+  lowCoverageQualityThreshold: 0.35,
 } as const;
 
 export type AnalysisProblemCode =

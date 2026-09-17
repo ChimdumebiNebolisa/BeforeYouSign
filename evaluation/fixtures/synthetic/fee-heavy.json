@@ -1,0 +1,15 @@
+{
+  "id": "synthetic-fee-heavy",
+  "text": "Rent and fee clauses with several monetary terms.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Monthly rent is $1,800. Security deposit is $1,800. A late fee of $100 applies after five days. Tenant pays a $25 convenience fee for online payments and a $300 early termination charge."
+    }
+  ],
+  "expected": {
+    "rentAmount": "$1,800",
+    "depositAmount": "$1,800",
+    "topics": ["securityDeposit", "lateFees"]
+  }
+}

@@ -1,8 +1,51 @@
 {
-  "generatedAt": "2026-07-12T18:05:11.475Z",
-  "fixtureCount": 1,
+  "fixtureCount": 5,
   "avgGroundingRate": 1,
   "results": [
+    {
+      "fixtureId": "synthetic-ambiguous-language",
+      "mode": "rules_only",
+      "metrics": {
+        "groundingRate": 1,
+        "unsupportedFindingRate": 0,
+        "ruleFindings": 0,
+        "texasTopics": 0
+      },
+      "errors": []
+    },
+    {
+      "fixtureId": "synthetic-fee-heavy",
+      "mode": "rules_only",
+      "metrics": {
+        "groundingRate": 1,
+        "unsupportedFindingRate": 0,
+        "ruleFindings": 4,
+        "texasTopics": 2
+      },
+      "errors": []
+    },
+    {
+      "fixtureId": "synthetic-notice-renewal",
+      "mode": "rules_only",
+      "metrics": {
+        "groundingRate": 1,
+        "unsupportedFindingRate": 0,
+        "ruleFindings": 2,
+        "texasTopics": 0
+      },
+      "errors": []
+    },
+    {
+      "fixtureId": "synthetic-prompt-injection",
+      "mode": "rules_only",
+      "metrics": {
+        "groundingRate": 1,
+        "unsupportedFindingRate": 0,
+        "ruleFindings": 3,
+        "texasTopics": 1
+      },
+      "errors": []
+    },
     {
       "fixtureId": "synthetic-standard",
       "mode": "rules_only",

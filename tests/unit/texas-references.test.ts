@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   TEXAS_RENTER_SUPPLEMENTAL_SOURCES,
   TEXAS_RENTER_TOPIC_RECORDS,
+  getTexasReferenceFreshness,
   isTexasContextEnabled,
 } from "@/lib/legal-reference/texas-renter-references";
 
@@ -47,5 +48,21 @@ describe("Texas legal reference provenance", () => {
     for (const record of Object.values(TEXAS_RENTER_TOPIC_RECORDS)) {
       expect(isTexasContextEnabled(record)).toBe(true);
     }
+  });
+
+  it("classifies stale and unknown sources without disabling the contextual note", () => {
+    const now = Date.parse("2026-09-17T00:00:00Z");
+    const current = TEXAS_RENTER_TOPIC_RECORDS.securityDeposit;
+    expect(getTexasReferenceFreshness(current, now)).toBe("current");
+
+    const expired = { ...current, effectiveThrough: "2026-09-01" };
+    expect(getTexasReferenceFreshness(expired, now)).toBe("stale");
+    expect(isTexasContextEnabled(expired)).toBe(true);
+
+    const old = { ...current, reviewedAt: "2025-01-01" };
+    expect(getTexasReferenceFreshness(old, now)).toBe("stale");
+
+    const unknown = { ...current, reviewedAt: "not-a-date" };
+    expect(getTexasReferenceFreshness(unknown, now)).toBe("unknown");
   });
 });

@@ -2,9 +2,8 @@ import { ANALYSIS_LIMITS, createAnalysisProblem } from "@/lib/analysis/limits";
 import type { AnalysisInput, NormalizedDocument } from "@/lib/analysis/pipeline/types";
 import { computeContentIntegrityKey } from "@/lib/analysis/pipeline/content-integrity";
 import { assessExtractionQuality, toDocumentExtraction } from "@/lib/pdf/extraction-quality";
-import { normalizeLeasePageText } from "@/lib/pdf/normalize";
+import { PdfPageLimitError } from "@/lib/pdf/extract-text";
 import type { PdfExtractor } from "@/lib/analysis/pipeline/types";
-import { maybeApplyOcr } from "@/lib/ocr/ocr-document";
 
 export async function analyzeDocument(
   input: AnalysisInput,
@@ -31,7 +30,17 @@ export async function analyzeDocument(
   let extractedPages;
   try {
     extractedPages = await extractPdfTextPages(input.bytes);
-  } catch {
+  } catch (error) {
+    if (error instanceof PdfPageLimitError) {
+      return {
+        ok: false,
+        problem: createAnalysisProblem(
+          "too_many_pages",
+          `PDF exceeds the ${error.limit} page limit.`,
+          { limit: error.limit, actual: error.actual },
+        ),
+      };
+    }
     return {
       ok: false,
       problem: createAnalysisProblem(
@@ -52,20 +61,8 @@ export async function analyzeDocument(
     };
   }
 
-  let quality = assessExtractionQuality(extractedPages);
-  let method: NormalizedDocument["extraction"]["method"] = "embedded_text";
-
-  if (quality.likelyScanned && process.env.BYS_OCR_ENABLED === "1") {
-    const ocrResult = await maybeApplyOcr(input.bytes, extractedPages);
-    if (ocrResult.pages.length > 0) {
-      extractedPages = ocrResult.pages.map((p) => ({
-        page: p.page,
-        text: normalizeLeasePageText(p.text),
-      }));
-      quality = assessExtractionQuality(extractedPages);
-      method = "ocr";
-    }
-  }
+  const quality = assessExtractionQuality(extractedPages);
+  const method: NormalizedDocument["extraction"]["method"] = "embedded_text";
 
   const totalChars = extractedPages.reduce((sum, p) => sum + p.text.length, 0);
   if (totalChars === 0) {

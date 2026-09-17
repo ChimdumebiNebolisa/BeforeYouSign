@@ -44,7 +44,7 @@ cd BeforeYouSign
 ### 2. Install dependencies
 
 ```bash
-npm install
+npm ci
 ```
 
 ### 3. Add environment variables
@@ -64,8 +64,9 @@ Environment variables used:
 ```md
 BYS_AI_KEY: Google AI API key for Gemini (server-side only; never use NEXT_PUBLIC_).
 BYS_GEMINI_MODEL: Optional model id; defaults to gemini-2.5-flash if unset.
-BYS_AI_TIMEOUT_MS: Optional server-side model timeout in milliseconds.
+BYS_AI_TIMEOUT_MS: Optional server-side model timeout in milliseconds (capped at 30,000 ms per provider attempt).
 BYS_MODEL_ENABLED: Set to 0 to exercise deterministic fallback behavior locally.
+BYS_TRUST_PROXY: Set to 1 only when the deployment proxy overwrites client IP headers; otherwise forwarding headers are ignored.
 ```
 
 Optional for development:
@@ -200,7 +201,9 @@ flowchart LR
 
 **Notes**
 
-- **`BYS_AI_KEY`**: If unset, the route still returns **snippets and deterministic risk**, but **`report` may be null** with a user-facing `reportError` string instead of a Gemini-produced report.
+- **`BYS_AI_KEY`**: If unset, the route still returns a complete deterministic report and labels the AI enhancement as unavailable.
+- **`BYS_MODEL_ENABLED`**: Set to `0` to skip Gemini and return the deterministic report. When enabled and `BYS_AI_KEY` is present, Gemini output is schema-validated and evidence-grounded before it is shown.
+- **`BYS_TRUST_PROXY`**: Forwarded client-IP headers are trusted only when this is explicitly set to `1`. The in-memory limiter is process-local and does not provide multi-instance protection.
 - **Paste/sample text** skips PDF extraction and is analyzed as a single virtual page.
 
 ---
@@ -233,14 +236,19 @@ Run static linting:
 npm run lint
 ```
 
-Run the API scan smoke test against a running local server:
+Run the API scan smoke test against an isolated production server:
 
 ```bash
-npm run dev
 npm run smoke:scan
 ```
 
-Run browser QA smoke checks against a running local server. Install Playwright browser binaries first if you have not run browser QA on this machine:
+Run the full browser QA suite with an isolated production server and temporary output:
+
+```bash
+npm run qa:all
+```
+
+Or run an individual browser QA check; each command starts an isolated production server. Install Playwright browser binaries first if you have not run browser QA on this machine:
 
 ```bash
 npx playwright install
@@ -252,7 +260,9 @@ npm run qa:phase1
 npm run qa:phase2
 ```
 
-The browser QA scripts use Playwright and write screenshots under `qa-screenshots/` for visual review.
+The browser QA scripts use Playwright and write screenshots under an ignored or explicitly configured `QA_OUTPUT_DIR` for visual review.
+
+For an opt-in staging check with a real server-side Gemini key, set `AI_SMOKE_ENABLED=1` and `AI_SMOKE_URL` before running `npm run qa:ai`. The check never prints the key or lease response.
 
 ---
 

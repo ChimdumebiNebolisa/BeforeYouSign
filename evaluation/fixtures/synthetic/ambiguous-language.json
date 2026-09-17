@@ -1,0 +1,13 @@
+{
+  "id": "synthetic-ambiguous-language",
+  "text": "Ambiguous clause wording.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Rent is due as agreed. Any additional charge may apply if management determines it is appropriate. Repairs will be handled as needed."
+    }
+  ],
+  "expected": {
+    "topics": []
+  }
+}

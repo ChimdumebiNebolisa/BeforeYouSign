@@ -621,6 +621,16 @@ export function TexasRenterCheckSection({
                       {f.sourceSectionLabel ? (
                         <span className="mt-1 block text-[11px] text-[#505f76]">{f.sourceSectionLabel}</span>
                       ) : null}
+                      {f.sourceReviewedAt ? (
+                        <span className="mt-1 block text-[11px] text-[#505f76]">
+                          Source last reviewed: {f.sourceReviewedAt}
+                        </span>
+                      ) : null}
+                      {f.sourceFreshnessWarning ? (
+                        <span className="mt-2 block rounded-md border border-[#fed7aa] bg-[#fff7ed] px-2 py-1 text-[11px] text-[#9a3412]">
+                          {f.sourceFreshnessWarning}
+                        </span>
+                      ) : null}
                     </p>
                   ) : (
                     <p className="mt-1 text-[11px] text-[#505f76]">

@@ -1,0 +1,13 @@
+{
+  "id": "synthetic-notice-renewal",
+  "text": "Notice and renewal clauses.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "The lease automatically renews for another twelve-month term unless tenant gives written notice at least 60 days before expiration. Notice must be delivered by certified mail."
+    }
+  ],
+  "expected": {
+    "topics": []
+  }
+}

@@ -1,6 +1,7 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
+import { ANALYSIS_LIMITS } from "@/lib/analysis/limits";
 import { normalizeLeasePageText } from "@/lib/pdf/normalize";
 
 export type ExtractedTextPage = {
@@ -22,6 +23,18 @@ type PdfParseCtor = {
 };
 
 let cachedPdfParseCtor: PdfParseCtor | null = null;
+
+export class PdfPageLimitError extends Error {
+  readonly actual: number;
+  readonly limit: number;
+
+  constructor(actual: number, limit: number) {
+    super("PDF exceeds the configured page limit.");
+    this.name = "PdfPageLimitError";
+    this.actual = actual;
+    this.limit = limit;
+  }
+}
 
 async function ensurePdfRuntimePolyfills(): Promise<void> {
   const g = globalThis as Record<string, unknown>;
@@ -91,6 +104,10 @@ export async function extractPdfTextPages(arrayBuffer: ArrayBuffer): Promise<Ext
   try {
     const info = await parser.getInfo();
     const totalPages = info.total;
+
+    if (totalPages > ANALYSIS_LIMITS.maxPages) {
+      throw new PdfPageLimitError(totalPages, ANALYSIS_LIMITS.maxPages);
+    }
 
     const pages: ExtractedTextPage[] = [];
     for (let pageNumber = 1; pageNumber <= totalPages; pageNumber++) {

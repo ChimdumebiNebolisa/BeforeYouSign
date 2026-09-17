@@ -9,6 +9,8 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      BYS_MODEL_ENABLED: "0"
 
     steps:
       - name: Check out repository
@@ -50,11 +52,26 @@ jobs:
       - name: Production-build browser tests
         run: npm run test:e2e
 
-      - name: Validate QA scripts parse
+      - name: Browser QA scripts
+        run: npm run qa:smoke
+
+      - name: Browser QA phase 1
+        run: npm run qa:phase1
+
+      - name: Browser QA phase 2
+        run: npm run qa:phase2
+
+      - name: Scan smoke test
+        run: npm run smoke:scan
+
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=moderate
+
+      - name: Validate support scripts parse
         run: |
           node --check scripts/phase2-scan-smoke.mjs
-          node --check scripts/smoke-test.mjs
-          node --check scripts/phase1-browser-qa.mjs
-          node --check scripts/phase2-browser-qa.mjs
+          node --check scripts/run-scan-smoke.mjs
           node --check scripts/evaluate.mjs
+          node --check scripts/ai-smoke-test.mjs
+          node --check scripts/run-browser-qa.mjs
           node --check scripts/verify-legal-references.mjs

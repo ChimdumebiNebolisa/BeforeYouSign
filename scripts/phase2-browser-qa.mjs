@@ -2,8 +2,8 @@ import { chromium, devices } from "playwright";
 import fs from "fs";
 import path from "path";
 
-const BASE = "http://localhost:3000";
-const OUT = path.join(process.cwd(), "qa-screenshots", "phase2");
+const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
+const OUT = path.resolve(process.env.QA_OUTPUT_DIR ?? path.join(process.cwd(), "qa-screenshots", "phase2"));
 
 const findings = [];
 function note(label, ok, detail = "") {
@@ -99,7 +99,7 @@ async function run() {
   note("Why it matters copy", /This affects your deposit/i.test(body));
   note("Source title present", /Texas Property Code Chapter 92/i.test(body));
   note("Source section label", /Security deposits and return of deposit/i.test(body));
-  note("Statewide source note", /Statewide Texas source\. City rules are not checked\./i.test(body));
+  note("Statewide source note", /These notes use statewide Texas renter resources\. City rules are not checked\./i.test(body));
   note("Checklist download button", await page.getByRole("button", { name: "Download question checklist" }).isVisible());
 
   await page.getByRole("button", { name: "Go to Summary" }).click();

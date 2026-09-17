@@ -8,7 +8,7 @@ import type { AnalysisStage } from "@/lib/analysis/pipeline/stages";
 
 export type AnalysisMode = "model_grounded" | "rules_only" | "unavailable";
 
-export type ExtractionMethod = "embedded_text" | "ocr" | "pasted_text";
+export type ExtractionMethod = "embedded_text" | "pasted_text";
 
 export type CoverageStatus = "complete" | "partial" | "unreadable";
 
@@ -18,8 +18,6 @@ export type DocumentExtraction = {
   totalChars: number;
   quality: number;
   coverageStatus: CoverageStatus;
-  ocrPagesAttempted?: number;
-  ocrPagesFailed?: number;
 };
 
 export type NormalizedDocument = {
@@ -90,7 +88,7 @@ export type AnalysisSuccessResponse = {
   deterministicRiskScore: number;
   deterministicRiskBand: DeterministicLeaseRisk["band"];
   deterministicRiskReasons: string[];
-  report: BeforeYouSignReport | null;
+  report: BeforeYouSignReport;
   reportError: string | null;
   groundingSummary?: GroundingSummary;
   reportDebug?: { failureStage?: string } | null;
@@ -114,7 +112,7 @@ export type AnalysisErrorResponse = {
 export type AnalysisResponse = AnalysisSuccessResponse | AnalysisErrorResponse;
 
 export type ModelAnalyzerResult = {
-  report: BeforeYouSignReport | null;
+  report: BeforeYouSignReport;
   reportError: string | null;
   mode: AnalysisMode;
   groundingSummary?: GroundingSummary;

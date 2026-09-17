@@ -2,8 +2,8 @@ import { chromium, devices } from "playwright";
 import fs from "fs";
 import path from "path";
 
-const BASE = "http://localhost:3000";
-const OUT = path.join(process.cwd(), "qa-screenshots", "phase1");
+const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
+const OUT = path.resolve(process.env.QA_OUTPUT_DIR ?? path.join(process.cwd(), "qa-screenshots", "phase1"));
 
 const BANNED = [
   /\brisk score\b/i,
@@ -87,7 +87,7 @@ async function run() {
   note("Section: See what it finds", /See what it finds/i.test(body));
   note("Section: How it works", /How it works/i.test(body));
   note("Section: What it checks", /What it checks/i.test(body));
-  note("Landing mentions Texas renter check", /Texas renter check/i.test(body));
+  note("Landing states Texas lease scope", /Texas residential lease/i.test(body));
   note("Section: What it does not do", /What it does not do/i.test(body));
   note("Section: FAQ", /\bFAQ\b/i.test(body));
   note("Footer: disclaimer present", /Educational information only\. Not legal advice\./i.test(body));

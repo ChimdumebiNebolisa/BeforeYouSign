@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 
 import { runAnalysisPipeline } from "@/lib/analysis/pipeline/run-analysis";
 import type { PdfExtractor } from "@/lib/analysis/pipeline/types";
-import { parseAnalysisErrorMessage } from "@/lib/analysis/api-schema";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;

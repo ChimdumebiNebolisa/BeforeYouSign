@@ -1,5 +1,7 @@
 # BeforeYouSign Daily Product Hardening Progress
 
+> Historical progress ledger. Verify all claims against the current source and CI before treating them as active product behavior.
+
 Last updated: 2026-07-12 16:40 America/Chicago
 
 ## Current phase

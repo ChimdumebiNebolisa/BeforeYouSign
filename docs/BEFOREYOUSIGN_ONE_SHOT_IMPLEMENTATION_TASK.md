@@ -1,5 +1,7 @@
 # BeforeYouSign One-Shot Implementation Task
 
+> Historical implementation plan. The current product contract and verification commands are maintained in `README.md` and the active source tree.
+
 ## Objective
 
 Complete the remaining hardening work in one implementation run while preserving the trust-first lease-analysis product contract. The implementation must leave the repository in a deployable state, use small independently verifiable commits, and integrate each commit into `main` immediately after its checks pass.

@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 
 import { describe, expect, it } from "vitest";
@@ -17,19 +17,17 @@ describe("deterministic evaluation harness", () => {
     }
 
     const baselinePath = path.join(process.cwd(), "evaluation/baselines/deterministic-v1.json");
-    writeFileSync(
-      baselinePath,
-      `${JSON.stringify(
-        {
-          generatedAt: new Date().toISOString(),
-          fixtureCount: results.length,
-          avgGroundingRate:
-            results.reduce((sum, r) => sum + r.metrics.groundingRate, 0) / results.length,
-          results,
-        },
-        null,
-        2,
-      )}\n`,
-    );
+    const baseline = JSON.parse(readFileSync(baselinePath, "utf8")) as {
+      fixtureCount: number;
+      avgGroundingRate: number;
+      results: typeof results;
+    };
+    const current = {
+      fixtureCount: results.length,
+      avgGroundingRate:
+        results.reduce((sum, r) => sum + r.metrics.groundingRate, 0) / results.length,
+      results,
+    };
+    expect(baseline).toEqual(current);
   });
 });

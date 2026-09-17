@@ -32,6 +32,11 @@ node_modules/
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/qa-screenshots/
+/.playwright-cli/
+/output/
 
 # production
 /build

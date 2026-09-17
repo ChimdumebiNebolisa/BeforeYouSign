@@ -3,8 +3,9 @@ import path from "path";
 
 const samplePath = path.join(process.cwd(), "public", "sample-leases", "standard.txt");
 const text = fs.readFileSync(samplePath, "utf8");
+const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000";
 
-const res = await fetch("http://localhost:3000/api/analyze", {
+const res = await fetch(`${baseUrl}/api/analyze`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ leaseText: text, fileName: "sample-lease.txt" }),

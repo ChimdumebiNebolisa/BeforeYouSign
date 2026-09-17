@@ -1,5 +1,7 @@
 # PolicyInsight Pattern Extraction Audit
 
+> Historical design audit. The current product combines deterministic analysis with an optional Gemini enhancement; verify this document against the active source before relying on implementation claims.
+
 Audit date: 2026-07-11
 
 ## Reference commits inspected
@@ -52,7 +54,7 @@ PolicyInsight reference clone: `../policy-insight-reference` (read-only).
 | Owner cookies | None | Low | Medium | Medium | High | **Defer** | No account model |
 | Expiring share links | None | Low | Medium | Higher | High | **Defer** | Out of renter MVP scope |
 | Grounded Q&A | None | Low | Medium | Medium | High | **Defer** | Not lease-review critical path |
-| Rate limiting (in-memory 10/min) | `acquireClientSlot` (concurrency=1) | Low | Low | Low | Low | **Defer** | Existing slot guard adequate |
+| Rate limiting (in-memory 10/min) | `acquireClientSlot` (bounded expiring window + concurrency=1) | Low | Low | Low | Low | **Adapt** | Application-level protection is useful for a single instance; multi-instance enforcement remains an infrastructure concern |
 | Scheduled retention cleanup | None | Low | Medium | Positive if wrong | Medium | **Defer** | No server-side document storage |
 | Multi-document samples | Lease-specific samples only | N/A | — | — | — | **Reject** | Preserve lease focus |
 | Spring Boot / Java stack | Next.js TypeScript | N/A | — | — | — | **Reject** | Framework not portable |
