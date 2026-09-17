@@ -1,8 +1,8 @@
 /**
- * Parses report output that should be JSON but may include fences or extra prose.
+ * Parses Gemini output that should be JSON but may include fences or extra prose.
  */
 
-export type ParseReportJsonResult =
+export type ParseGeminiModelJsonResult =
   | { ok: true; value: unknown }
   | { ok: false; reason: "empty" | "invalid_json" };
 
@@ -64,7 +64,7 @@ function tryJsonParse(s: string): unknown | null {
 /**
  * Sanitize then parse model output. Does not validate the BeforeYouSign report shape.
  */
-export function parseReportJson(raw: string): ParseReportJsonResult {
+export function parseGeminiModelJson(raw: string): ParseGeminiModelJsonResult {
   const trimmed = raw.trim();
   if (!trimmed) {
     return { ok: false, reason: "empty" };

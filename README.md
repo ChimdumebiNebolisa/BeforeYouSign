@@ -2,7 +2,7 @@
 
 ## What this is
 
-**BeforeYouSign** is a Next.js web app that helps renters review **residential lease** documents before signing. Users upload a PDF lease, paste plain text, or load sample lease fixtures. The server extracts text (when needed), runs **regex-based clause detection** and **deterministic risk scoring**, then builds a **structured report** (summary, fees, deadlines, red flags, suggested questions) from the lease text. Results display in the browser with evidence quotes tied to page-level extracted text.
+**BeforeYouSign** is a Next.js web app that helps renters review **residential lease** documents before signing. Users upload a PDF lease, paste plain text, or load sample lease fixtures. The server extracts text (when needed), runs **regex-based clause detection** and **deterministic risk scoring**, and optionally calls **Google Gemini** to produce a **structured JSON report** (summary, fees, deadlines, red flags, suggested questions). Results display in the browser with evidence quotes tied to page-level extracted text.
 
 ## Problem it solves
 
@@ -14,8 +14,9 @@ Lease agreements are long and written in dense legal language. Renters often str
 - **Structured report UI**: carousel sections for summary, red flags, money and fees, deadlines, responsibilities, questions, next steps, and “not clearly stated” when applicable.
 - **Evidence linking**: clicking report rows can scroll the **extracted text** viewer and highlight matching quotes by page (evidence ID-first when grounded).
 - **Rule-based snippet extraction** (rent, deposit, fees, notice, renewal, maintenance, utilities, vague phrases) and **deterministic risk band** with reasons.
-- **Deterministic narrative report** built from lease pattern matches and extracted text.
-- **Analysis transparency** so users can see how the report was produced.
+- **Gemini-powered narrative report** with JSON schema validation; **fallback report** built from rules when the model fails or returns invalid JSON.
+- **Model-only retry** when AI fails after extraction: client caches extracted pages and calls **`POST /api/analyze/retry-model`** without re-uploading the PDF.
+- **Analysis mode banner** (`model_grounded`, `rules_only`, `unavailable`) so users know how the report was produced.
 - **Full report Markdown export** (client-side download) plus existing question checklist export.
 - **Transparency panel** (“How this was analyzed”) showing extraction counts, snippet hits, and heuristic risk signals.
 
@@ -25,9 +26,9 @@ See [docs/POLICYINSIGHT_EXTRACTION_AUDIT.md](docs/POLICYINSIGHT_EXTRACTION_AUDIT
 
 **Frontend:** Next.js (App Router), React, TypeScript, Tailwind CSS v4, Embla Carousel, Lucide icons, shadcn-style UI primitives (`src/components/ui/`).
 
-**Backend:** Next.js Route Handler — `POST /api/analyze` (`src/app/api/analyze/`).
+**Backend:** Next.js Route Handlers — `POST /api/analyze` (full pipeline) and `POST /api/analyze/retry-model` (model-only retry from cached extracted pages) (`src/app/api/analyze/`).
 
-**Analysis:** Deterministic lease pattern matching and structured report assembly.
+**AI/API:** Google Gemini via `@google/generative-ai` (`src/lib/analysis/gemini-report.ts`), structured output aligned with `src/lib/analysis/schema.ts`.
 
 **Other tools:** `pdf-parse` + `pdf-lib` (`src/lib/pdf/`), ESLint (`npm run lint`), Playwright QA smoke scripts.
 
@@ -53,10 +54,18 @@ Create a `.env.local` file in the root (you can start from `.env.local.example`)
 **Windows (cmd):** `copy .env.local.example .env.local`
 **macOS / Linux:** `cp .env.local.example .env.local`
 
+```env
+BYS_AI_KEY=
+BYS_GEMINI_MODEL=gemini-2.5-flash
+```
+
 Environment variables used:
 
 ```md
-BYS_OCR_ENABLED: Set to 1 to enable the configured OCR adapter.
+BYS_AI_KEY: Google AI API key for Gemini (server-side only; never use NEXT_PUBLIC_).
+BYS_GEMINI_MODEL: Optional model id; defaults to gemini-2.5-flash if unset.
+BYS_AI_TIMEOUT_MS: Optional server-side model timeout in milliseconds.
+BYS_MODEL_ENABLED: Set to 0 to exercise deterministic fallback behavior locally.
 ```
 
 Optional for development:
@@ -85,7 +94,7 @@ For this project:
 2. **Submit analysis:** The client sends **`POST /api/analyze`** — **multipart** (`file`) for PDFs or **JSON** (`leaseText`, optional `fileName`) for pasted/sample text (`landing-client.tsx`, `route.ts`).
 3. **Prepare text:** PDFs are read per page via **`extractPdfTextPages`**; pasted text becomes a single synthetic page. All text passes **`normalizeLeasePageText`** (`src/lib/pdf/`).
 4. **Deterministic pass:** **`rules.ts`** extracts snippet matches; **`scoring.ts`** computes a risk band and reasons; ambiguous phrases are flagged (`findUnclearLeasePhrases`).
-5. **Build report:** **`buildRuleOnlyFallbackReport`** assembles the report from deterministic findings and extracted lease text.
+5. **AI report (when configured):** **`runStructuredLeaseAnalysis`** calls Gemini with **`buildLeaseAnalysisUserPrompt`**; responses are parsed (**`model-json.ts`**), validated (**`parseBeforeYouSignReportJson`**), normalized (**`report-normalization.ts`**), and evidence-grounded. On failure, **`buildRuleOnlyFallbackReport`** supplies a report-shaped fallback. Users can **retry AI only** via **`POST /api/analyze/retry-model`** when extraction already succeeded.
 6. **Render results:** JSON returns **`extractedPages`**, snippet arrays, deterministic risk fields, **`mode`**, and **`report`**. The client shows **`LeaseTextViewer`**, **`LeaseReportView`**, **`AnalysisModeBanner`**, and **`TechnicalDetailsPanel`** (`landing-client.tsx`).
 
 ## Architecture
@@ -93,10 +102,10 @@ For this project:
 Brief folder layout:
 
 ```txt
-src/app/: App Router — layout, page, favicon/app icons, and POST /api/analyze.
+src/app/: App Router — layout, page, favicon/app icons, POST /api/analyze and /api/analyze/retry-model.
 src/components/beforeyousign/: Intake, report carousel, text viewer, loading shell.
 src/components/ui/: Shared UI (e.g. Button).
-src/lib/analysis/: Regex rules, scoring, deterministic report assembly, and normalization.
+src/lib/analysis/: Regex rules, Gemini, schema, scoring, prompts, normalization.
 src/lib/pdf/: PDF extraction (pdf-parse) and text normalization.
 public/: Static assets — sample leases, images.
 ```
@@ -106,7 +115,7 @@ System overview:
 ```txt
 Frontend: React client components; single-page lease intake and results.
 Backend: Next.js Route Handler (Node) — one analyze endpoint; no separate API server.
-External services: none for lease analysis.
+External services: Google Gemini API (when BYS_AI_KEY is set).
 Deployment: Standard Next.js production build (npm run build && npm run start); host per your platform (e.g. Vercel-compatible).
 ```
 
@@ -133,6 +142,7 @@ flowchart TB
     NORM["normalizeLeasePageText"]
     RULES["rules.ts — snippet finders"]
     RISK["scoring.ts — deterministic band + reasons"]
+    GEM["gemini-report.ts — Gemini JSON schema"]
     RNORM["report-normalization.ts"]
     FALL["buildRuleOnlyFallbackReport"]
     OUT["JSON — pages, snippets, risk, report"]
@@ -143,7 +153,10 @@ flowchart TB
     TXT --> NORM
     NORM --> RULES
     RULES --> RISK
-    RISK --> FALL
+    RISK --> GEM
+    GEM -->|parsed OK| RNORM
+    GEM -->|timeout / parse / schema fail| FALL
+    RNORM --> OUT
     FALL --> OUT
   end
 
@@ -167,6 +180,7 @@ flowchart LR
   subgraph analysis["Analysis"]
     RL["rules.ts"]
     SC["scoring.ts"]
+    GR["gemini-report.ts"]
     SCH["schema.ts"]
     MR["model-json.ts"]
     REP["report-normalization.ts"]
@@ -177,11 +191,16 @@ flowchart LR
   RT --> NOR
   RT --> RL
   RT --> SC
-  RT --> REP
+  RT --> GR
+  GR --> SCH
+  GR --> MR
+  GR --> REP
+  GR --> PR
 ```
 
 **Notes**
 
+- **`BYS_AI_KEY`**: If unset, the route still returns **snippets and deterministic risk**, but **`report` may be null** with a user-facing `reportError` string instead of a Gemini-produced report.
 - **Paste/sample text** skips PDF extraction and is analyzed as a single virtual page.
 
 ---

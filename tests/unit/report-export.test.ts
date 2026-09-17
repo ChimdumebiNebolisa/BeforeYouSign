@@ -59,7 +59,7 @@ describe("buildReportMarkdown", () => {
     });
 
     expect(md).toContain("Educational information only");
-    expect(md).toContain("Pattern-based review");
+    expect(md).toContain("AI-enhanced");
     expect(md).toContain("## Summary");
     expect(md).toContain("sample-lease.txt");
     expect(md).toContain("ev-test-1");
@@ -161,10 +161,10 @@ describe("buildReportMarkdown", () => {
       mode: "unavailable",
     });
 
-    expect(md).toContain("Review unavailable");
+    expect(md).toContain("AI unavailable");
     expect(md).toContain("ev-deadline");
     expect(md).toContain("Automatic renewal");
-    expect(md).toContain("Origin: Pattern scan");
+    expect(md).toContain("Origin: AI grounded");
     expect(md).toContain("Why it matters:");
     expect(md).toContain("https://example.org/texas");
     expect(md).toContain("None listed in this report.");

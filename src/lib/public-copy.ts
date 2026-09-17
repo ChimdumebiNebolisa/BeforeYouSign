@@ -2,7 +2,7 @@
 
 /** Landing intake/footer — processing only; legal disclaimer lives in hero + footer disclaimer. */
 export const LANDING_PRIVACY_PROCESSING =
-  "We do not save your report after you close the page unless recovery is explicitly enabled. Lease text is processed on our server for this one-time review.";
+  "We do not save your report after you close the page unless recovery is explicitly enabled. Lease text is processed on our server. If AI summarization is enabled, text is also sent to the configured AI provider for that request.";
 
 export const UPLOAD_LIMITS_NOTE =
   "PDF uploads are limited to 10 MB, 100 pages, and 120,000 extracted characters. Pasted text is limited to 120,000 characters.";
@@ -53,7 +53,7 @@ export const LANDING_FAQ = [
   {
     question: "Do you store my lease?",
     answer:
-      "The app does not use a database or save your report after you close the page. Lease text is processed on the server for the one-time review.",
+      "The app does not use a database or save your report after you close the page. Lease text is processed on the server, and AI summarization may send text to the AI provider for that request.",
   },
   {
     question: "What if my PDF is scanned?",

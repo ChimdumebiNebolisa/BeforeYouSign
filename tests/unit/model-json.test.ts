@@ -1,32 +1,32 @@
 import { describe, expect, it } from "vitest";
 
-import { extractFirstJsonObject, parseReportJson } from "@/lib/analysis/model-json";
+import { extractFirstJsonObject, parseGeminiModelJson } from "@/lib/analysis/model-json";
 
-describe("parseReportJson", () => {
+describe("parseGeminiModelJson", () => {
   it("parses plain JSON", () => {
-    const result = parseReportJson('{"summary":"ok"}');
+    const result = parseGeminiModelJson('{"summary":"ok"}');
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.value).toEqual({ summary: "ok" });
   });
 
   it("parses fenced JSON", () => {
-    const result = parseReportJson('```json\n{"summary":"ok"}\n```');
+    const result = parseGeminiModelJson('```json\n{"summary":"ok"}\n```');
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.value).toEqual({ summary: "ok" });
   });
 
   it("extracts JSON from surrounding prose", () => {
-    const result = parseReportJson('Here is the report: {"summary":"ok"} done.');
+    const result = parseGeminiModelJson('Here is the report: {"summary":"ok"} done.');
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.value).toEqual({ summary: "ok" });
   });
 
   it("rejects empty input", () => {
-    expect(parseReportJson("")).toEqual({ ok: false, reason: "empty" });
+    expect(parseGeminiModelJson("")).toEqual({ ok: false, reason: "empty" });
   });
 
   it("rejects invalid JSON", () => {
-    expect(parseReportJson("{not json")).toEqual({ ok: false, reason: "invalid_json" });
+    expect(parseGeminiModelJson("{not json")).toEqual({ ok: false, reason: "invalid_json" });
   });
 });
 

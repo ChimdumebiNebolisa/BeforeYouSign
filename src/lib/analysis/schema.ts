@@ -1,4 +1,4 @@
-import { parseReportJson } from "@/lib/analysis/model-json";
+import { parseGeminiModelJson } from "@/lib/analysis/model-json";
 
 export type RiskLevel = "low" | "medium" | "high";
 
@@ -231,6 +231,6 @@ export function parseBeforeYouSignReportJson(raw: unknown): BeforeYouSignReport 
 }
 
 export function tryParseModelJson(text: string): unknown | null {
-  const parsed = parseReportJson(text);
+  const parsed = parseGeminiModelJson(text);
   return parsed.ok ? parsed.value : null;
 }
