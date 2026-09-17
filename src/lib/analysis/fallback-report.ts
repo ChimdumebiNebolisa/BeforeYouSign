@@ -37,7 +37,7 @@ function extractFeeValue(text: string): string | null {
 }
 
 function extractDeadlineValue(text: string): string | null {
-  const dayWindow = text.match(/\b(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?\s*(?:calendar\s+)?(?:days?|hours?)\b/i);
+  const dayWindow = text.match(/\b(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?\s*(?:(?:calendar|business)\s+)?(?:days?|hours?)\b/i);
   if (dayWindow) return dayWindow[0];
 
   const date = text.match(
