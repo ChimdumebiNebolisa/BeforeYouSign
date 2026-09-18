@@ -45,12 +45,17 @@ export function segmentDocument(
 
   for (const page of pages) {
     const paragraphs = splitParagraphs(page.text);
+    let searchFrom = 0;
     for (const paragraph of paragraphs) {
       for (const segment of splitLongParagraph(paragraph)) {
         if (segment.length < MIN_CHUNK_CHARS) continue;
-        const startIndex = page.text.indexOf(segment);
+        // Search forward from the previous match so repeated clauses receive
+        // their own offsets and stable IDs instead of all pointing at the first
+        // occurrence on the page.
+        const startIndex = page.text.indexOf(segment, searchFrom);
         if (startIndex < 0) continue;
         const endIndex = startIndex + segment.length;
+        searchFrom = endIndex;
         chunks.push({
           id: hashChunkId(documentId, page.page, startIndex, endIndex),
           page: page.page,

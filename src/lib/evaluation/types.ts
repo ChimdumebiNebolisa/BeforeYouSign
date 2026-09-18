@@ -29,7 +29,7 @@ export type EvaluationFixture = {
 
 export type EvaluationRunResult = {
   fixtureId: string;
-  mode: "rules_only" | "model_grounded" | "unavailable";
+  mode: "rules_only";
   metrics: Record<string, number>;
   errors: string[];
 };

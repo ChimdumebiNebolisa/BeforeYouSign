@@ -1,5 +1,7 @@
 # PolicyInsight Pattern Extraction Audit
 
+> Historical architecture record. The AI/model-retry implementation described in this document was later removed from BeforeYouSign. The supported current workflow is deterministic lease pattern matching with synchronous, non-persistent results.
+
 Audit date: 2026-07-11
 
 ## Reference commits inspected
@@ -19,15 +21,14 @@ PolicyInsight reference clone: `../policy-insight-reference` (read-only).
 |------------|----------|
 | Stable evidence chunk IDs (SHA256) | `src/lib/evidence/segment.ts` |
 | Evidence registry | `src/lib/evidence/registry.ts` |
-| ID-only model grounding | `src/lib/analysis/ground-model-candidates.ts` |
+| Evidence ID hydration | `src/lib/evidence/registry.ts`, `src/lib/evidence/index.ts` |
 | Deterministic rule-only fallback | `src/lib/analysis/fallback-report.ts` |
 | Input size validation | `src/lib/analysis/limits.ts`, `validate-intake.ts` |
 | Content-safe logging | `src/lib/observability/safe-analysis-events.ts` |
 | Legal reference verification | `scripts/verify-legal-references.mjs`, `texas-renter-references.ts` |
-| Feature flags | `src/lib/rollout/flags.ts` |
-| Partial Markdown export (checklist) | `src/lib/checklist-export.ts` |
+| Full Markdown export | `src/lib/report-export.ts` |
 | Sample leases | `public/sample-leases/`, `public/samples/` |
-| Gemini retry (schema strip) | `src/lib/analysis/gemini-report.ts` |
+| Retired AI/model retry | Removed from the supported product path |
 | Error taxonomy (runtime) | `AnalysisProblemCode` in `limits.ts` |
 | OCR hook (deferred) | `src/lib/ocr/` |
 | Vitest unit + integration tests | `tests/unit/`, `tests/integration/` |
@@ -39,10 +40,10 @@ PolicyInsight reference clone: `../policy-insight-reference` (read-only).
 | PolicyInsight feature | BeforeYouSign equivalent | User value | Infra cost | Security/privacy | Complexity | Decision | Reason |
 |----------------------|--------------------------|------------|------------|------------------|------------|----------|--------|
 | Source chunking (1800 char windows) | Page-paragraph segmentation (`segment.ts`, max 800 chars) | High | None | Low | Low | **Adapt** | BYS page-based model fits leases; strengthen quote→chunk resolution |
-| Citation validation (UUID filter) | `groundModelCandidates` drops invalid IDs | High | None | Low | Low | **Adapt** | Core exists; harden fallback path + UI highlight by ID |
+| Citation validation (UUID filter) | Evidence registry resolves quotes and offsets | High | None | Low | Low | **Adapt** | Core exists; harden fallback path + UI highlight by ID |
 | Report JSON schema | `BeforeYouSignReport` + Zod parsing | High | None | Low | — | **Keep** | Lease-specific schema is correct product scope |
 | Job state enum (`JobStatus`) | String log stages only | Medium | None | Low | Low | **Implement** | Typed `AnalysisStage` for logging, errors, progress |
-| Retry without re-extract | Full pipeline retry in UI | High | None | Low (browser cache) | Medium | **Implement** | `POST /api/analyze/retry-model` skips PDF extraction |
+| Retry without re-extract | None | High | None | Low | Medium | **Removed** | Current product is deterministic and synchronous; the former endpoint returns 410 |
 | Deterministic fallback + labeling | `buildRuleOnlyFallbackReport`, `AnalysisMode` | High | None | Low | Low | **Adapt** | Add user-visible mode banner |
 | Markdown export (full report) | Checklist export only | Medium | None | Low | Low | **Implement** | `buildReportMarkdown` client download |
 | Evidence sidebar + citation chips | Report slides + quote highlight | Medium | None | Low | Medium | **Adapt** | evidenceId-first highlight in lease text viewer |
@@ -52,7 +53,7 @@ PolicyInsight reference clone: `../policy-insight-reference` (read-only).
 | Owner cookies | None | Low | Medium | Medium | High | **Defer** | No account model |
 | Expiring share links | None | Low | Medium | Higher | High | **Defer** | Out of renter MVP scope |
 | Grounded Q&A | None | Low | Medium | Medium | High | **Defer** | Not lease-review critical path |
-| Rate limiting (in-memory 10/min) | `acquireClientSlot` (concurrency=1) | Low | Low | Low | Low | **Defer** | Existing slot guard adequate |
+| Rate limiting (in-memory 10/min) | Global in-process cap plus trusted per-client cap | Medium | Low | Low | Low | **Adapt** | Edge/platform rate limiting is still recommended for multi-instance deployments |
 | Scheduled retention cleanup | None | Low | Medium | Positive if wrong | Medium | **Defer** | No server-side document storage |
 | Multi-document samples | Lease-specific samples only | N/A | — | — | — | **Reject** | Preserve lease focus |
 | Spring Boot / Java stack | Next.js TypeScript | N/A | — | — | — | **Reject** | Framework not portable |
@@ -61,17 +62,17 @@ PolicyInsight reference clone: `../policy-insight-reference` (read-only).
 
 ## Content integrity key (`documentId`)
 
-The API field `documentId` is a **content integrity key** (SHA256 prefix of normalized extracted page text). It helps the client detect stale retry cache state when pages and key diverge accidentally. It is **not** authentication, authorization, or tamper prevention — any client can recompute the key from submitted pages. The retry endpoint validates payload size, shape, and limits independently.
+The API field `documentId` is a **content integrity key** (SHA256 prefix of normalized extracted page text). It is **not** authentication, authorization, or tamper prevention — any client can recompute the key from submitted pages.
 
 ---
 
 ## Implemented in this branch
 
-1. **Evidence hardening** — `resolveQuoteToChunk` in fallback path; `buildEvidenceIndex` in API response; evidenceId-first highlight in viewer; grounding summary note in UI.
+1. **Evidence hardening** — `resolveQuoteToChunk` in the fallback path; `buildEvidenceIndex` in the API response; evidenceId-first highlighting in the viewer.
 2. **Typed analysis stages** — `AnalysisStage` union threaded through pipeline, logging, and error responses.
-3. **Retry + fallback UX** — Client-side page cache; `POST /api/analyze/retry-model`; mode banner; retry on partial AI failure.
+3. **Deterministic fallback UX** — Rule-only analyzer, mode banner, and browser retry of the complete request.
 4. **Full report export** — `buildReportMarkdown` + download button.
-5. **Tests** — Evidence validation, stages, export, API routes, model retry, expanded fixtures.
+5. **Tests** — Evidence validation, stages, export, API routes, jurisdiction gating, and expanded fixtures.
 
 ---
 

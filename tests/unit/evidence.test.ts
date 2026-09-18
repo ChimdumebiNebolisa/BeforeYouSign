@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createEvidenceRegistry, hydrateEvidence } from "@/lib/evidence/registry";
+import { createEvidenceRegistry, hydrateEvidence, hydrateEvidenceFromSpan } from "@/lib/evidence/registry";
 import {
   segmentDocument,
   findChunkForSpan,
@@ -42,6 +42,27 @@ describe("evidence registry", () => {
     const longSentence = "Rent shall be paid on time. ".repeat(40).trim();
     const chunks = segmentDocument("doc-long", [{ page: 1, text: longSentence }]);
     expect(chunks.length).toBeGreaterThan(1);
+  });
+
+  it("falls back to a matching quote when offsets are unavailable", () => {
+    const registry = createEvidenceRegistry("doc-quote", pages);
+    const hydrated = hydrateEvidenceFromSpan(registry, 1, -1, -1, "Security deposit: $1,450.");
+    expect(hydrated?.page).toBe(1);
+    expect(hydrated?.quote).toContain("Security deposit");
+  });
+
+  it("keeps distinct offsets for repeated paragraphs", () => {
+    const repeated = "Landlord may enter the premises with reasonable notice for inspection.";
+    const pageText = `${repeated}\n\n${repeated}`;
+    const chunks = segmentDocument("doc-repeated", [{ page: 1, text: pageText }]);
+
+    expect(chunks).toHaveLength(2);
+    expect(chunks[0]?.startIndex).not.toBe(chunks[1]?.startIndex);
+    expect(chunks.map((chunk) => pageText.slice(chunk.startIndex, chunk.endIndex))).toEqual([
+      repeated,
+      repeated,
+    ]);
+    expect(new Set(chunks.map((chunk) => chunk.id)).size).toBe(2);
   });
 
   it("finds chunk spans and evidence index lookups", () => {

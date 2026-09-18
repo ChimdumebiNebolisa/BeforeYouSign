@@ -1,11 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { isClickableGroundedEvidence } from "@/lib/analysis/evidence-click";
 import { buildRuleOnlyFallbackReport } from "@/lib/analysis/fallback-report";
-import { groundModelCandidates } from "@/lib/analysis/ground-model-candidates";
 import { createEvidenceRegistry } from "@/lib/evidence/registry";
 import { resolveQuoteToChunk } from "@/lib/evidence/segment";
-import type { ModelReportCandidate } from "@/lib/analysis/model-candidate-schema";
 import { sanitizeExportFilename, buildReportMarkdown } from "@/lib/report-export";
 import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import { ANALYSIS_STAGE_LABELS, type AnalysisStage } from "@/lib/analysis/pipeline/stages";
@@ -46,42 +43,6 @@ describe("extracted pattern hardening", () => {
       expect(evidence).toHaveLength(0);
     });
 
-    it("removes unknown model evidence IDs and deduplicates duplicates", () => {
-      const chunkId = registry.chunks[0]!.id;
-      const candidate: ModelReportCandidate = {
-        summary: "Rent terms are stated.",
-        whatYoureAgreeingTo: [],
-        riskLevel: "low",
-        riskReason: "Standard rent language.",
-        moneyAndFees: [
-          {
-            label: "Rent",
-            value: "$1,450",
-            evidenceIds: [chunkId, chunkId, "ev-unknown"],
-          },
-        ],
-        deadlinesAndNotice: [],
-        responsibilities: [],
-        potentialRedFlags: [],
-        questionsToAsk: [],
-        nextSteps: [],
-        missingOrUnclear: [],
-        disclaimer: "Educational information only. Not legal advice.",
-      };
-
-      const grounded = groundModelCandidates({
-        candidate,
-        registry,
-        documentId,
-        pages,
-        ruleBasedFindings: [],
-        deterministicRisk: { score: 1, band: "low", reasons: [] },
-      });
-
-      expect(grounded.groundingSummary.droppedClaims).toBeGreaterThan(0);
-      expect(grounded.report?.moneyAndFees[0]?.evidence).toHaveLength(1);
-      expect(isClickableGroundedEvidence(grounded.report?.moneyAndFees[0]?.evidence?.[0])).toBe(true);
-    });
   });
 
   describe("export", () => {

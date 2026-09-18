@@ -37,8 +37,11 @@ function sanitizeEvent(event: SafeAnalysisEvent): SafeAnalysisEvent {
 
 export function emitSafeAnalysisEvent(event: SafeAnalysisEvent): void {
   const sanitized = sanitizeEvent(event);
-  if (process.env.NODE_ENV === "development") {
-    console.log("[beforeyousign][event]", JSON.stringify(sanitized));
+  // Keep production events metadata-only so deployments can collect latency,
+  // volume, and failure signals without writing lease content to logs. Tests
+  // stay quiet unless they explicitly exercise logging.
+  if (process.env.NODE_ENV !== "test" && process.env.BYS_ANALYSIS_EVENTS !== "0") {
+    console.info("[beforeyousign][event]", JSON.stringify(sanitized));
   }
 }
 

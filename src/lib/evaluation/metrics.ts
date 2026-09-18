@@ -1,5 +1,4 @@
 import type { BeforeYouSignReport } from "@/lib/analysis/schema";
-import type { GroundingSummary } from "@/lib/analysis/pipeline/types";
 
 export function countMaterialClaims(report: BeforeYouSignReport): number {
   return (
@@ -8,7 +7,6 @@ export function countMaterialClaims(report: BeforeYouSignReport): number {
     report.potentialRedFlags.length
   );
 }
-
 export function groundingRate(report: BeforeYouSignReport): number {
   const material = countMaterialClaims(report);
   if (material === 0) return 1;
@@ -33,13 +31,4 @@ export function spanOverlap(aStart: number, aEnd: number, bStart: number, bEnd: 
   if (overlap <= 0) return 0;
   const union = Math.max(aEnd, bEnd) - Math.min(aStart, bStart);
   return union > 0 ? overlap / union : 0;
-}
-
-export function summarizeGrounding(summary?: GroundingSummary) {
-  if (!summary) return { groundingRate: 1, droppedRate: 0 };
-  const total = summary.materialClaims || 1;
-  return {
-    groundingRate: summary.groundedClaims / total,
-    droppedRate: summary.droppedClaims / total,
-  };
 }

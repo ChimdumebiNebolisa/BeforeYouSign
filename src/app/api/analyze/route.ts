@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 
 import { runAnalysisPipeline } from "@/lib/analysis/pipeline/run-analysis";
 import type { PdfExtractor } from "@/lib/analysis/pipeline/types";
-import { parseAnalysisErrorMessage } from "@/lib/analysis/api-schema";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -26,5 +25,15 @@ export async function POST(request: Request) {
     extractPdfTextPages,
   });
 
-  return NextResponse.json(response, { status: httpStatus });
+  const retryAfterSeconds =
+    !response.ok && typeof response.error === "object" && response.error.code === "rate_limited"
+      ? response.error.retryAfterSeconds
+      : undefined;
+
+  return NextResponse.json(response, {
+    status: httpStatus,
+    ...(retryAfterSeconds !== undefined
+      ? { headers: { "Retry-After": String(retryAfterSeconds) } }
+      : {}),
+  });
 }

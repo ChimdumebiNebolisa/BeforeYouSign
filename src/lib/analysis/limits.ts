@@ -1,11 +1,12 @@
 export const ANALYSIS_LIMITS = {
   maxPdfBytes: 10 * 1024 * 1024,
+  maxJsonRequestBytes: 512 * 1024,
+  maxMultipartRequestBytes: 10 * 1024 * 1024 + 256 * 1024,
   maxPages: 100,
   maxChars: 120_000,
   maxEvidenceChunks: 500,
-  maxModelInputChunks: 200,
+  maxConcurrentAnalyses: 4,
   maxConcurrentPerClient: 1,
-  maxProviderRetries: 1,
   lowExtractionCharThreshold: 400,
   ocrQualityThreshold: 0.35,
 } as const;
@@ -19,7 +20,6 @@ export type AnalysisProblemCode =
   | "extraction_failed"
   | "extraction_empty"
   | "rate_limited"
-  | "provider_timeout"
   | "analysis_failed";
 
 export type AnalysisProblem = {
@@ -28,6 +28,7 @@ export type AnalysisProblem = {
   httpStatus: number;
   limit?: number;
   actual?: number;
+  retryAfterSeconds?: number;
 };
 
 export function createAnalysisProblem(
@@ -49,8 +50,6 @@ export function createAnalysisProblem(
         return 422;
       case "rate_limited":
         return 429;
-      case "provider_timeout":
-        return 504;
       default:
         return 500;
     }
@@ -60,6 +59,7 @@ export function createAnalysisProblem(
     code,
     message,
     httpStatus,
+    ...(code === "rate_limited" ? { retryAfterSeconds: 2 } : {}),
     ...options,
   };
 }
