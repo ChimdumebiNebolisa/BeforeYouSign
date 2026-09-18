@@ -46,6 +46,8 @@ cd BeforeYouSign
 npm install
 ```
 
+Use Node.js 22 or newer. CI runs Node.js 22.
+
 ### 3. Add environment variables
 
 Create a `.env.local` file in the root (you can start from `.env.local.example`):
@@ -56,7 +58,9 @@ Create a `.env.local` file in the root (you can start from `.env.local.example`)
 Environment variables used:
 
 ```md
-BYS_OCR_ENABLED: Set to 1 to enable the configured OCR adapter.
+BYS_OCR_ENABLED: Reserved for a configured OCR adapter; the repository currently ships no OCR provider.
+BYS_TRUST_PROXY_HEADERS: Set to 1 only when the deployment proxy overwrites forwarding headers; otherwise trusted per-client limits are disabled and the global in-process cap still applies.
+BYS_ANALYSIS_EVENTS: Set to 0 to disable metadata-only analysis event logs.
 ```
 
 Optional for development:
@@ -82,11 +86,11 @@ Open the local URL shown in the terminal (typically [http://localhost:3000](http
 For this project:
 
 1. **Choose intake:** Upload a PDF, paste lease text, or load a sample file from the UI (`src/components/beforeyousign/`).
-2. **Submit analysis:** The client sends **`POST /api/analyze`** — **multipart** (`file`) for PDFs or **JSON** (`leaseText`, optional `fileName`) for pasted/sample text (`landing-client.tsx`, `route.ts`).
+2. **Submit analysis:** After choosing the rental property state and confirming the lease, the client sends **`POST /api/analyze`** — **multipart** (`file`, `stateCode`) for PDFs or **JSON** (`leaseText`, `fileName`, `stateCode`) for pasted/sample text (`landing-client.tsx`, `route.ts`). Texas currently has state-specific renter guidance; other states receive general lease review with an explicit disclosure.
 3. **Prepare text:** PDFs are read per page via **`extractPdfTextPages`**; pasted text becomes a single synthetic page. All text passes **`normalizeLeasePageText`** (`src/lib/pdf/`).
 4. **Deterministic pass:** **`rules.ts`** extracts snippet matches; **`scoring.ts`** computes a risk band and reasons; ambiguous phrases are flagged (`findUnclearLeasePhrases`).
 5. **Build report:** **`buildRuleOnlyFallbackReport`** assembles the report from deterministic findings and extracted lease text.
-6. **Render results:** JSON returns **`extractedPages`**, snippet arrays, deterministic risk fields, **`mode`**, and **`report`**. The client shows **`LeaseTextViewer`**, **`LeaseReportView`**, **`AnalysisModeBanner`**, and **`TechnicalDetailsPanel`** (`landing-client.tsx`).
+6. **Render results:** JSON returns **`extractedPages`**, snippet arrays, deterministic risk fields, **`mode`**, and **`report`**. The client shows **`LeaseTextViewer`**, **`LeaseReportView`**, and **`TechnicalDetailsPanel`** (`landing-client.tsx`).
 
 ## Architecture
 
@@ -167,10 +171,7 @@ flowchart LR
   subgraph analysis["Analysis"]
     RL["rules.ts"]
     SC["scoring.ts"]
-    SCH["schema.ts"]
-    MR["model-json.ts"]
     REP["report-normalization.ts"]
-    PR["prompt.ts"]
   end
 
   RT --> EXT
@@ -240,7 +241,7 @@ The browser QA scripts use Playwright and write screenshots under `qa-screenshot
 ## Known limitations
 
 - **No user accounts or persisted reports** — refreshing loses in-session results unless the user runs analysis again.
-- **Single synchronous HTTP request** — very large PDFs or slow model responses may hit hosting timeouts (`maxDuration` on the route is capped for serverless-style deployments).
+- **Single synchronous HTTP request** — very large PDFs or slow extraction may hit hosting timeouts (`maxDuration` on the route is capped for serverless-style deployments).
 - **PDF text extraction is not OCR** — scanned image-only PDFs may yield little or no extractable text.
-- **Evidence highlighting** uses substring matching (`indexOf` on the quote); minor mismatches between model quotes and extracted text can prevent a highlight.
+- **Evidence highlighting** uses extracted-text offsets and quote matching; minor mismatches between source text and normalized quotes can prevent a highlight.
 - **No persistent report recovery or background jobs** — analysis is a single synchronous request and results remain in browser state only.

@@ -2,6 +2,7 @@ import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 import { FIXED_REPORT_DISCLAIMER } from "@/lib/public-copy";
 import { displayFindingProvenance } from "@/lib/display-labels";
+import { getStateGuidanceStatus, getStateName, type StateCode, type StateGuidanceStatus } from "@/lib/jurisdiction/states";
 
 function formatEvidence(ev: { page: number; quote: string; evidenceId?: string }): string {
   const page = `p. ${ev.page}`;
@@ -14,8 +15,16 @@ export function buildChecklistMarkdown(input: {
   report: BeforeYouSignReport;
   texasRenterFindings: TexasRenterFinding[];
   fileName?: string;
+  stateCode?: StateCode;
+  stateGuidance?: StateGuidanceStatus;
 }): string {
-  const { report, texasRenterFindings, fileName } = input;
+  const {
+    report,
+    texasRenterFindings,
+    fileName,
+    stateCode = "TX",
+    stateGuidance = getStateGuidanceStatus(stateCode),
+  } = input;
   const lines: string[] = [
     "# BeforeYouSign — Question checklist",
     "",
@@ -70,16 +79,23 @@ export function buildChecklistMarkdown(input: {
   }
   lines.push("");
 
-  lines.push("## Texas renter check", "");
-  if (texasRenterFindings.length) {
-    texasRenterFindings.forEach((f) => {
-      lines.push(`- **${f.topicLabel}**`);
-      lines.push(`  - ${f.questionToAsk}`);
-      lines.push(`  - Lease quote (p. ${f.page}): "${f.leaseQuote.replace(/\s+/g, " ").trim().slice(0, 120)}"`);
-      if (f.sourceUrl) lines.push(`  - Source: ${f.sourceTitle ?? f.sourceUrl}`);
-    });
+  if (stateGuidance === "supported") {
+    lines.push(`## ${getStateName(stateCode)} renter check`, "");
+    if (texasRenterFindings.length) {
+      texasRenterFindings.forEach((f) => {
+        lines.push(`- **${f.topicLabel}**`);
+        lines.push(`  - ${f.questionToAsk}`);
+        lines.push(`  - Lease quote (p. ${f.page}): "${f.leaseQuote.replace(/\s+/g, " ").trim().slice(0, 120)}"`);
+        if (f.sourceUrl) lines.push(`  - Source: ${f.sourceTitle ?? f.sourceUrl}`);
+      });
+    } else {
+      lines.push(`- No ${getStateName(stateCode)} renter check topics were matched in this lease.`);
+    }
   } else {
-    lines.push("- No Texas renter check topics were matched in this lease.");
+    lines.push("## State-specific guidance", "");
+    lines.push(
+      `- State-specific renter guidance is not currently available for ${getStateName(stateCode)}. This checklist contains general lease review only.`,
+    );
   }
   lines.push("");
 

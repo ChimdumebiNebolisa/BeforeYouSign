@@ -50,13 +50,14 @@ async function run() {
   await page.goto(BASE, { waitUntil: "networkidle" });
   note("Landing loads", page.url().includes("localhost:3000"));
   const landingBody = await page.locator("body").innerText();
-  note("Landing Texas renter section", /Texas renter check/i.test(landingBody));
+  note("Landing state-aware lease positioning", /Choose the property state before review|Rental property state/i.test(landingBody));
   note("Landing OCR warning", /Scanned image-only PDFs may not extract correctly/i.test(landingBody));
   checkBanned(landingBody, "landing");
 
   await page.getByRole("tab", { name: "Sample" }).click();
   await page.locator("#review-intake").getByRole("button", { name: "Run Sample Lease", exact: true }).click();
   await page.getByRole("button", { name: /Continue to analysis/i }).waitFor({ timeout: 15000 });
+  await page.getByLabel(/I confirm this is a residential lease for a property in Texas/i).check();
   await page.getByRole("button", { name: /Continue to analysis/i }).click();
   await page.getByText("Local landlord-tenant law was not checked").waitFor({ state: "visible", timeout: 180000 });
 

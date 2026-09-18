@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { PRIVACY_CONTINUE_LINE, UPLOAD_LIMITS_NOTE } from "@/lib/public-copy";
 import { ANALYSIS_LIMITS } from "@/lib/analysis/limits";
 
@@ -19,12 +19,57 @@ export function PasteTextDialog({
   const textareaId = useId();
   const helperId = useId();
   const dialogTitleId = useId();
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+
+  const closeDialog = () => {
+    setIsOpen(false);
+    window.requestAnimationFrame(() => triggerRef.current?.focus());
+  };
 
   useEffect(() => {
     if (openRequestVersion <= 0) return;
     const id = window.requestAnimationFrame(() => setIsOpen(true));
     return () => window.cancelAnimationFrame(id);
   }, [openRequestVersion]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const dialog = dialogRef.current;
+    const focusFrame = window.requestAnimationFrame(() => dialog?.focus());
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setIsOpen(false);
+        window.requestAnimationFrame(() => triggerRef.current?.focus());
+        return;
+      }
+
+      if (event.key !== "Tab" || !dialog) return;
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), textarea, input, select, [href], [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
 
   if (embedded) {
     return (
@@ -41,7 +86,7 @@ export function PasteTextDialog({
           onChange={(e) => setDraft(e.target.value)}
           aria-describedby={helperId}
           className="mt-4 h-48 w-full resize-none rounded-xl bg-muted p-3 text-sm text-foreground outline-none ring-1 ring-border/40 focus:bg-card focus:ring-2 focus:ring-primary/25"
-          placeholder="Paste your Texas residential lease text here…"
+          placeholder="Paste your residential lease text here…"
         />
         <button
           type="button"
@@ -71,6 +116,7 @@ export function PasteTextDialog({
     <>
       <button
         type="button"
+        ref={triggerRef}
         className="mt-3 w-full rounded-xl border border-border/60 bg-card py-3 text-sm font-semibold text-foreground transition hover:bg-muted active:scale-[0.99]"
         onClick={() => setIsOpen(true)}
       >
@@ -84,10 +130,12 @@ export function PasteTextDialog({
       {isOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#191c1e]/45 p-4 backdrop-blur-[2px]">
           <div
+            ref={dialogRef}
             className="bys-modal-shadow w-full max-w-2xl rounded-[1.75rem] bg-[#ffffff] p-5 sm:p-6"
             role="dialog"
             aria-modal="true"
             aria-labelledby={dialogTitleId}
+            tabIndex={-1}
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -103,7 +151,7 @@ export function PasteTextDialog({
               <button
                 type="button"
                 className="rounded-full px-3 py-1 text-sm font-medium text-[#757682] hover:bg-[#f2f4f6]"
-                onClick={() => setIsOpen(false)}
+                onClick={closeDialog}
               >
                 Close
               </button>
@@ -127,7 +175,7 @@ export function PasteTextDialog({
                 onClick={() => {
                   const next = draft.trim();
                   setPasted(next.length ? next : null);
-                  setIsOpen(false);
+                  closeDialog();
                   if (next.length) onStartPaste(next);
                 }}
               >
@@ -136,7 +184,7 @@ export function PasteTextDialog({
               <button
                 type="button"
                 className="h-11 w-full rounded-xl bg-[#e0e3e5] text-sm font-semibold text-[#191c1e] sm:w-auto sm:px-6"
-                onClick={() => setIsOpen(false)}
+                onClick={closeDialog}
               >
                 Cancel
               </button>

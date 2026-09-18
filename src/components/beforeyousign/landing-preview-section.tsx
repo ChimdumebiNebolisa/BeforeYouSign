@@ -2,7 +2,7 @@ const STICKY_NOTES = [
   "Finds rent, deposits, and hidden fees",
   "Shows the exact lease wording",
   "Helps you ask better questions",
-  "Links lease terms to Texas renter resources",
+  "Links supported-state renter resources",
 ] as const;
 
 const PREVIEW_ITEMS = [
@@ -23,7 +23,7 @@ export function LandingPreviewSection() {
             See what it finds
           </h2>
           <p className="mt-2 text-muted-foreground">
-            A preview of the kind of summary you get after reviewing a Texas residential lease.
+            A preview of the kind of summary you get after reviewing a residential lease.
           </p>
         </div>
 
@@ -31,7 +31,7 @@ export function LandingPreviewSection() {
           <div className="rounded-3xl border border-[#e2e8f0] bg-card p-8 shadow-[0_24px_48px_rgba(0,32,69,0.12)] sm:p-10 lg:p-11">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Sample preview</p>
             <h3 className="mt-2 font-[family-name:var(--font-headline)] text-lg font-semibold text-foreground">
-              Texas Residential Lease Agreement
+              Residential Lease Agreement
             </h3>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">

@@ -75,19 +75,19 @@ async function run() {
     /Understand your lease\s*before you sign\./i.test(body),
   );
   note(
-    'Subheadline: Texas residential lease copy',
-    /Upload or paste a Texas residential lease to find key costs, deadlines, terms to review, and questions to ask\./i.test(
+    'Subheadline: state-aware residential lease copy',
+    /Upload or paste a residential lease to find key costs, deadlines, terms to review, and questions to ask\./i.test(
       body,
     ),
   );
   note(
-    "Support note: Texas leases only",
-    /Texas leases only\. For education, not legal advice\./i.test(body),
+    "Support note: state selection",
+    /Choose the property state before review\. For education, not legal advice\./i.test(body),
   );
   note("Section: See what it finds", /See what it finds/i.test(body));
   note("Section: How it works", /How it works/i.test(body));
   note("Section: What it checks", /What it checks/i.test(body));
-  note("Landing mentions Texas renter check", /Texas renter check/i.test(body));
+  note("Landing has state-aware lease positioning", /Choose the property state before review|Rental property state/i.test(body));
   note("Section: What it does not do", /What it does not do/i.test(body));
   note("Section: FAQ", /\bFAQ\b/i.test(body));
   note("Footer: disclaimer present", /Educational information only\. Not legal advice\./i.test(body));
@@ -100,7 +100,7 @@ async function run() {
     (await header.getByRole("link", { name: "How it works" }).count()) === 0 &&
       (await header.getByRole("link", { name: "FAQ" }).count()) === 0,
   );
-  note("Nav: no Texas badge in header", (await header.getByText("Texas leases only").count()) === 0);
+  note("State selector is visible", await page.getByLabel("Rental property state").isVisible());
   note(
     "Nav: no Review a lease button in header",
     (await header.getByRole("button", { name: "Review a lease" }).count()) === 0,
@@ -138,7 +138,7 @@ async function run() {
   // Tabs
   await page.goto(BASE, { waitUntil: "networkidle" });
   await page.getByRole("tab", { name: "Paste Text" }).click();
-  note("Paste Text tab shows textarea", await page.getByPlaceholder(/Paste your Texas residential lease/i).isVisible());
+  note("Paste Text tab shows textarea", await page.getByPlaceholder(/Paste your residential lease/i).isVisible());
   await page.getByRole("tab", { name: "Sample" }).click();
   note(
     "Sample tab shows run button",
@@ -158,6 +158,7 @@ async function run() {
   note("Sample lease reaches intake preview", /Lease intake/i.test(await page.locator("body").innerText()));
   await page.screenshot({ path: path.join(OUT, "02-intake-sample.png"), fullPage: true });
 
+  await page.getByLabel(/I confirm this is a residential lease for a property in Texas/i).check();
   await page.getByRole("button", { name: /Continue to analysis/i }).click();
   await page.getByText("Local landlord-tenant law was not checked").waitFor({ state: "visible", timeout: 180000 });
   await page.waitForTimeout(1000);
@@ -194,7 +195,7 @@ async function run() {
   // Paste flow
   await page.goto(BASE, { waitUntil: "networkidle" });
   await page.getByRole("tab", { name: "Paste Text" }).click();
-  await page.getByPlaceholder(/Paste your Texas residential lease/i).fill(
+  await page.getByPlaceholder(/Paste your residential lease/i).fill(
     "Monthly rent: $1200 due on the 1st.\nSecurity deposit: $1200.\nLate fee: $50 per day.",
   );
   await page.getByRole("button", { name: /Use pasted text/i }).click();
@@ -240,6 +241,7 @@ async function run() {
   await mpage.getByRole("tab", { name: "Sample" }).click();
   await mpage.locator("#review-intake").getByRole("button", { name: "Run Sample Lease", exact: true }).click();
   await mpage.waitForTimeout(2000);
+  await mpage.getByLabel(/I confirm this is a residential lease for a property in Texas/i).check();
   await mpage.getByRole("button", { name: /Continue to analysis/i }).click();
   await mpage.getByText("Local landlord-tenant law was not checked").waitFor({ state: "visible", timeout: 180000 });
   await mpage.waitForTimeout(1000);

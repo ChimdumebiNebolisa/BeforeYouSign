@@ -38,7 +38,7 @@ export function LandingHero({ onReviewLease, onRunSample }: LandingHeroProps) {
           <span className="mt-0.5 shrink-0 text-primary" aria-hidden>
             ⓘ
           </span>
-          <span>Texas leases only. For education, not legal advice.</span>
+          <span>Choose the property state before review. For education, not legal advice.</span>
         </span>
       </p>
     </div>

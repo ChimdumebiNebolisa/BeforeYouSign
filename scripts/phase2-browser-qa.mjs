@@ -16,6 +16,7 @@ async function runSampleToReport(page) {
   await page.getByRole("tab", { name: "Sample" }).click();
   await page.locator("#review-intake").getByRole("button", { name: "Run Sample Lease", exact: true }).click();
   await page.getByRole("button", { name: /Continue to analysis/i }).waitFor({ timeout: 15000 });
+  await page.getByLabel(/I confirm this is a residential lease for a property in Texas/i).check();
   await page.getByRole("button", { name: /Continue to analysis/i }).click();
   await page.getByText("Local landlord-tenant law was not checked").waitFor({ state: "visible", timeout: 180000 });
 }
@@ -99,7 +100,10 @@ async function run() {
   note("Why it matters copy", /This affects your deposit/i.test(body));
   note("Source title present", /Texas Property Code Chapter 92/i.test(body));
   note("Source section label", /Security deposits and return of deposit/i.test(body));
-  note("Statewide source note", /Statewide Texas source\. City rules are not checked\./i.test(body));
+  note(
+    "Statewide source note",
+    /These notes use statewide Texas renter resources\. City rules are not checked\./i.test(body),
+  );
   note("Checklist download button", await page.getByRole("button", { name: "Download question checklist" }).isVisible());
 
   await page.getByRole("button", { name: "Go to Summary" }).click();
