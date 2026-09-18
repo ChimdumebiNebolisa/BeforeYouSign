@@ -5,6 +5,28 @@ import { assessExtractionQuality, toDocumentExtraction } from "@/lib/pdf/extract
 import { normalizeLeasePageText } from "@/lib/pdf/normalize";
 import type { PdfExtractor } from "@/lib/analysis/pipeline/types";
 import { maybeApplyOcr } from "@/lib/ocr/ocr-document";
+import { PdfExtractionLimitError, type ExtractedTextPage } from "@/lib/pdf/extract-text";
+
+export function validateExtractedPageLimits(pages: ExtractedTextPage[]) {
+  if (pages.length > ANALYSIS_LIMITS.maxPages) {
+    return createAnalysisProblem(
+      "too_many_pages",
+      `PDF exceeds the ${ANALYSIS_LIMITS.maxPages} page limit.`,
+      { limit: ANALYSIS_LIMITS.maxPages, actual: pages.length },
+    );
+  }
+
+  const totalChars = pages.reduce((sum, page) => sum + page.text.length, 0);
+  if (totalChars > ANALYSIS_LIMITS.maxChars) {
+    return createAnalysisProblem(
+      "too_many_chars",
+      `Extracted text exceeds the ${ANALYSIS_LIMITS.maxChars.toLocaleString()} character limit.`,
+      { limit: ANALYSIS_LIMITS.maxChars, actual: totalChars },
+    );
+  }
+
+  return null;
+}
 
 export async function analyzeDocument(
   input: AnalysisInput,
@@ -30,8 +52,24 @@ export async function analyzeDocument(
 
   let extractedPages;
   try {
-    extractedPages = await extractPdfTextPages(input.bytes);
-  } catch {
+    extractedPages = await extractPdfTextPages(input.bytes, {
+      maxPages: ANALYSIS_LIMITS.maxPages,
+      maxChars: ANALYSIS_LIMITS.maxChars,
+    });
+  } catch (error) {
+    if (error instanceof PdfExtractionLimitError) {
+      return {
+        ok: false,
+        problem: createAnalysisProblem(
+          error.code,
+          error.code === "too_many_pages"
+            ? `PDF exceeds the ${error.limit} page limit.`
+            : `Extracted text exceeds the ${error.limit.toLocaleString()} character limit.`,
+          { limit: error.limit, actual: error.actual },
+        ),
+      };
+    }
+
     return {
       ok: false,
       problem: createAnalysisProblem(
@@ -58,10 +96,15 @@ export async function analyzeDocument(
   if (quality.likelyScanned && process.env.BYS_OCR_ENABLED === "1") {
     const ocrResult = await maybeApplyOcr(input.bytes, extractedPages);
     if (ocrResult.pages.length > 0) {
-      extractedPages = ocrResult.pages.map((p) => ({
+      const ocrPages = ocrResult.pages.map((p) => ({
         page: p.page,
         text: normalizeLeasePageText(p.text),
       }));
+      const ocrLimitProblem = validateExtractedPageLimits(ocrPages);
+      if (ocrLimitProblem) {
+        return { ok: false, problem: ocrLimitProblem };
+      }
+      extractedPages = ocrPages;
       quality = assessExtractionQuality(extractedPages);
       method = "ocr";
     }
