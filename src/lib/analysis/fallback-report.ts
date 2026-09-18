@@ -33,7 +33,10 @@ function extractFeeValue(text: string): string | null {
   const monthsOfRent = text.match(
     /\b(?:(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)(?:\s*\(\s*\d{1,2}\s*\))?|\d{1,2})\s+months?'?\s+rent\b/i,
   );
-  return monthsOfRent ? monthsOfRent[0] : extractCurrencyValue(text);
+  if (monthsOfRent) return monthsOfRent[0];
+
+  const currencyRate = text.match(/\$[\d,]+(?:\.\d{2})?\s*(?:per|\/)\s*(?:day|week|month|year)\b/i);
+  return currencyRate ? currencyRate[0] : extractCurrencyValue(text);
 }
 
 function extractDeadlineValue(text: string): string | null {

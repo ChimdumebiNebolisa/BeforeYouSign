@@ -312,4 +312,28 @@ describe("buildRuleOnlyFallbackReport", () => {
       }),
     );
   });
+
+  it("preserves the daily rate for dollar-based holdover rent", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Holdover rent: Tenant shall pay $75 per day for every day Tenant remains after the lease term ends.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Holdover rent",
+        value: "$75 per day",
+      }),
+    );
+  });
 });
