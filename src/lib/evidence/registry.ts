@@ -37,7 +37,6 @@ export function hydrateEvidenceFromSpan(
   endIndex: number,
   quote: string,
 ): GroundedEvidenceRef | null {
-  const pageText = registry.chunks.find((c) => c.page === page)?.text;
   const chunk =
     registry.chunks.find(
       (c) =>
@@ -51,22 +50,22 @@ export function hydrateEvidenceFromSpan(
   }
 
   if (startIndex >= 0 && endIndex > startIndex) {
-  const matchingChunk = registry.chunks.find(
-    (c) => c.page === page && c.startIndex <= startIndex && c.endIndex >= endIndex,
-  );
-  if (matchingChunk) {
-    return {
-      evidenceId: matchingChunk.id,
-      page,
-      quote: quote.trim(),
-      startIndex,
-      endIndex,
-      supportStatus: "grounded",
-    };
-  }
+    const matchingChunk = registry.chunks.find(
+      (c) => c.page === page && c.startIndex <= startIndex && c.endIndex >= endIndex,
+    );
+    if (matchingChunk) {
+      return {
+        evidenceId: matchingChunk.id,
+        page,
+        quote: quote.trim(),
+        startIndex,
+        endIndex,
+        supportStatus: "grounded",
+      };
+    }
   }
 
-  if (!pageText && quote) {
+  if (quote.trim()) {
     const byQuote = registry.chunks.find(
       (c) => c.page === page && c.text.includes(quote.trim()),
     );

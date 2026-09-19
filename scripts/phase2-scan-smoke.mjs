@@ -8,7 +8,7 @@ const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000";
 const res = await fetch(`${baseUrl}/api/analyze`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ leaseText: text, fileName: "sample-lease.txt" }),
+  body: JSON.stringify({ leaseText: text, fileName: "sample-lease.txt", stateCode: "TX" }),
 });
 
 const data = await res.json();

@@ -34,7 +34,7 @@ export function assessExtractionQuality(pages: ExtractedTextPage[]): ExtractionQ
   const likelyScanned = avgCharsPerPage < ANALYSIS_LIMITS.lowExtractionCharThreshold;
 
   let coverageStatus: CoverageStatus = "complete";
-  if (likelyScanned || quality < ANALYSIS_LIMITS.lowCoverageQualityThreshold) {
+  if (likelyScanned || quality < ANALYSIS_LIMITS.ocrQualityThreshold) {
     coverageStatus = totalChars > 0 ? "partial" : "unreadable";
   }
 

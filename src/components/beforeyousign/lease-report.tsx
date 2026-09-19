@@ -28,9 +28,9 @@ import { ChecklistDownloadButton } from "@/components/beforeyousign/checklist-do
 import { ReportDownloadButton } from "@/components/beforeyousign/report-download-button";
 import type { AnalysisMode } from "@/lib/analysis/pipeline/types";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
+import { getStateGuidanceStatus, getStateName, type StateCode, type StateGuidanceStatus } from "@/lib/jurisdiction/states";
 
 const RED_FLAGS_SLIDE_INDEX = 1;
-const TEXAS_RENTER_SLIDE_INDEX = 6;
 
 const SLIDE_LABELS_BASE = [
   "Summary",
@@ -39,7 +39,6 @@ const SLIDE_LABELS_BASE = [
   "Deadlines and notices",
   "Responsibilities",
   "Questions to ask",
-  "Texas renter check",
   "Next steps",
 ] as const;
 
@@ -65,9 +64,13 @@ function LeaseReportCarousel({
   onFlagEvidenceClick,
   evidenceSourceLabel,
   texasRenterFindings,
+  stateCode,
+  stateGuidance,
 }: {
   report: BeforeYouSignReport;
   texasRenterFindings: TexasRenterFinding[];
+  stateCode: StateCode;
+  stateGuidance: StateGuidanceStatus;
   summaryIntro: string;
   agreeBullets: string[];
   riskNote: string;
@@ -84,9 +87,16 @@ function LeaseReportCarousel({
   evidenceSourceLabel?: EvidenceSourceLabel;
 }) {
   const hasMissing = report.missingOrUnclear.length > 0;
+  const hasStateSpecificGuidance = stateGuidance === "supported";
+  const stateSlideIndex = hasStateSpecificGuidance ? 6 : -1;
   const slideLabels = useMemo(
-    () => (hasMissing ? [...SLIDE_LABELS_BASE, "Not clearly stated"] : [...SLIDE_LABELS_BASE]),
-    [hasMissing],
+    (): string[] => {
+      const labels: string[] = [...SLIDE_LABELS_BASE];
+      if (hasStateSpecificGuidance) labels.splice(6, 0, `${getStateName(stateCode)} renter check`);
+      if (hasMissing) labels.push("Not clearly stated");
+      return labels;
+    },
+    [hasMissing, hasStateSpecificGuidance, stateCode],
   );
   const slideCount = slideLabels.length;
 
@@ -118,16 +128,17 @@ function LeaseReportCarousel({
   useEffect(() => {
     if (!emblaApi || !selectedFindingId) return;
     const hitRedFlag = report.potentialRedFlags.some((f) => f.id === selectedFindingId);
-    const hitTexas = texasRenterFindings.some((f) => f.id === selectedFindingId);
-    if (!hitRedFlag && !hitTexas) return;
+    const hitStateSpecificFinding =
+      hasStateSpecificGuidance && texasRenterFindings.some((f) => f.id === selectedFindingId);
+    if (!hitRedFlag && !hitStateSpecificFinding) return;
     const jump = prefersReducedMotion();
-    emblaApi.scrollTo(hitTexas ? TEXAS_RENTER_SLIDE_INDEX : RED_FLAGS_SLIDE_INDEX, jump);
+    emblaApi.scrollTo(hitStateSpecificFinding ? stateSlideIndex : RED_FLAGS_SLIDE_INDEX, jump);
     const id = selectedFindingId;
     requestAnimationFrame(() => {
       const el = document.querySelector<HTMLElement>(`[data-finding-id="${CSS.escape(id)}"]`);
       el?.scrollIntoView({ block: "nearest", behavior: jump ? "auto" : "smooth" });
     });
-  }, [selectedFindingId, emblaApi, report.potentialRedFlags, texasRenterFindings]);
+  }, [selectedFindingId, emblaApi, report.potentialRedFlags, stateSlideIndex, texasRenterFindings]);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
@@ -238,16 +249,18 @@ function LeaseReportCarousel({
               />
             </div>
           </div>
-          <div className="min-w-0 flex-[0_0_100%] px-0.5">
-            <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
-              <TexasRenterCheckSection
-                findings={texasRenterFindings}
-                selectedFindingId={selectedFindingId}
-                onEvidenceClick={onFlagEvidenceClick}
-                evidenceSourceLabel={evidenceSourceLabel}
-              />
+          {hasStateSpecificGuidance ? (
+            <div className="min-w-0 flex-[0_0_100%] px-0.5">
+              <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
+                <TexasRenterCheckSection
+                  findings={texasRenterFindings}
+                  selectedFindingId={selectedFindingId}
+                  onEvidenceClick={onFlagEvidenceClick}
+                  evidenceSourceLabel={evidenceSourceLabel}
+                />
+              </div>
             </div>
-          </div>
+          ) : null}
           <div className="min-w-0 flex-[0_0_100%] px-0.5">
             <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
               <NextStepsSection report={report} />
@@ -285,6 +298,8 @@ function LeaseReportCarousel({
 export function LeaseReportView({
   report,
   texasRenterFindings = [],
+  stateCode = "TX",
+  stateGuidance = getStateGuidanceStatus(stateCode),
   onFlagEvidenceClick,
   selectedFindingId,
   evidenceSourceLabel,
@@ -295,6 +310,8 @@ export function LeaseReportView({
 }: {
   report: BeforeYouSignReport;
   texasRenterFindings?: TexasRenterFinding[];
+  stateCode?: StateCode;
+  stateGuidance?: StateGuidanceStatus;
   onFlagEvidenceClick: (args: EvidenceClickArgs) => void;
   selectedFindingId?: string | null;
   evidenceSourceLabel?: EvidenceSourceLabel;
@@ -324,6 +341,8 @@ export function LeaseReportView({
   const shared = {
     report,
     texasRenterFindings,
+    stateCode,
+    stateGuidance,
     summaryIntro,
     agreeBullets,
     riskNote,
@@ -347,6 +366,8 @@ export function LeaseReportView({
         <ReportDownloadButton
           report={report}
           texasRenterFindings={texasRenterFindings}
+          stateCode={stateCode}
+          stateGuidance={stateGuidance}
           fileName={fileName}
           mode={mode}
           deterministicRiskBand={deterministicRiskBand}
@@ -355,6 +376,8 @@ export function LeaseReportView({
         <ChecklistDownloadButton
           report={report}
           texasRenterFindings={texasRenterFindings}
+          stateCode={stateCode}
+          stateGuidance={stateGuidance}
           fileName={fileName}
         />
       </div>

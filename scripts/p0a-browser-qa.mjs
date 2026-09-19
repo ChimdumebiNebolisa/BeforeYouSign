@@ -70,6 +70,7 @@ async function run() {
   await continueBtn.waitFor({ state: "visible", timeout: 10000 });
   await page.screenshot({ path: path.join(OUT, "02-intake-sample.png"), fullPage: true });
 
+  await page.getByLabel(/I confirm this is a residential lease for a property in Texas/i).check();
   await continueBtn.click();
   await page.getByText(/Reviewing your lease|Analysis in progress/i).waitFor({ timeout: 10000 }).catch(() => {});
   await page
@@ -146,6 +147,7 @@ async function run() {
   await mpage.screenshot({ path: path.join(OUT, "08-landing-mobile.png"), fullPage: true });
   await mpage.getByRole("button", { name: /Run Sample Lease/i }).click();
   await mpage.waitForTimeout(2000);
+  await mpage.getByLabel(/I confirm this is a residential lease for a property in Texas/i).check();
   await mpage.getByRole("button", { name: /Continue to analysis/i }).click();
   await mpage
     .getByText("Local landlord-tenant law was not checked")

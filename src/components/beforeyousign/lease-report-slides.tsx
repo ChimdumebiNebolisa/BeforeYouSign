@@ -678,16 +678,16 @@ export function LocalLawBanner() {
 }
 
 export function FixedReportDisclaimer({ report }: { report: BeforeYouSignReport }) {
-  const modelDisclaimer = report.disclaimer?.trim();
-  const showModelDisclaimer =
-    modelDisclaimer &&
-    modelDisclaimer.toLowerCase() !== FIXED_REPORT_DISCLAIMER.toLowerCase();
+  const reportDisclaimer = report.disclaimer?.trim();
+  const showReportDisclaimer =
+    reportDisclaimer &&
+    reportDisclaimer.toLowerCase() !== FIXED_REPORT_DISCLAIMER.toLowerCase();
 
   return (
     <div className="rounded-lg border border-[#e6e8ea] bg-[#fafbfc] px-4 py-3 text-[11px] leading-relaxed text-[#757682]">
       <p>{FIXED_REPORT_DISCLAIMER}</p>
-      {showModelDisclaimer ? (
-        <p className="mt-2 text-[10px] text-[#9ca3af]">{modelDisclaimer}</p>
+      {showReportDisclaimer ? (
+        <p className="mt-2 text-[10px] text-[#9ca3af]">{reportDisclaimer}</p>
       ) : null}
     </div>
   );

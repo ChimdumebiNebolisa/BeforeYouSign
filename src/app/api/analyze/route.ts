@@ -25,5 +25,15 @@ export async function POST(request: Request) {
     extractPdfTextPages,
   });
 
-  return NextResponse.json(response, { status: httpStatus });
+  const retryAfterSeconds =
+    !response.ok && typeof response.error === "object" && response.error.code === "rate_limited"
+      ? response.error.retryAfterSeconds
+      : undefined;
+
+  return NextResponse.json(response, {
+    status: httpStatus,
+    ...(retryAfterSeconds !== undefined
+      ? { headers: { "Retry-After": String(retryAfterSeconds) } }
+      : {}),
+  });
 }

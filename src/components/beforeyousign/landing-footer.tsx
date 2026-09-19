@@ -12,7 +12,7 @@ export function LandingFooter() {
         <div className="mx-auto max-w-[42rem] space-y-4 lg:mx-0">
           <div>
             <p className="font-[family-name:var(--font-headline)] text-lg font-bold text-primary">BeforeYouSign</p>
-            <p className="mt-1 text-sm text-muted-foreground">Texas residential lease review for students and renters.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Residential lease review for students and renters.</p>
           </div>
           <p className="text-xs leading-relaxed text-muted-foreground">{FIXED_REPORT_DISCLAIMER}</p>
           <p className="text-xs leading-relaxed text-muted-foreground">{LANDING_PRIVACY_PROCESSING}</p>

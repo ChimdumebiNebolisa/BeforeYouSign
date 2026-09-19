@@ -28,10 +28,6 @@ export function displayFindingProvenance(provenance: FindingProvenance | undefin
   switch (provenance) {
     case "deterministic":
       return "Pattern scan";
-    case "model":
-      return "AI grounded";
-    case "combined":
-      return "Pattern + AI";
     default:
       return "Origin unknown";
   }

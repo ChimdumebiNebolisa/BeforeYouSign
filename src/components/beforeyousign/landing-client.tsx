@@ -19,24 +19,32 @@ import { LandingWhatItChecks } from "@/components/beforeyousign/landing-what-it-
 import { LandingLimitations } from "@/components/beforeyousign/landing-limitations";
 import { LandingFaq } from "@/components/beforeyousign/landing-faq";
 import { LandingFooter } from "@/components/beforeyousign/landing-footer";
-import { AnalysisModeBanner } from "@/components/beforeyousign/analysis-mode-banner";
 import { FixedReportDisclaimer, LocalLawBanner } from "@/components/beforeyousign/lease-report-slides";
 import type { EvidenceIndex } from "@/lib/evidence/index";
 import { OCR_WARNING } from "@/lib/public-copy";
+import { getStateGuidanceStatus, getStateName, type StateCode } from "@/lib/jurisdiction/states";
 
 type IntakeState =
   | { kind: "upload"; file: File }
   | { kind: "sample"; text: string }
   | { kind: "paste"; text: string };
 
-type ModelRetryCache = {
-  documentId: string;
-  pages: { page: number; text: string }[];
-  fileName: string;
-  fileSizeBytes: number;
-  contentType: string | null;
-  extraction: AnalysisSuccessResponse["document"]["extraction"];
-};
+const ANALYSIS_REQUEST_TIMEOUT_MS = 55_000;
+
+async function fetchAnalysis(input: RequestInfo | URL, init: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), ANALYSIS_REQUEST_TIMEOUT_MS);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new Error("Analysis took too long to finish. Please retry or paste the lease text instead.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
 
 export function LandingClient() {
   const [intake, setIntake] = useState<IntakeState | null>(null);
@@ -61,23 +69,23 @@ export function LandingClient() {
     deterministicRiskReasons?: string[];
     report?: BeforeYouSignReport | null;
     reportError?: string | null;
-    reportDebug?: { failureStage?: string } | null;
-    analysisVersion?: number;
+     analysisVersion?: number;
     mode?: AnalysisSuccessResponse["mode"];
     requestId?: string;
-    groundingSummary?: AnalysisSuccessResponse["groundingSummary"];
     evidenceIndex?: EvidenceIndex;
     document?: AnalysisSuccessResponse["document"];
+    stateCode?: StateCode;
+    stateGuidance?: AnalysisSuccessResponse["stateGuidance"];
   } | null>(null);
-  const [modelRetryCache, setModelRetryCache] = useState<ModelRetryCache | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRetryingModel, setIsRetryingModel] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [viewerTargetPage, setViewerTargetPage] = useState<number | null>(null);
   const [viewerHighlight, setViewerHighlight] = useState<EvidenceClickArgs | null>(null);
   const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
   const [leaseTextPanelExpanded, setLeaseTextPanelExpanded] = useState(true);
   const [intakeTab, setIntakeTab] = useState<"upload" | "paste" | "sample">("upload");
+  const [stateCode, setStateCode] = useState<StateCode>("TX");
+  const [stateConfirmed, setStateConfirmed] = useState(false);
 
   const scrollToIntake = () => {
     document.getElementById("review-intake")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -86,7 +94,6 @@ export function LandingClient() {
   useEffect(() => {
     const handleGoHome = () => {
       setUploadReceipt(null);
-      setModelRetryCache(null);
       setIsSubmitting(false);
       setErrorMessage(null);
       setViewerTargetPage(null);
@@ -95,6 +102,8 @@ export function LandingClient() {
       setLeaseTextPanelExpanded(true);
       setIntake(null);
       setIntakeTab("upload");
+      setStateCode("TX");
+      setStateConfirmed(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
@@ -118,47 +127,37 @@ export function LandingClient() {
 
   const resetIntakeUi = () => {
     setUploadReceipt(null);
-    setModelRetryCache(null);
     setIsSubmitting(false);
     setErrorMessage(null);
     setViewerTargetPage(null);
     setViewerHighlight(null);
     setSelectedFindingId(null);
     setLeaseTextPanelExpanded(true);
+    setStateConfirmed(false);
   };
 
   const applyAnalysisResponse = useCallback((data: AnalysisSuccessResponse & {
     report?: unknown;
     reportError?: string | null;
-    reportDebug?: { failureStage?: string };
   }) => {
     const report =
       data.report === undefined || data.report === null
         ? null
         : parseBeforeYouSignReportJson(data.report);
 
-    if (data.extractedPages?.length && data.document?.extraction && data.documentId) {
-      setModelRetryCache({
-        documentId: data.documentId,
-        pages: data.extractedPages,
-        fileName: data.fileName,
-        fileSizeBytes: data.fileSizeBytes,
-        contentType: data.contentType,
-        extraction: data.document.extraction,
-      });
-    }
-
     setUploadReceipt({
       ...data,
       report,
       reportError: typeof data.reportError === "string" ? data.reportError : null,
-      reportDebug:
-        data.reportDebug && typeof data.reportDebug === "object" ? data.reportDebug : null,
     });
   }, []);
 
   const runLeaseAnalysis = useCallback(async () => {
     if (!intake) return;
+    if (!stateConfirmed) {
+      setErrorMessage(`Confirm that this is a residential lease for a property in ${getStateName(stateCode)}.`);
+      return;
+    }
     try {
       setIsSubmitting(true);
       setErrorMessage(null);
@@ -172,17 +171,19 @@ export function LandingClient() {
       if (intake.kind === "upload") {
         const formData = new FormData();
         formData.append("file", intake.file, intake.file.name);
-        res = await fetch("/api/analyze", {
+        formData.append("stateCode", stateCode);
+        res = await fetchAnalysis("/api/analyze", {
           method: "POST",
           body: formData,
         });
       } else {
-        res = await fetch("/api/analyze", {
+        res = await fetchAnalysis("/api/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             leaseText: intake.text,
             fileName: intake.kind === "sample" ? "sample-lease.txt" : "pasted-lease.txt",
+            stateCode,
           }),
         });
       }
@@ -208,11 +209,7 @@ export function LandingClient() {
         throw new Error(message);
       }
 
-      const data = (await res.json()) as AnalysisSuccessResponse & {
-        report?: unknown;
-        reportError?: string | null;
-        reportDebug?: { failureStage?: string };
-      };
+      const data = (await res.json()) as AnalysisSuccessResponse & { report?: unknown; reportError?: string | null };
 
       applyAnalysisResponse(data);
     } catch (e) {
@@ -220,60 +217,7 @@ export function LandingClient() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [intake, applyAnalysisResponse]);
-
-  const runModelRetry = useCallback(async () => {
-    if (!modelRetryCache) return;
-    try {
-      setIsRetryingModel(true);
-      setErrorMessage(null);
-
-      const res = await fetch("/api/analyze/retry-model", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          documentId: modelRetryCache.documentId,
-          pages: modelRetryCache.pages,
-          fileName: modelRetryCache.fileName,
-          fileSizeBytes: modelRetryCache.fileSizeBytes,
-          contentType: modelRetryCache.contentType,
-          extraction: modelRetryCache.extraction,
-        }),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        let message = formatAnalysisError(text, res.status);
-        try {
-          const errJson = JSON.parse(text) as { error?: unknown };
-          if (typeof errJson.error === "string" && errJson.error) {
-            message = errJson.error;
-          } else if (
-            errJson.error &&
-            typeof errJson.error === "object" &&
-            "message" in errJson.error &&
-            typeof (errJson.error as { message: unknown }).message === "string"
-          ) {
-            message = (errJson.error as { message: string }).message;
-          }
-        } catch {
-          // use raw body
-        }
-        throw new Error(message);
-      }
-
-      const data = (await res.json()) as AnalysisSuccessResponse & {
-        report?: unknown;
-        reportError?: string | null;
-        reportDebug?: { failureStage?: string };
-      };
-      applyAnalysisResponse(data);
-    } catch (e) {
-      setErrorMessage(e instanceof Error ? e.message : "Failed to retry AI analysis.");
-    } finally {
-      setIsRetryingModel(false);
-    }
-  }, [modelRetryCache, applyAnalysisResponse]);
+  }, [intake, applyAnalysisResponse, stateCode, stateConfirmed]);
 
   if (intake && isSubmitting) {
     return <AnalysisInProgressView intake={intake} />;
@@ -299,6 +243,25 @@ export function LandingClient() {
 
           <IntakeDocumentPreview intake={intake} />
 
+          <div className="rounded-xl border border-[#c5c5d3]/45 bg-[#f7f9fb] p-4">
+            <div className="flex items-start gap-3">
+              <input
+                id="state-lease-confirmation"
+                type="checkbox"
+                checked={stateConfirmed}
+                onChange={(event) => {
+                  setStateConfirmed(event.target.checked);
+                  if (event.target.checked) setErrorMessage(null);
+                }}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[#00246a]"
+              />
+              <label htmlFor="state-lease-confirmation" className="text-sm leading-relaxed text-[#444651]">
+                I confirm this is a residential lease for a property in {getStateName(stateCode)}. State-specific
+                renter references are shown only when available for the selected state.
+              </label>
+            </div>
+          </div>
+
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <Button
               variant="outline"
@@ -314,7 +277,7 @@ export function LandingClient() {
               <Button
                 className="h-11 rounded-xl bys-gradient-cta px-6 text-white shadow-sm hover:opacity-95"
                 onClick={() => void runLeaseAnalysis()}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !stateConfirmed}
               >
                 {isSubmitting
                   ? intake.kind === "upload"
@@ -373,6 +336,8 @@ export function LandingClient() {
                   <LeaseReportView
                     report={uploadReceipt.report}
                     texasRenterFindings={uploadReceipt.texasRenterFindings ?? []}
+                    stateCode={uploadReceipt.stateCode ?? stateCode}
+                    stateGuidance={uploadReceipt.stateGuidance}
                     fileName={uploadReceipt.fileName}
                     mode={uploadReceipt.mode}
                     deterministicRiskBand={uploadReceipt.deterministicRiskBand}
@@ -396,14 +361,13 @@ export function LandingClient() {
                     }}
                   />
                 ) : null}
-                <AnalysisModeBanner
-                  mode={uploadReceipt.mode}
-                  reportDebug={uploadReceipt.reportDebug}
-                  groundingSummary={uploadReceipt.groundingSummary}
-                  onRetryModel={modelRetryCache ? () => void runModelRetry() : undefined}
-                  isRetrying={isRetryingModel}
-                />
                 <TechnicalDetailsPanel receipt={uploadReceipt} />
+                <div className="rounded-lg border border-[#c5c5d3]/35 bg-[#f7f9fb] px-4 py-3 text-[12px] leading-relaxed text-[#444651]">
+                  {((uploadReceipt.stateGuidance ?? getStateGuidanceStatus(uploadReceipt.stateCode ?? stateCode)) ===
+                    "supported")
+                    ? `${getStateName(uploadReceipt.stateCode ?? stateCode)} renter guidance is included using the supported statewide reference set. City rules are not checked.`
+                    : `State-specific renter guidance is not currently available for ${getStateName(uploadReceipt.stateCode ?? stateCode)}. This report contains general lease review only.`}
+                </div>
                 <LocalLawBanner />
                 {uploadReceipt.report ? <FixedReportDisclaimer report={uploadReceipt.report} /> : null}
               </div>
@@ -489,6 +453,12 @@ export function LandingClient() {
                 pasteOpenRequestVersion={pasteOpenNonce}
                 activeTab={intakeTab}
                 onTabChange={setIntakeTab}
+                stateCode={stateCode}
+                onStateChange={(nextState) => {
+                  setStateCode(nextState);
+                  setStateConfirmed(false);
+                  setErrorMessage(null);
+                }}
               />
             </div>
           </div>

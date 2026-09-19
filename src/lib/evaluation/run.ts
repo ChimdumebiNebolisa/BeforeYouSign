@@ -22,7 +22,7 @@ export function runDeterministicEvaluation(fixturesDir: string): EvaluationRunRe
 
   return files.map((file) => {
     const fixture = loadFixture(path.join(syntheticDir, file));
-    const deterministic = runDeterministicAnalysis(fixture.pages);
+    const deterministic = runDeterministicAnalysis(fixture.pages, "TX");
     const documentId = hashDocumentId(fixture.pages.map((p) => p.text).join("\n"));
     const registry = createEvidenceRegistry(documentId, fixture.pages);
     const report = buildRuleOnlyFallbackReport({

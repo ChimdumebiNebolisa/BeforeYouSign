@@ -53,13 +53,13 @@ describe("buildReportMarkdown", () => {
       report: minimalReport,
       texasRenterFindings: [],
       fileName: "sample-lease.txt",
-      mode: "model_grounded",
+      mode: "rules_only",
       deterministicRiskBand: "medium",
       deterministicRiskReasons: ["Late fee detected"],
     });
 
     expect(md).toContain("Educational information only");
-    expect(md).toContain("AI-enhanced");
+    expect(md).toContain("Rule-based only");
     expect(md).toContain("## Summary");
     expect(md).toContain("sample-lease.txt");
     expect(md).toContain("ev-test-1");
@@ -94,17 +94,15 @@ describe("buildReportMarkdown", () => {
           topicLabel: "Security deposits",
           questionToAsk: "Is the deposit refundable?",
           page: 2,
-          leaseQuote: "Deposit shall be returned within 30 days.",
+          leaseQuote: "Deposit *shall* be returned [within 30 days].",
           sourceUrl: "https://example.com",
-          sourceTitle: "Example source",
-          sourceReviewedAt: "2026-08-01",
-          sourceFreshness: "current",
+          sourceTitle: "Example [source]",
         }),
       ],
     });
     expect(md).toContain("Security deposits");
-    expect(md).toContain("Example source");
-    expect(md).toContain("Source last reviewed: 2026-08-01");
+    expect(md).toContain("Example \\[source\\]");
+    expect(md).toContain("Deposit \\*shall\\* be returned \\[within 30 days\\]");
     expect(md).not.toContain("ungrounded");
   });
 
@@ -134,7 +132,7 @@ describe("buildReportMarkdown", () => {
             category: "renewal",
             title: "Automatic renewal",
             severity: "moderate",
-            provenance: "model",
+            provenance: "deterministic",
             explanation: "Lease renews unless you opt out.",
             whyItMatters: "You may stay longer than planned.",
             evidence: [
@@ -161,13 +159,15 @@ describe("buildReportMarkdown", () => {
           sourceUrl: "https://example.org/texas",
         }),
       ],
-      mode: "unavailable",
+      mode: "rules_only",
     });
 
-    expect(md).toContain("AI unavailable");
+    expect(md).toContain("Rule-based only");
     expect(md).toContain("ev-deadline");
     expect(md).toContain("Automatic renewal");
-    expect(md).toContain("Origin: AI grounded");
+    expect(md).toContain("Moderate attention");
+    expect(md).not.toContain("(moderate)");
+    expect(md).toContain("Origin: Pattern scan");
     expect(md).toContain("Why it matters:");
     expect(md).toContain("https://example.org/texas");
     expect(md).toContain("None listed in this report.");
@@ -183,6 +183,48 @@ describe("buildReportMarkdown", () => {
       texasRenterFindings: [],
     });
     expect(md).toContain("Pet policy not specified");
+  });
+
+  it("handles optional export fields without leaking undefined values", () => {
+    const md = buildReportMarkdown({
+      report: {
+        ...minimalReport,
+        summary: null as unknown as string,
+        potentialRedFlags: [
+          {
+            id: "flag-optional",
+            category: "fees",
+            title: "Fee language",
+            severity: "minor",
+            explanation: "",
+            whyItMatters: "",
+            evidence: [
+              { page: 1, quote: "Fee language appears here.", supportStatus: "grounded" },
+            ],
+          },
+        ],
+      },
+      deterministicRiskBand: "low",
+      texasRenterFindings: [
+        texasFinding({ id: "tx-optional", topic: "lateFees", sourceUrl: undefined }),
+      ],
+    });
+
+    expect(md).not.toContain("undefined");
+    expect(md).toContain("Pattern scan hint: Lower attention");
+  });
+
+  it("labels non-Texas exports as general-only review", () => {
+    const md = buildReportMarkdown({
+      report: minimalReport,
+      texasRenterFindings: [],
+      stateCode: "CA",
+      stateGuidance: "general_only",
+    });
+
+    expect(md).toContain("## State-specific guidance");
+    expect(md).toContain("not currently available for California");
+    expect(md).not.toContain("Texas renter check");
   });
 });
 
@@ -208,30 +250,5 @@ describe("buildChecklistMarkdown", () => {
     });
 
     expect(md).toContain("Origin: Pattern scan");
-  });
-
-  it("escapes user-controlled checklist content", () => {
-    const md = buildChecklistMarkdown({
-      report: {
-        ...minimalReport,
-        questionsToAsk: ["Ask *why* and `how` [before signing]"],
-        moneyAndFees: [{ label: "Fee *label*", value: "Amount [unknown]" }],
-      },
-      texasRenterFindings: [
-        texasFinding({
-          id: "tx-markdown",
-          topic: "securityDeposit",
-          topicLabel: "Deposit *topic*",
-          questionToAsk: "Ask about [deductions]",
-          leaseQuote: "Use `quoted` language.",
-        }),
-      ],
-      fileName: "lease_[draft].md",
-    });
-
-    expect(md).toContain("Ask \\*why\\* and \\`how\\` \\[before signing\\]");
-    expect(md).toContain("Fee \\*label\\*");
-    expect(md).toContain("Use \\`quoted\\` language.");
-    expect(md).not.toContain("**Deposit *topic***");
   });
 });

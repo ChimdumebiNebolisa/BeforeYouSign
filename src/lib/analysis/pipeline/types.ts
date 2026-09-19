@@ -5,10 +5,11 @@ import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan
 import type { EvidenceIndex } from "@/lib/evidence/index";
 import type { ExtractedTextPage } from "@/lib/pdf/extract-text";
 import type { AnalysisStage } from "@/lib/analysis/pipeline/stages";
+import type { StateCode, StateGuidanceStatus } from "@/lib/jurisdiction/states";
 
-export type AnalysisMode = "model_grounded" | "rules_only" | "unavailable";
+export type AnalysisMode = "rules_only";
 
-export type ExtractionMethod = "embedded_text" | "pasted_text";
+export type ExtractionMethod = "embedded_text" | "ocr" | "pasted_text";
 
 export type CoverageStatus = "complete" | "partial" | "unreadable";
 
@@ -18,6 +19,8 @@ export type DocumentExtraction = {
   totalChars: number;
   quality: number;
   coverageStatus: CoverageStatus;
+  ocrPagesAttempted?: number;
+  ocrPagesFailed?: number;
 };
 
 export type NormalizedDocument = {
@@ -27,8 +30,14 @@ export type NormalizedDocument = {
 };
 
 export type AnalysisInput =
-  | { kind: "text"; leaseText: string; fileName: string }
-  | { kind: "pdf"; bytes: ArrayBuffer; fileName: string; contentType: string | null };
+  | { kind: "text"; leaseText: string; fileName: string; stateCode: StateCode }
+  | {
+      kind: "pdf";
+      bytes: ArrayBuffer;
+      fileName: string;
+      contentType: string | null;
+      stateCode: StateCode;
+    };
 
 export type DeterministicAnalysis = {
   rentSnippets: { page: number; quote: string }[];
@@ -45,28 +54,14 @@ export type DeterministicAnalysis = {
   fullLeaseText: string;
 };
 
-export type GroundingSummary = {
-  materialClaims: number;
-  groundedClaims: number;
-  droppedClaims: number;
-};
-
-export type ModelRetryInput = {
-  /** Content integrity key (SHA256 prefix of joined page text). Not authentication. */
-  documentId: string;
-  pages: ExtractedTextPage[];
-  fileName: string;
-  fileSizeBytes: number;
-  contentType: string | null;
-  extraction: DocumentExtraction;
-};
-
 export type AnalysisSuccessResponse = {
   ok: true;
   analysisVersion: number;
   mode: AnalysisMode;
   stage: AnalysisStage;
   requestId: string;
+  stateCode: StateCode;
+  stateGuidance: StateGuidanceStatus;
   documentId: string;
   fileName: string;
   fileSizeBytes: number;
@@ -88,10 +83,8 @@ export type AnalysisSuccessResponse = {
   deterministicRiskScore: number;
   deterministicRiskBand: DeterministicLeaseRisk["band"];
   deterministicRiskReasons: string[];
-  report: BeforeYouSignReport;
+  report: BeforeYouSignReport | null;
   reportError: string | null;
-  groundingSummary?: GroundingSummary;
-  reportDebug?: { failureStage?: string } | null;
   evidenceIndex?: EvidenceIndex;
 };
 
@@ -106,23 +99,25 @@ export type AnalysisErrorResponse = {
         message: string;
         limit?: number;
         actual?: number;
+        retryAfterSeconds?: number;
       };
 };
 
 export type AnalysisResponse = AnalysisSuccessResponse | AnalysisErrorResponse;
 
-export type ModelAnalyzerResult = {
-  report: BeforeYouSignReport;
+export type AnalysisEngineResult = {
+  report: BeforeYouSignReport | null;
   reportError: string | null;
   mode: AnalysisMode;
-  groundingSummary?: GroundingSummary;
-  reportDebug?: { failureStage?: string } | null;
   evidenceIndex?: EvidenceIndex;
 };
 
-export type ModelAnalyzer = (input: {
+export type AnalysisEngine = (input: {
   document: NormalizedDocument;
   deterministic: DeterministicAnalysis;
-}) => Promise<ModelAnalyzerResult>;
+}) => Promise<AnalysisEngineResult>;
 
-export type PdfExtractor = (bytes: ArrayBuffer) => Promise<ExtractedTextPage[]>;
+export type PdfExtractor = (
+  bytes: ArrayBuffer,
+  limits?: { maxPages?: number; maxChars?: number },
+) => Promise<ExtractedTextPage[]>;

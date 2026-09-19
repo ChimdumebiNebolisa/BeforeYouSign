@@ -4,17 +4,9 @@ const ANALYSIS_MODE_LABELS: Record<
   AnalysisMode,
   { bannerTitle: string; exportLabel: string }
 > = {
-  model_grounded: {
-    bannerTitle: "AI-enhanced summary",
-    exportLabel: "AI-enhanced (evidence-backed)",
-  },
   rules_only: {
     bannerTitle: "Rule-based summary",
     exportLabel: "Rule-based only",
-  },
-  unavailable: {
-    bannerTitle: "AI summary unavailable",
-    exportLabel: "AI unavailable",
   },
 };
 

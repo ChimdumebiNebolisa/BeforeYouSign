@@ -1,25 +1,29 @@
 import type {
   AnalysisSuccessResponse,
+  AnalysisEngineResult,
   DeterministicAnalysis,
-  ModelAnalyzerResult,
   NormalizedDocument,
 } from "@/lib/analysis/pipeline/types";
+import { getStateGuidanceStatus, type StateCode } from "@/lib/jurisdiction/states";
 
 export function assembleSuccessResponse(input: {
   requestId: string;
   fileName: string;
   fileSizeBytes: number;
   contentType: string | null;
+  stateCode: StateCode;
   document: NormalizedDocument;
   deterministic: DeterministicAnalysis;
-  model: ModelAnalyzerResult;
+  engine: AnalysisEngineResult;
 }): AnalysisSuccessResponse {
   return {
     ok: true,
     analysisVersion: 2,
     stage: "completed",
-    mode: input.model.mode,
+    mode: input.engine.mode,
     requestId: input.requestId,
+    stateCode: input.stateCode,
+    stateGuidance: getStateGuidanceStatus(input.stateCode),
     documentId: input.document.documentId,
     fileName: input.fileName,
     fileSizeBytes: input.fileSizeBytes,
@@ -41,10 +45,8 @@ export function assembleSuccessResponse(input: {
     deterministicRiskScore: input.deterministic.deterministicRisk.score,
     deterministicRiskBand: input.deterministic.deterministicRisk.band,
     deterministicRiskReasons: input.deterministic.deterministicRisk.reasons,
-    report: input.model.report,
-    reportError: input.model.reportError,
-    groundingSummary: input.model.groundingSummary,
-    reportDebug: input.model.reportDebug,
-    evidenceIndex: input.model.evidenceIndex,
+    report: input.engine.report,
+    reportError: input.engine.reportError,
+    evidenceIndex: input.engine.evidenceIndex,
   };
 }

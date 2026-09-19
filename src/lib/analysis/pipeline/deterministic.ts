@@ -12,9 +12,13 @@ import {
 import { computeDeterministicLeaseRisk } from "@/lib/analysis/scoring";
 import { scanTexasRenterTopics } from "@/lib/legal-reference/texas-renter-scan";
 import type { DeterministicAnalysis } from "@/lib/analysis/pipeline/types";
+import type { StateCode } from "@/lib/jurisdiction/states";
 import type { ExtractedTextPage } from "@/lib/pdf/extract-text";
 
-export function runDeterministicAnalysis(pages: ExtractedTextPage[]): DeterministicAnalysis {
+export function runDeterministicAnalysis(
+  pages: ExtractedTextPage[],
+  stateCode: StateCode = "TX",
+): DeterministicAnalysis {
   const rentSnippets = findRentSnippets(pages);
   const depositSnippets = findDepositSnippets(pages);
   const feeSnippets = findFeeSnippets(pages);
@@ -32,7 +36,7 @@ export function runDeterministicAnalysis(pages: ExtractedTextPage[]): Determinis
     utilities: utilitiesSnippets,
   });
   const unclearLeasePhrases = findUnclearLeasePhrases(pages);
-  const texasRenterFindings = scanTexasRenterTopics(pages);
+  const texasRenterFindings = stateCode === "TX" ? scanTexasRenterTopics(pages) : [];
   const fullLeaseText = pages.map((p) => p.text).join("\n\n");
   const deterministicRisk = computeDeterministicLeaseRisk({
     fullText: fullLeaseText,

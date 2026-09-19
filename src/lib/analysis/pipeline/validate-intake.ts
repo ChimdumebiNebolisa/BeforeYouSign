@@ -2,58 +2,39 @@ import { randomUUID } from "node:crypto";
 
 import { ANALYSIS_LIMITS, createAnalysisProblem, type AnalysisProblem } from "@/lib/analysis/limits";
 import type { AnalysisInput } from "@/lib/analysis/pipeline/types";
+import { parseStateCode, type StateCode } from "@/lib/jurisdiction/states";
 import { normalizeLeasePageText } from "@/lib/pdf/normalize";
 
 export { hashDocumentId, computeContentIntegrityKey } from "@/lib/analysis/pipeline/content-integrity";
 
-type ClientRateState = {
-  windowStartedAt: number;
-  requestCount: number;
-  inFlight: number;
-  lastSeenAt: number;
-};
+const inFlightByClient = new Map<string, number>();
+let inFlightAnalyses = 0;
 
-const clientRateState = new Map<string, ClientRateState>();
+function parseRequestedState(value: unknown): StateCode | null {
+  return parseStateCode(value);
+}
 
-export class RequestBodyTooLargeError extends Error {
-  readonly actual: number;
-  readonly limit: number;
+type RequestBodyResult =
+  | { ok: true; body: Uint8Array }
+  | { ok: false; problem: AnalysisProblem };
 
-  constructor(actual: number, limit: number) {
-    super("Request body exceeds the configured limit.");
-    this.name = "RequestBodyTooLargeError";
-    this.actual = actual;
-    this.limit = limit;
+async function readRequestBody(request: Request, maxBytes: number): Promise<RequestBodyResult> {
+  const contentLength = request.headers.get("content-length");
+  const declaredLength = contentLength ? Number(contentLength) : NaN;
+  if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
+    return {
+      ok: false,
+      problem: createAnalysisProblem(
+        "payload_too_large",
+        "Request body exceeds the analysis input limit.",
+        { limit: maxBytes, actual: declaredLength },
+      ),
+    };
   }
-}
 
-export function isRequestBodyTooLargeError(error: unknown): error is RequestBodyTooLargeError {
-  return (
-    error instanceof RequestBodyTooLargeError ||
-    (typeof error === "object" &&
-      error !== null &&
-      (error as { name?: unknown }).name === "RequestBodyTooLargeError")
-  );
-}
-
-function getContentLength(request: Request): number | null {
-  const raw = request.headers.get("content-length");
-  if (!raw) return null;
-  const parsed = Number.parseInt(raw, 10);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
-}
-
-function assertContentLength(request: Request, limit: number): void {
-  const contentLength = getContentLength(request);
-  if (contentLength !== null && contentLength > limit) {
-    throw new RequestBodyTooLargeError(contentLength, limit);
+  if (!request.body) {
+    return { ok: true, body: new Uint8Array() };
   }
-}
-
-export async function readRequestTextWithinLimit(request: Request, limit: number): Promise<string> {
-  assertContentLength(request, limit);
-
-  if (!request.body) return "";
 
   const reader = request.body.getReader();
   const chunks: Uint8Array[] = [];
@@ -63,86 +44,36 @@ export async function readRequestTextWithinLimit(request: Request, limit: number
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
+      if (!value) continue;
 
-      const chunk = value ?? new Uint8Array();
-      total += chunk.byteLength;
-      if (total > limit) {
+      total += value.byteLength;
+      if (total > maxBytes) {
         await reader.cancel();
-        throw new RequestBodyTooLargeError(total, limit);
+        return {
+          ok: false,
+          problem: createAnalysisProblem(
+            "payload_too_large",
+            "Request body exceeds the analysis input limit.",
+            { limit: maxBytes, actual: total },
+          ),
+        };
       }
-      chunks.push(chunk);
+      chunks.push(value);
     }
-  } finally {
-    reader.releaseLock();
+  } catch {
+    return {
+      ok: false,
+      problem: createAnalysisProblem("invalid_input", "Unable to read the request body."),
+    };
   }
 
-  const bytes = new Uint8Array(total);
+  const body = new Uint8Array(total);
   let offset = 0;
   for (const chunk of chunks) {
-    bytes.set(chunk, offset);
+    body.set(chunk, offset);
     offset += chunk.byteLength;
   }
-  return new TextDecoder().decode(bytes);
-}
-
-export function createLimitedRequest(request: Request, limit: number): Request {
-  assertContentLength(request, limit);
-  if (!request.body) return request;
-
-  const source = request.body;
-  let total = 0;
-  const limitedBody = new ReadableStream<Uint8Array>({
-    start(controller) {
-      const reader = source.getReader();
-      const pump = (): Promise<void> =>
-        reader.read().then(({ done, value }) => {
-          if (done) {
-            controller.close();
-            return;
-          }
-
-          const chunk = value ?? new Uint8Array();
-          total += chunk.byteLength;
-          if (total > limit) {
-            void reader.cancel();
-            controller.error(new RequestBodyTooLargeError(total, limit));
-            return;
-          }
-
-          controller.enqueue(chunk);
-          return pump();
-        }).catch((error: unknown) => controller.error(error));
-
-      return pump();
-    },
-  });
-
-  return new Request(request, { body: limitedBody, duplex: "half" } as RequestInit & { duplex: "half" });
-}
-
-function pruneRateLimitState(now: number): void {
-  for (const [key, state] of clientRateState) {
-    if (now - state.lastSeenAt > ANALYSIS_LIMITS.rateWindowMs) {
-      clientRateState.delete(key);
-    }
-  }
-
-  while (clientRateState.size >= ANALYSIS_LIMITS.maxRateLimitEntries) {
-    let oldestKey: string | null = null;
-    let oldestSeenAt = Number.POSITIVE_INFINITY;
-    for (const [key, state] of clientRateState) {
-      if (state.lastSeenAt < oldestSeenAt) {
-        oldestKey = key;
-        oldestSeenAt = state.lastSeenAt;
-      }
-    }
-    if (!oldestKey) break;
-    clientRateState.delete(oldestKey);
-  }
-}
-
-export function resetRateLimitStateForTests(): void {
-  clientRateState.clear();
+  return { ok: true, body };
 }
 
 export function createRequestId(): string {
@@ -150,54 +81,47 @@ export function createRequestId(): string {
 }
 
 export function getClientKey(request: Request): string {
-  if (process.env.BYS_TRUST_PROXY !== "1") return "unidentified-client";
-
-  const realIp = request.headers.get("x-real-ip")?.trim();
-  if (realIp) return realIp;
+  // Only trust forwarding headers when the deployment explicitly confirms that
+  // its reverse proxy overwrites them. Otherwise, all anonymous traffic shares
+  // the fail-closed slot instead of allowing clients to spoof arbitrary keys.
+  if (process.env.BYS_TRUST_PROXY_HEADERS !== "1") return "anonymous";
 
   const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0]?.trim() || "unidentified-client";
-  return "unidentified-client";
+  if (forwarded) return forwarded.split(",")[0]?.trim() ?? "unknown";
+  return request.headers.get("x-real-ip") ?? "unknown";
 }
 
-export function acquireClientSlot(clientKey: string, now = Date.now()): AnalysisProblem | null {
-  pruneRateLimitState(now);
-  let state = clientRateState.get(clientKey);
-  if (!state || now - state.windowStartedAt >= ANALYSIS_LIMITS.rateWindowMs) {
-    state = {
-      windowStartedAt: now,
-      requestCount: 0,
-      inFlight: 0,
-      lastSeenAt: now,
-    };
-    clientRateState.set(clientKey, state);
-  }
-
-  state.lastSeenAt = now;
-  if (state.requestCount >= ANALYSIS_LIMITS.maxRequestsPerRateWindow) {
+export function acquireClientSlot(clientKey: string): AnalysisProblem | null {
+  if (inFlightAnalyses >= ANALYSIS_LIMITS.maxConcurrentAnalyses) {
     return createAnalysisProblem(
       "rate_limited",
-      "Too many analysis requests were made recently. Please wait and try again.",
+      "The analysis service is busy. Please wait a moment and try again.",
     );
   }
 
-  if (state.inFlight >= ANALYSIS_LIMITS.maxConcurrentPerClient) {
-    return createAnalysisProblem(
-      "rate_limited",
-      "Too many analysis requests are already in progress. Please wait and try again.",
-    );
+  // Anonymous requests are intentionally governed by the global cap. Sharing
+  // one per-client slot would make one slow request block every visitor.
+  if (clientKey !== "anonymous") {
+    const current = inFlightByClient.get(clientKey) ?? 0;
+    if (current >= ANALYSIS_LIMITS.maxConcurrentPerClient) {
+      return createAnalysisProblem(
+        "rate_limited",
+        "Too many analysis requests are already in progress. Please wait and try again.",
+      );
+    }
+    inFlightByClient.set(clientKey, current + 1);
   }
-
-  state.requestCount += 1;
-  state.inFlight += 1;
+  inFlightAnalyses += 1;
   return null;
 }
 
 export function releaseClientSlot(clientKey: string): void {
-  const state = clientRateState.get(clientKey);
-  if (!state) return;
-  state.inFlight = Math.max(0, state.inFlight - 1);
-  state.lastSeenAt = Date.now();
+  inFlightAnalyses = Math.max(0, inFlightAnalyses - 1);
+  if (clientKey === "anonymous") return;
+
+  const current = inFlightByClient.get(clientKey) ?? 0;
+  if (current <= 1) inFlightByClient.delete(clientKey);
+  else inFlightByClient.set(clientKey, current - 1);
 }
 
 export async function parseAnalysisInput(request: Request): Promise<
@@ -207,21 +131,13 @@ export async function parseAnalysisInput(request: Request): Promise<
   const headerContentType = (request.headers.get("content-type") ?? "").toLowerCase();
 
   if (headerContentType.includes("application/json")) {
+    const bodyResult = await readRequestBody(request, ANALYSIS_LIMITS.maxJsonRequestBytes);
+    if (!bodyResult.ok) return bodyResult;
+
     let parsed: unknown;
     try {
-      const rawBody = await readRequestTextWithinLimit(request, ANALYSIS_LIMITS.maxJsonBodyBytes);
-      parsed = JSON.parse(rawBody);
-    } catch (error) {
-      if (isRequestBodyTooLargeError(error)) {
-        return {
-          ok: false,
-          problem: createAnalysisProblem(
-            "payload_too_large",
-            "JSON request body is too large.",
-            { limit: error.limit, actual: error.actual },
-          ),
-        };
-      }
+      parsed = JSON.parse(new TextDecoder().decode(bodyResult.body)) as unknown;
+    } catch {
       return {
         ok: false,
         problem: createAnalysisProblem("invalid_input", "Invalid JSON body."),
@@ -240,6 +156,17 @@ export async function parseAnalysisInput(request: Request): Promise<
       return {
         ok: false,
         problem: createAnalysisProblem("invalid_input", "leaseText must be a string."),
+      };
+    }
+
+    const stateCode = parseRequestedState((parsed as { stateCode?: unknown }).stateCode);
+    if (!stateCode) {
+      return {
+        ok: false,
+        problem: createAnalysisProblem(
+          "invalid_input",
+          "Choose the state where the rental property is located before starting analysis.",
+        ),
       };
     }
 
@@ -270,7 +197,7 @@ export async function parseAnalysisInput(request: Request): Promise<
 
     return {
       ok: true,
-      input: { kind: "text", leaseText: normalizedText, fileName },
+      input: { kind: "text", leaseText: normalizedText, fileName, stateCode },
       fileSizeBytes: Buffer.byteLength(normalizedText, "utf8"),
     };
   }
@@ -285,26 +212,21 @@ export async function parseAnalysisInput(request: Request): Promise<
     };
   }
 
+  const bodyResult = await readRequestBody(request, ANALYSIS_LIMITS.maxMultipartRequestBytes);
+  if (!bodyResult.ok) return bodyResult;
+
   let formData: FormData;
   try {
-    formData = await createLimitedRequest(
-      request,
-      ANALYSIS_LIMITS.maxPdfBytes + ANALYSIS_LIMITS.maxMultipartOverheadBytes,
-    ).formData();
-  } catch (error) {
-    if (isRequestBodyTooLargeError(error)) {
-      return {
-        ok: false,
-        problem: createAnalysisProblem(
-          "payload_too_large",
-          "Multipart request body is too large.",
-          { limit: error.limit, actual: error.actual },
-        ),
-      };
-    }
+    const boundedRequest = new Request(request.url, {
+      method: request.method,
+      headers: request.headers,
+      body: new Blob([bodyResult.body.slice().buffer as ArrayBuffer]),
+    });
+    formData = await boundedRequest.formData();
+  } catch {
     return {
       ok: false,
-      problem: createAnalysisProblem("invalid_input", "Invalid multipart request body."),
+      problem: createAnalysisProblem("invalid_input", "Invalid multipart form body."),
     };
   }
   const file = formData.get("file");
@@ -332,6 +254,16 @@ export async function parseAnalysisInput(request: Request): Promise<
 
   const fileName = (file as unknown as { name?: string }).name ?? "uploaded.pdf";
   const contentType = file.type || null;
+  const stateCode = parseRequestedState(formData.get("stateCode"));
+  if (!stateCode) {
+    return {
+      ok: false,
+      problem: createAnalysisProblem(
+        "invalid_input",
+        "Choose the state where the rental property is located before starting analysis.",
+      ),
+    };
+  }
   const bytes = await file.arrayBuffer();
 
   const pdfHeader = new Uint8Array(bytes.slice(0, 5));
@@ -354,7 +286,7 @@ export async function parseAnalysisInput(request: Request): Promise<
 
   return {
     ok: true,
-    input: { kind: "pdf", bytes, fileName, contentType },
+    input: { kind: "pdf", bytes, fileName, contentType, stateCode },
     fileSizeBytes: file.size,
   };
 }

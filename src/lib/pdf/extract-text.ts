@@ -9,6 +9,22 @@ export type ExtractedTextPage = {
   text: string;
 };
 
+export type PdfExtractionLimits = {
+  maxPages?: number;
+  maxChars?: number;
+};
+
+export class PdfExtractionLimitError extends Error {
+  constructor(
+    public readonly code: "too_many_pages" | "too_many_chars",
+    public readonly actual: number,
+    public readonly limit: number,
+  ) {
+    super(`PDF exceeds the configured ${code} limit.`);
+    this.name = "PdfExtractionLimitError";
+  }
+}
+
 let pdfWorkerConfigured = false;
 
 type PdfParseInstance = {
@@ -23,18 +39,6 @@ type PdfParseCtor = {
 };
 
 let cachedPdfParseCtor: PdfParseCtor | null = null;
-
-export class PdfPageLimitError extends Error {
-  readonly actual: number;
-  readonly limit: number;
-
-  constructor(actual: number, limit: number) {
-    super("PDF exceeds the configured page limit.");
-    this.name = "PdfPageLimitError";
-    this.actual = actual;
-    this.limit = limit;
-  }
-}
 
 async function ensurePdfRuntimePolyfills(): Promise<void> {
   const g = globalThis as Record<string, unknown>;
@@ -95,24 +99,34 @@ async function ensurePdfWorkerConfigured(): Promise<void> {
   pdfWorkerConfigured = true;
 }
 
-export async function extractPdfTextPages(arrayBuffer: ArrayBuffer): Promise<ExtractedTextPage[]> {
+export async function extractPdfTextPages(
+  arrayBuffer: ArrayBuffer,
+  limits: PdfExtractionLimits = ANALYSIS_LIMITS,
+): Promise<ExtractedTextPage[]> {
   await ensurePdfWorkerConfigured();
 
   const PDFParse = await getPdfParseCtor();
   const parser = new PDFParse({ data: Buffer.from(arrayBuffer) });
+  const maxPages = limits.maxPages ?? ANALYSIS_LIMITS.maxPages;
+  const maxChars = limits.maxChars ?? ANALYSIS_LIMITS.maxChars;
 
   try {
     const info = await parser.getInfo();
     const totalPages = info.total;
 
-    if (totalPages > ANALYSIS_LIMITS.maxPages) {
-      throw new PdfPageLimitError(totalPages, ANALYSIS_LIMITS.maxPages);
+    if (totalPages > maxPages) {
+      throw new PdfExtractionLimitError("too_many_pages", totalPages, maxPages);
     }
 
     const pages: ExtractedTextPage[] = [];
+    let totalChars = 0;
     for (let pageNumber = 1; pageNumber <= totalPages; pageNumber++) {
       const pageText = await parser.getText({ partial: [pageNumber] });
       const text = normalizeLeasePageText(pageText.text);
+      totalChars += text.length;
+      if (totalChars > maxChars) {
+        throw new PdfExtractionLimitError("too_many_chars", totalChars, maxChars);
+      }
       pages.push({ page: pageNumber, text });
     }
 

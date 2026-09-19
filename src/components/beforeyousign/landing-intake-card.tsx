@@ -3,6 +3,7 @@
 import { UploadLeaseCta } from "@/components/beforeyousign/upload-lease-cta";
 import { PasteTextDialog } from "@/components/beforeyousign/paste-text-dialog";
 import { SampleLeaseCta } from "@/components/beforeyousign/sample-lease-cta";
+import { STATE_OPTIONS, type StateCode } from "@/lib/jurisdiction/states";
 import { useRef } from "react";
 
 export type IntakeTab = "upload" | "paste" | "sample";
@@ -20,6 +21,8 @@ type LandingIntakeCardProps = {
   pasteOpenRequestVersion?: number;
   activeTab: IntakeTab;
   onTabChange: (tab: IntakeTab) => void;
+  stateCode: StateCode;
+  onStateChange: (stateCode: StateCode) => void;
 };
 
 export function LandingIntakeCard({
@@ -29,6 +32,8 @@ export function LandingIntakeCard({
   pasteOpenRequestVersion = 0,
   activeTab,
   onTabChange,
+  stateCode,
+  onStateChange,
 }: LandingIntakeCardProps) {
   const tabRefs = useRef<Record<IntakeTab, HTMLButtonElement | null>>({
     upload: null,
@@ -49,6 +54,28 @@ export function LandingIntakeCard({
       <div className="space-y-1 text-center lg:text-left">
         <h2 className="font-[family-name:var(--font-headline)] text-2xl font-bold text-foreground">Review a lease</h2>
         <p className="text-sm text-muted-foreground">Upload a PDF, paste text, or run the sample lease.</p>
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="lease-state" className="text-sm font-semibold text-foreground">
+          Rental property state
+        </label>
+        <select
+          id="lease-state"
+          value={stateCode}
+          onChange={(event) => onStateChange(event.target.value as StateCode)}
+          className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-primary/30"
+        >
+          {STATE_OPTIONS.map((state) => (
+            <option key={state.code} value={state.code}>
+              {state.name}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          State-specific renter guidance is currently available for Texas. Other states receive general lease review
+          only.
+        </p>
       </div>
 
       <div className="flex rounded-full bg-muted p-1" role="tablist" aria-label="Lease intake options">

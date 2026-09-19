@@ -2,19 +2,20 @@ import type { BeforeYouSignReport } from "@/lib/analysis/schema";
 import type { AnalysisMode } from "@/lib/analysis/pipeline/types";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 import { FIXED_REPORT_DISCLAIMER } from "@/lib/public-copy";
-import { displayFindingProvenance, displayReviewPriority } from "@/lib/display-labels";
+import { displayFindingProvenance, displayReviewPriority, displaySeverity } from "@/lib/display-labels";
 import { formatAnalysisModeLabel } from "@/lib/analysis-mode-labels";
 import { isClickableGroundedEvidence } from "@/lib/analysis/evidence-click";
+import { getStateGuidanceStatus, getStateName, type StateCode, type StateGuidanceStatus } from "@/lib/jurisdiction/states";
 
 function safeText(value: string | null | undefined): string {
   if (value == null) return "";
   return String(value);
 }
 
-function formatEvidence(ev: { page: number; quote: string; evidenceId?: string }): string {
+function formatEvidence(ev: { page: number; quote: string; evidenceId: string }): string {
   const page = `p. ${ev.page}`;
-  const id = ev.evidenceId ? ` [${escapeMd(ev.evidenceId)}]` : "";
-  const quote = escapeMd(safeText(ev.quote).replace(/\s+/g, " ").trim().slice(0, 160));
+  const id = ` [${ev.evidenceId}]`;
+  const quote = safeText(ev.quote).replace(/\s+/g, " ").trim().slice(0, 160);
   return `${page}${id}: "${quote}"`;
 }
 
@@ -44,9 +45,19 @@ export function buildReportMarkdown(input: {
   mode?: AnalysisMode;
   deterministicRiskBand?: "low" | "medium" | "high";
   deterministicRiskReasons?: string[];
+  stateCode?: StateCode;
+  stateGuidance?: StateGuidanceStatus;
 }): string {
-  const { report, texasRenterFindings, fileName, mode, deterministicRiskBand, deterministicRiskReasons } =
-    input;
+  const {
+    report,
+    texasRenterFindings,
+    fileName,
+    mode,
+    deterministicRiskBand,
+    deterministicRiskReasons,
+    stateCode = "TX",
+    stateGuidance = getStateGuidanceStatus(stateCode),
+  } = input;
   const lines: string[] = [
     "# BeforeYouSign — Lease analysis report",
     "",
@@ -120,7 +131,7 @@ export function buildReportMarkdown(input: {
   lines.push("## Terms to review", "");
   if (report.potentialRedFlags.length) {
     report.potentialRedFlags.forEach((f) => {
-      lines.push(`- **${escapeMd(safeText(f.title))}** (${f.severity})`);
+      lines.push(`- **${escapeMd(safeText(f.title))}** (${displaySeverity(f.severity)})`);
       lines.push(`  - Origin: ${displayFindingProvenance(f.provenance)}`);
       if (f.explanation) lines.push(`  - ${escapeMd(safeText(f.explanation))}`);
       if (f.whyItMatters) lines.push(`  - Why it matters: ${escapeMd(safeText(f.whyItMatters))}`);
@@ -149,22 +160,27 @@ export function buildReportMarkdown(input: {
   }
   lines.push("");
 
-  lines.push("## Texas renter check", "");
-  if (texasRenterFindings.length) {
-    texasRenterFindings.forEach((f) => {
-      lines.push(`- **${escapeMd(safeText(f.topicLabel))}**`);
-      lines.push(`  - ${escapeMd(safeText(f.questionToAsk))}`);
-      lines.push(
-        `  - Lease quote (p. ${f.page}): "${escapeMd(safeText(f.leaseQuote).replace(/\s+/g, " ").trim().slice(0, 160))}"`,
-      );
-      if (f.sourceUrl) lines.push(`  - Source: ${escapeMd(f.sourceTitle ?? f.sourceUrl)}`);
-      if (f.sourceReviewedAt) {
-        lines.push(`  - Source last reviewed: ${escapeMd(f.sourceReviewedAt)}`);
-      }
-      if (f.sourceFreshnessWarning) lines.push(`  - Source note: ${escapeMd(f.sourceFreshnessWarning)}`);
-    });
+  if (stateGuidance === "supported") {
+    lines.push(`## ${getStateName(stateCode)} renter check`, "");
+    if (texasRenterFindings.length) {
+      texasRenterFindings.forEach((f) => {
+        lines.push(`- **${escapeMd(safeText(f.topicLabel))}**`);
+        lines.push(`  - ${escapeMd(safeText(f.questionToAsk))}`);
+        lines.push(
+          `  - Lease quote (p. ${f.page}): "${escapeMd(safeText(f.leaseQuote).replace(/\s+/g, " ").trim().slice(0, 160))}"`,
+        );
+        if (f.sourceUrl) {
+          lines.push(`  - Source: ${escapeMd(f.sourceTitle ?? f.sourceUrl)}`);
+        }
+      });
+    } else {
+      lines.push(`- No ${getStateName(stateCode)} renter check topics were matched in this lease.`);
+    }
   } else {
-    lines.push("- No Texas renter check topics were matched in this lease.");
+    lines.push("## State-specific guidance", "");
+    lines.push(
+      `- State-specific renter guidance is not currently available for ${getStateName(stateCode)}. This report contains general lease review only.`,
+    );
   }
   lines.push("");
 

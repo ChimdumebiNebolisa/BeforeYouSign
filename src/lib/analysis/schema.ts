@@ -1,5 +1,3 @@
-import { parseGeminiModelJson } from "@/lib/analysis/model-json";
-
 export type RiskLevel = "low" | "medium" | "high";
 
 export type SupportStatus = "grounded" | "unknown" | "unsupported";
@@ -28,7 +26,7 @@ export type FindingCategory =
 
 export type FindingSeverity = "minor" | "moderate" | "critical";
 
-export type FindingProvenance = "deterministic" | "model" | "combined";
+export type FindingProvenance = "deterministic";
 
 export type Finding = {
   id: string;
@@ -71,12 +69,11 @@ const FINDING_CATEGORIES = new Set<FindingCategory>([
 ]);
 
 const SEVERITIES = new Set<FindingSeverity>(["minor", "moderate", "critical"]);
-const FINDING_PROVENANCE = new Set<FindingProvenance>(["deterministic", "model", "combined"]);
+const FINDING_PROVENANCE = new Set<FindingProvenance>(["deterministic"]);
 
 function isNonEmptyString(v: unknown): v is string {
   return typeof v === "string" && v.trim().length > 0;
 }
-
 function isRiskLevel(v: unknown): v is RiskLevel {
   return v === "low" || v === "medium" || v === "high";
 }
@@ -138,7 +135,6 @@ function parseFinding(v: unknown): Finding | null {
     evidence,
   };
 }
-
 function parseLabeledRows(v: unknown): { label: string; value: string; evidence?: EvidenceRef[] }[] | null {
   if (!Array.isArray(v)) return null;
   const out: { label: string; value: string; evidence?: EvidenceRef[] }[] = [];
@@ -228,9 +224,4 @@ export function parseBeforeYouSignReportJson(raw: unknown): BeforeYouSignReport 
     missingOrUnclear,
     disclaimer: o.disclaimer.trim(),
   };
-}
-
-export function tryParseModelJson(text: string): unknown | null {
-  const parsed = parseGeminiModelJson(text);
-  return parsed.ok ? parsed.value : null;
 }

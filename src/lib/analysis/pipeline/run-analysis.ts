@@ -1,12 +1,10 @@
 import { analyzeDocument } from "@/lib/analysis/pipeline/analyze-document";
 import { assembleSuccessResponse } from "@/lib/analysis/pipeline/assemble-response";
 import { runDeterministicAnalysis } from "@/lib/analysis/pipeline/deterministic";
-import { createDefaultModelAnalyzer } from "@/lib/analysis/pipeline/model-analyzer";
-import { shouldUseModelContribution } from "@/lib/rollout/flags";
+import { createRuleOnlyAnalyzer } from "@/lib/analysis/pipeline/rule-only-analyzer";
 import type {
+  AnalysisEngine,
   AnalysisResponse,
-  ModelAnalyzer,
-  ModelRetryInput,
   PdfExtractor,
 } from "@/lib/analysis/pipeline/types";
 import {
@@ -21,33 +19,12 @@ import { emitSafeAnalysisEvent } from "@/lib/observability/safe-analysis-events"
 export async function runAnalysisPipeline(input: {
   request: Request;
   extractPdfTextPages: PdfExtractor;
-  modelAnalyzer?: ModelAnalyzer;
+  analyzer?: AnalysisEngine;
 }): Promise<{ response: AnalysisResponse; httpStatus: number }> {
   const requestId = createRequestId();
   const clientKey = getClientKey(input.request);
   const startedAt = Date.now();
-  let modelAnalyzer: ModelAnalyzer = input.modelAnalyzer ?? createDefaultModelAnalyzer();
-
-  if (!shouldUseModelContribution() && !input.modelAnalyzer) {
-    modelAnalyzer = async ({ document, deterministic }) => {
-      const { createEvidenceRegistry } = await import("@/lib/evidence/registry");
-      const { buildRuleOnlyFallbackReport } = await import("@/lib/analysis/fallback-report");
-      const registry = createEvidenceRegistry(document.documentId, document.pages);
-      return {
-        report: buildRuleOnlyFallbackReport({
-          documentId: document.documentId,
-          pages: document.pages,
-          ruleBasedFindings: deterministic.ruleBasedFindings,
-          deterministicRisk: deterministic.deterministicRisk,
-          evidenceRegistry: registry,
-        }),
-        reportError: null,
-        mode: "rules_only",
-        reportDebug: null,
-        evidenceIndex: (await import("@/lib/evidence/index")).buildEvidenceIndex(registry),
-      };
-    };
-  }
+  const analyzer: AnalysisEngine = input.analyzer ?? createRuleOnlyAnalyzer();
 
   const slotProblem = acquireClientSlot(clientKey);
   if (slotProblem) {
@@ -60,6 +37,9 @@ export async function runAnalysisPipeline(input: {
         error: {
           code: slotProblem.code,
           message: slotProblem.message,
+          ...(slotProblem.retryAfterSeconds !== undefined
+            ? { retryAfterSeconds: slotProblem.retryAfterSeconds }
+            : {}),
         },
       },
     };
@@ -118,9 +98,12 @@ export async function runAnalysisPipeline(input: {
       };
     }
 
-    const deterministic = runDeterministicAnalysis(documentResult.document.pages);
+    const deterministic = runDeterministicAnalysis(
+      documentResult.document.pages,
+      parsed.input.stateCode,
+    );
 
-    const model = await modelAnalyzer({
+    const engine = await analyzer({
       document: documentResult.document,
       deterministic,
     });
@@ -128,11 +111,9 @@ export async function runAnalysisPipeline(input: {
     emitSafeAnalysisEvent({
       requestId,
       stage: "completed",
-      mode: model.mode,
+      mode: engine.mode,
       pageCount: documentResult.document.pages.length,
       totalChars: documentResult.document.extraction.totalChars,
-      droppedClaims: model.groundingSummary?.droppedClaims,
-      groundedClaims: model.groundingSummary?.groundedClaims,
       durationMs: Date.now() - startedAt,
     });
 
@@ -140,12 +121,13 @@ export async function runAnalysisPipeline(input: {
       httpStatus: 200,
       response: assembleSuccessResponse({
         requestId,
-        fileName: parsed.input.kind === "text" ? parsed.input.fileName : parsed.input.fileName,
+        fileName: parsed.input.fileName,
         fileSizeBytes: parsed.fileSizeBytes,
         contentType: documentResult.contentType,
+        stateCode: parsed.input.stateCode,
         document: documentResult.document,
         deterministic,
-        model,
+        engine,
       }),
     };
   } catch {
@@ -162,108 +144,6 @@ export async function runAnalysisPipeline(input: {
         requestId,
         stage: "failed",
         error: "We hit an unexpected server error while processing this request. Please retry.",
-      },
-    };
-  } finally {
-    releaseClientSlot(clientKey);
-  }
-}
-
-export async function runModelRetryPipeline(input: {
-  request: Request;
-  retry: ModelRetryInput;
-  modelAnalyzer?: ModelAnalyzer;
-}): Promise<{ response: AnalysisResponse; httpStatus: number }> {
-  const requestId = createRequestId();
-  const clientKey = getClientKey(input.request);
-  const startedAt = Date.now();
-  let modelAnalyzer: ModelAnalyzer = input.modelAnalyzer ?? createDefaultModelAnalyzer();
-
-  if (!shouldUseModelContribution() && !input.modelAnalyzer) {
-    modelAnalyzer = async ({ document, deterministic }) => {
-      const { createEvidenceRegistry } = await import("@/lib/evidence/registry");
-      const { buildRuleOnlyFallbackReport } = await import("@/lib/analysis/fallback-report");
-      const { buildEvidenceIndex } = await import("@/lib/evidence/index");
-      const registry = createEvidenceRegistry(document.documentId, document.pages);
-      return {
-        report: buildRuleOnlyFallbackReport({
-          documentId: document.documentId,
-          pages: document.pages,
-          ruleBasedFindings: deterministic.ruleBasedFindings,
-          deterministicRisk: deterministic.deterministicRisk,
-          evidenceRegistry: registry,
-        }),
-        reportError: null,
-        mode: "rules_only",
-        reportDebug: null,
-        evidenceIndex: buildEvidenceIndex(registry),
-      };
-    };
-  }
-
-  const slotProblem = acquireClientSlot(clientKey);
-  if (slotProblem) {
-    return {
-      httpStatus: slotProblem.httpStatus,
-      response: {
-        ok: false,
-        requestId,
-        stage: "validating_input",
-        error: {
-          code: slotProblem.code,
-          message: slotProblem.message,
-        },
-      },
-    };
-  }
-
-  try {
-    const document = {
-      documentId: input.retry.documentId,
-      pages: input.retry.pages,
-      extraction: input.retry.extraction,
-    };
-
-    const deterministic = runDeterministicAnalysis(document.pages);
-    const model = await modelAnalyzer({ document, deterministic });
-
-    emitSafeAnalysisEvent({
-      requestId,
-      stage: "completed",
-      mode: model.mode,
-      pageCount: document.pages.length,
-      totalChars: document.extraction.totalChars,
-      droppedClaims: model.groundingSummary?.droppedClaims,
-      groundedClaims: model.groundingSummary?.groundedClaims,
-      durationMs: Date.now() - startedAt,
-    });
-
-    return {
-      httpStatus: 200,
-      response: assembleSuccessResponse({
-        requestId,
-        fileName: input.retry.fileName,
-        fileSizeBytes: input.retry.fileSizeBytes,
-        contentType: input.retry.contentType,
-        document,
-        deterministic,
-        model,
-      }),
-    };
-  } catch {
-    emitSafeAnalysisEvent({
-      requestId,
-      stage: "failed",
-      failureCode: "analysis_failed",
-      durationMs: Date.now() - startedAt,
-    });
-    return {
-      httpStatus: 500,
-      response: {
-        ok: false,
-        requestId,
-        stage: "failed",
-        error: "We hit an unexpected server error while retrying analysis. Please try again.",
       },
     };
   } finally {
