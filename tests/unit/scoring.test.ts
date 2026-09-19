@@ -95,4 +95,45 @@ describe("computeDeterministicLeaseRisk", () => {
 
     expect(risk.reasons).toContain("Landlord entry language may be broad.");
   });
+
+  it("does not combine an unrelated percentage with late or rent language", () => {
+    const risk = computeDeterministicLeaseRisk({
+      fullText: "Renter's insurance receives a 20% discount. Rent is due monthly. Late correspondence is logged.",
+      findings: [],
+      unclearPhrases: [],
+    });
+
+    expect(risk.reasons).not.toContain("Late-fee terms may add costs quickly if rent is late.");
+    expect(risk.band).toBe("low");
+  });
+
+  it.each([
+    "A late fee equal to 10% of past-due rent applies after five days.",
+    "A late fee of $25 per day applies until rent is paid.",
+  ])("scores an aggressive late fee within one clause: %s", (quote) => {
+    const risk = computeDeterministicLeaseRisk({
+      fullText: quote,
+      findings: [{ category: "fees", page: 1, quote }],
+      unclearPhrases: [],
+    });
+
+    expect(risk.reasons).toContain("Late-fee terms may add costs quickly if rent is late.");
+    expect(risk.band).toBe("medium");
+  });
+
+  it("evaluates utility ambiguity within each utility finding", () => {
+    const vague = computeDeterministicLeaseRisk({
+      fullText: "Utilities may be allocated by management. Elsewhere, the landlord pays pool water costs.",
+      findings: [{ category: "utilities", page: 1, quote: "Utilities may be allocated by management." }],
+      unclearPhrases: [],
+    });
+    const assigned = computeDeterministicLeaseRisk({
+      fullText: "All utilities are paid by Tenant.",
+      findings: [{ category: "utilities", page: 1, quote: "All utilities are paid by Tenant." }],
+      unclearPhrases: [],
+    });
+
+    expect(vague.reasons).toContain("Utility responsibilities are not clearly split.");
+    expect(assigned.reasons).not.toContain("Utility responsibilities are not clearly split.");
+  });
 });

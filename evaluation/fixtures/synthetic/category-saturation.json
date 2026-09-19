@@ -1,0 +1,25 @@
+{
+  "id": "synthetic-category-saturation",
+  "text": "Multiple fee clauses plus renewal, notice, and utility terms.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Application fee is $25. Processing fee is $30. Parking fee is $50 per month. Pet fee is $200. Cleaning fee is $150. Automatic renewal applies for another term unless Tenant gives written notice at least 60 days before expiration. Utilities may be allocated by management."
+    }
+  ],
+  "annotations": [
+    { "page": 1, "start": 0, "end": 22, "category": "fees", "text": "Application fee is $25" },
+    { "page": 1, "start": 24, "end": 45, "category": "fees", "text": "Processing fee is $30" },
+    { "page": 1, "start": 47, "end": 75, "category": "fees", "text": "Parking fee is $50 per month" },
+    { "page": 1, "start": 77, "end": 92, "category": "fees", "text": "Pet fee is $200" },
+    { "page": 1, "start": 94, "end": 114, "category": "fees", "text": "Cleaning fee is $150" },
+    { "page": 1, "start": 116, "end": 228, "category": "renewal", "text": "Automatic renewal applies for another term unless Tenant gives written notice at least 60 days before expiration" },
+    { "page": 1, "start": 179, "end": 210, "category": "notice", "text": "written notice at least 60 days" },
+    { "page": 1, "start": 230, "end": 270, "category": "utilities", "text": "Utilities may be allocated by management" }
+  ],
+  "expected": {
+    "ruleCategories": ["fees", "notice", "renewal", "utilities"],
+    "texasTopics": [],
+    "riskBand": "high"
+  }
+}

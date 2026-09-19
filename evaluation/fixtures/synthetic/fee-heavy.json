@@ -7,9 +7,16 @@
       "text": "Monthly rent is $1,800. Security deposit is $1,800. A late fee of $100 applies after five days. Tenant pays a $25 convenience fee for online payments and a $300 early termination charge."
     }
   ],
+  "annotations": [
+    { "page": 1, "start": 8, "end": 22, "category": "rent", "text": "rent is $1,800" },
+    { "page": 1, "start": 24, "end": 50, "category": "deposit", "text": "Security deposit is $1,800" },
+    { "page": 1, "start": 54, "end": 94, "category": "fees", "text": "late fee of $100 applies after five days" }
+  ],
   "expected": {
     "rentAmount": "$1,800",
     "depositAmount": "$1,800",
-    "topics": ["securityDeposit", "lateFees"]
+    "ruleCategories": ["rent", "deposit", "fees"],
+    "texasTopics": ["securityDeposit", "lateFees"],
+    "riskBand": "low"
   }
 }

@@ -31,6 +31,12 @@ describe("findRentSnippets", () => {
   it("returns empty for unrelated text", () => {
     expect(findRentSnippets([{ page: 1, text: "No money mentioned here." }])).toEqual([]);
   });
+
+  it("does not classify a recurring fee as base rent", () => {
+    expect(
+      findRentSnippets([{ page: 1, text: "Parking fee is $50 per month." }]),
+    ).toEqual([]);
+  });
 });
 
 describe("findDepositSnippets", () => {

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { POST as analyzePost } from "@/app/api/analyze/route";
-import { POST as retryPost } from "@/app/api/analyze/retry-model/route";
+import { ANALYSIS_LIMITS } from "@/lib/analysis/limits";
+import { parseAnalysisInput } from "@/lib/analysis/pipeline/validate-intake";
 
 function jsonRequest(url: string, body: unknown): Request {
   return new Request(url, {
@@ -11,15 +12,42 @@ function jsonRequest(url: string, body: unknown): Request {
   });
 }
 
-describe("analysis routes", () => {
-  it("removes the former AI retry endpoint", async () => {
-    const response = await retryPost(
-      jsonRequest("http://localhost/api/analyze/retry-model", { documentId: "removed" }),
+function pdfUploadRequest(size: number): Request {
+  const bytes = new Uint8Array(size);
+  bytes.set(new TextEncoder().encode("%PDF-"));
+  const formData = new FormData();
+  formData.append("file", new Blob([bytes], { type: "application/pdf" }), "lease.pdf");
+  formData.append("stateCode", "TX");
+  return new Request("http://localhost/api/analyze", { method: "POST", body: formData });
+}
+
+describe("analysis route hardening", () => {
+  it("accepts a PDF at the 4 MiB application limit", async () => {
+    const parsed = await parseAnalysisInput(pdfUploadRequest(ANALYSIS_LIMITS.maxPdfBytes));
+
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) expect(parsed.fileSizeBytes).toBe(ANALYSIS_LIMITS.maxPdfBytes);
+  });
+
+  it("rejects a PDF above the 4 MiB application limit", async () => {
+    const parsed = await parseAnalysisInput(pdfUploadRequest(ANALYSIS_LIMITS.maxPdfBytes + 1));
+
+    expect(parsed).toMatchObject({ ok: false, problem: { code: "payload_too_large", httpStatus: 413 } });
+  });
+
+  it("rejects an oversized multipart stream without a content-length header", async () => {
+    const response = await analyzePost(
+      new Request("http://localhost/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "multipart/form-data; boundary=streamed" },
+        body: "x".repeat(ANALYSIS_LIMITS.maxMultipartRequestBytes + 1),
+      }),
     );
 
-    expect(response.status).toBe(410);
+    expect(response.status).toBe(413);
     expect(await response.json()).toMatchObject({
-      error: expect.stringContaining("AI analysis has been removed"),
+      ok: false,
+      error: { code: "payload_too_large" },
     });
   });
 

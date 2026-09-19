@@ -5,7 +5,8 @@ import { acquireClientSlot, releaseClientSlot } from "@/lib/analysis/pipeline/va
 
 describe("ANALYSIS_LIMITS", () => {
   it("defines expected upload bounds", () => {
-    expect(ANALYSIS_LIMITS.maxPdfBytes).toBe(10 * 1024 * 1024);
+    expect(ANALYSIS_LIMITS.maxPdfBytes).toBe(4 * 1024 * 1024);
+    expect(ANALYSIS_LIMITS.maxMultipartRequestBytes).toBe(4 * 1024 * 1024 + 256 * 1024);
     expect(ANALYSIS_LIMITS.maxPages).toBe(100);
     expect(ANALYSIS_LIMITS.maxChars).toBe(120_000);
     expect(ANALYSIS_LIMITS.maxConcurrentAnalyses).toBe(4);

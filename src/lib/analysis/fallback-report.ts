@@ -57,6 +57,59 @@ function normalizeQuoteKey(text: string): string {
     .trim();
 }
 
+type RedFlagSeverity = "minor" | "moderate" | "critical";
+
+const RED_FLAG_SEVERITY_RANK: Record<RedFlagSeverity, number> = {
+  minor: 1,
+  moderate: 2,
+  critical: 3,
+};
+
+function findingSeverity(finding: RuleBasedFinding): RedFlagSeverity {
+  const quote = finding.quote;
+  const aggressiveLatePercentage =
+    finding.category === "fees" &&
+    /\blate\b/i.test(quote) &&
+    Array.from(quote.matchAll(/\b(\d+(?:\.\d+)?)\s*%/g)).some(
+      (match) => Number(match[1]) >= 10,
+    );
+  const dailyLateCharge =
+    finding.category === "fees" &&
+    /\blate\b/i.test(quote) &&
+    /\b(?:per|each)\s+day\b|\bdaily\b/i.test(quote);
+  const remainderOfRent =
+    finding.category === "fees" &&
+    /\bearly\s+terminat/i.test(quote) &&
+    /\bremainder\s+of\s+(?:the\s+)?rent\b/i.test(quote);
+
+  if (aggressiveLatePercentage || dailyLateCharge || remainderOfRent) return "critical";
+  if (finding.category === "fees" || finding.category === "notice") return "moderate";
+  if (finding.category === "renewal" && /\b(?:automatic|auto[\s-]?renew)/i.test(quote)) {
+    return "moderate";
+  }
+  if (
+    finding.category === "maintenance" &&
+    /\btenant\b/i.test(quote) &&
+    /\b(?:structural|hvac|plumbing|electrical|roof)\b/i.test(quote)
+  ) {
+    return "moderate";
+  }
+  if (
+    finding.category === "utilities" &&
+    !(
+      /\b(?:tenant|landlord)\b[^.]{0,200}\b(?:responsible(?:\s+for)?|pays?|shall\s+pay|must\s+pay)\b/i.test(
+        quote,
+      ) ||
+      /\b(?:utilities?|electric|gas|water|sewer|trash)\b[^.]{0,200}\b(?:paid\s+by|responsibility\s+of)\s+(?:the\s+)?(?:tenant|landlord)\b/i.test(
+        quote,
+      )
+    )
+  ) {
+    return "moderate";
+  }
+  return "minor";
+}
+
 function shortClause(text: string, maxChars: number): string {
   const normalized = text.replace(/\s+/g, " ").trim();
   if (normalized.length <= maxChars) return normalized;
@@ -485,35 +538,59 @@ export function buildRuleOnlyFallbackReport(input: {
     ...byCategory.utilities,
   ];
 
-  const seenFlagQuotes = new Set<string>();
-
-  const potentialRedFlags = redFlagCandidates
-    .filter((f) => {
-      const key = normalizeQuoteKey(f.quote);
-      if (seenFlagQuotes.has(key)) return false;
-      seenFlagQuotes.add(key);
-      return true;
-    })
-    .slice(0, 4)
-    .map((f, index) => {
-      const severity: "minor" | "moderate" | "critical" =
-        input.deterministicRisk.band === "high" && (f.category === "fees" || f.category === "renewal")
-          ? "critical"
-          : input.deterministicRisk.band === "medium"
-            ? "moderate"
-            : "minor";
-
+  const rankedCandidates = redFlagCandidates
+    .map((finding, sourceOrder) => {
+      const foundOffset = pageTexts.get(finding.page)?.indexOf(finding.quote) ?? -1;
       return {
-        id: `rule-flag-${index + 1}`,
-        category: categoryMap[f.category],
-        title: fallbackFlagTitle(f.category, f.quote),
-        severity,
-        provenance: "deterministic" as const,
-        explanation: fallbackFlagExplanation(f.category, f.quote),
-        whyItMatters: fallbackFlagWhyItMatters(f.category, f.quote),
-        evidence: toEvidence(input.evidenceRegistry, input.documentId, f, pageTexts),
+        finding,
+        severity: findingSeverity(finding),
+        sourceCategory: categoryMap[finding.category],
+        documentOffset: foundOffset >= 0 ? foundOffset : sourceOrder,
+        sourceOrder,
       };
-    });
+    })
+    .sort(
+      (a, b) =>
+        RED_FLAG_SEVERITY_RANK[b.severity] - RED_FLAG_SEVERITY_RANK[a.severity] ||
+        a.finding.page - b.finding.page ||
+        a.documentOffset - b.documentOffset ||
+        a.sourceOrder - b.sourceOrder,
+    );
+
+  const seenFlagQuotes = new Set<string>();
+  const uniqueRankedCandidates = rankedCandidates.filter(({ finding }) => {
+    const key = normalizeQuoteKey(finding.quote);
+    if (seenFlagQuotes.has(key)) return false;
+    seenFlagQuotes.add(key);
+    return true;
+  });
+
+  const selectedCandidates: typeof uniqueRankedCandidates = [];
+  const selectedCategories = new Set<(typeof uniqueRankedCandidates)[number]["sourceCategory"]>();
+  for (const candidate of uniqueRankedCandidates) {
+    if (selectedCategories.has(candidate.sourceCategory)) continue;
+    selectedCandidates.push(candidate);
+    selectedCategories.add(candidate.sourceCategory);
+    if (selectedCandidates.length === 4) break;
+  }
+  if (selectedCandidates.length < 4) {
+    for (const candidate of uniqueRankedCandidates) {
+      if (selectedCandidates.includes(candidate)) continue;
+      selectedCandidates.push(candidate);
+      if (selectedCandidates.length === 4) break;
+    }
+  }
+
+  const potentialRedFlags = selectedCandidates.map(({ finding, severity }, index) => ({
+    id: `rule-flag-${index + 1}`,
+    category: categoryMap[finding.category],
+    title: fallbackFlagTitle(finding.category, finding.quote),
+    severity,
+    provenance: "deterministic" as const,
+    explanation: fallbackFlagExplanation(finding.category, finding.quote),
+    whyItMatters: fallbackFlagWhyItMatters(finding.category, finding.quote),
+    evidence: toEvidence(input.evidenceRegistry, input.documentId, finding, pageTexts),
+  }));
 
   const questionsToAsk = Array.from(
     new Set([

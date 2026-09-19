@@ -25,12 +25,12 @@ PolicyInsight reference clone: `../policy-insight-reference` (read-only).
 | Deterministic rule-only fallback | `src/lib/analysis/fallback-report.ts` |
 | Input size validation | `src/lib/analysis/limits.ts`, `validate-intake.ts` |
 | Content-safe logging | `src/lib/observability/safe-analysis-events.ts` |
-| Legal reference verification | `scripts/verify-legal-references.mjs`, `texas-renter-references.ts` |
+| Legal-reference metadata verification | `scripts/verify-legal-metadata.mjs`, `texas-renter-references.ts` |
 | Full Markdown export | `src/lib/report-export.ts` |
 | Sample leases | `public/sample-leases/`, `public/samples/` |
 | Retired AI/model retry | Removed from the supported product path |
 | Error taxonomy (runtime) | `AnalysisProblemCode` in `limits.ts` |
-| OCR hook (deferred) | `src/lib/ocr/` |
+| OCR | Not implemented; scanned documents direct users to paste text |
 | Vitest unit + integration tests | `tests/unit/`, `tests/integration/` |
 
 ---

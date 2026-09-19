@@ -5,7 +5,7 @@ export const LANDING_PRIVACY_PROCESSING =
   "We do not save your lease or report after you close the page. Lease text is processed on our server for this one-time review.";
 
 export const UPLOAD_LIMITS_NOTE =
-  "PDF uploads are limited to 10 MB, 100 pages, and 120,000 extracted characters. Pasted text is limited to 120,000 characters.";
+  "PDF uploads are limited to 4 MB, 100 pages, and 120,000 extracted characters. Pasted text is limited to 120,000 characters.";
 
 export const PRIVACY_CONTINUE_LINE =
   "By continuing, you submit lease text for one-time analysis. Do not upload documents you are not comfortable processing through this tool.";

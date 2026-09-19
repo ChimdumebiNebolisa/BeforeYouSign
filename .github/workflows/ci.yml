@@ -9,17 +9,15 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    env:
-      BYS_MODEL_ENABLED: "0"
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install dependencies
@@ -40,8 +38,8 @@ jobs:
       - name: Deterministic evaluation
         run: npm run evaluate
 
-      - name: Verify legal references
-        run: npm run verify:legal
+      - name: Verify legal-reference metadata
+        run: npm run verify:legal-metadata
 
       - name: Build
         run: npm run build
@@ -70,8 +68,21 @@ jobs:
       - name: Validate support scripts parse
         run: |
           node --check scripts/phase2-scan-smoke.mjs
+          node --check scripts/smoke-test.mjs
+          node --check scripts/phase1-browser-qa.mjs
+          node --check scripts/phase2-browser-qa.mjs
           node --check scripts/run-scan-smoke.mjs
           node --check scripts/evaluate.mjs
-          node --check scripts/ai-smoke-test.mjs
           node --check scripts/run-browser-qa.mjs
-          node --check scripts/verify-legal-references.mjs
+          node --check scripts/verify-legal-metadata.mjs
+
+      - name: Upload browser test artifacts
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: browser-test-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
