@@ -311,7 +311,7 @@ export function LandingClient() {
               })()}
             <div className="mt-2 flex min-w-0 flex-col gap-8 lg:flex-row lg:items-start">
               {uploadReceipt.extractedPages && uploadReceipt.extractedPages.length > 0 ? (
-                <div className="w-full min-w-0 lg:sticky lg:top-32 lg:w-[52%] lg:max-w-[52%] lg:shrink-0">
+                <div className="w-full min-w-0 lg:sticky lg:top-32 lg:w-[70%] lg:max-w-[70%] lg:shrink-0">
                   <LeaseTextViewer
                     pages={uploadReceipt.extractedPages}
                     scrollToPage={viewerTargetPage}
