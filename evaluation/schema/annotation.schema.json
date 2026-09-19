@@ -1,40 +1,64 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "BeforeYouSignAnnotation",
+  "title": "BeforeYouSignEvaluationFixture",
   "type": "object",
-  "required": ["fixtureId", "license", "consent", "pages"],
+  "required": ["id", "text", "pages", "annotations", "expected"],
+  "additionalProperties": false,
   "properties": {
-    "fixtureId": { "type": "string" },
-    "license": { "type": "string" },
-    "consent": { "type": "string" },
-    "annotator": { "type": "string" },
-    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "text": { "type": "string" },
     "pages": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "type": "object",
         "required": ["page", "text"],
+        "additionalProperties": false,
         "properties": {
           "page": { "type": "integer", "minimum": 1 },
           "text": { "type": "string" }
         }
       }
     },
-    "spans": {
+    "annotations": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["page", "start", "end", "category", "text"],
+        "additionalProperties": false,
         "properties": {
           "page": { "type": "integer", "minimum": 1 },
           "start": { "type": "integer", "minimum": 0 },
-          "end": { "type": "integer", "minimum": 0 },
-          "category": { "type": "string" },
-          "text": { "type": "string" },
-          "amount": { "type": "string" },
-          "deadlineDays": { "type": "integer" },
-          "omission": { "type": "boolean" }
+          "end": { "type": "integer", "minimum": 1 },
+          "category": {
+            "enum": ["rent", "deposit", "fees", "notice", "renewal", "maintenance", "utilities"]
+          },
+          "text": { "type": "string", "minLength": 1 }
         }
+      }
+    },
+    "expected": {
+      "type": "object",
+      "required": ["ruleCategories", "texasTopics"],
+      "additionalProperties": false,
+      "properties": {
+        "rentAmount": { "type": "string" },
+        "depositAmount": { "type": "string" },
+        "ruleCategories": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["rent", "deposit", "fees", "notice", "renewal", "maintenance", "utilities"]
+          }
+        },
+        "texasTopics": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["securityDeposit", "repairs", "lateFees", "lockoutOrUtilities", "landlordEntry"]
+          }
+        },
+        "riskBand": { "enum": ["low", "medium", "high"] }
       }
     }
   }

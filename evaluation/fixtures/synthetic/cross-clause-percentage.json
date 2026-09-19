@@ -1,0 +1,16 @@
+{
+  "id": "synthetic-cross-clause-percentage",
+  "text": "Unrelated percentage and timing language must not combine into a late-fee signal.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Renter's insurance receives a 20% discount. Rent is due monthly. Late correspondence is logged."
+    }
+  ],
+  "annotations": [],
+  "expected": {
+    "ruleCategories": [],
+    "texasTopics": [],
+    "riskBand": "low"
+  }
+}

@@ -168,7 +168,7 @@ export function findRenewalSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\bautomatic\s+renewal\b[^.\n]{0,200}/gi,
     /\bmonth-?to-?month\b[^.\n]{0,200}/gi,
-    /\b(?:auto-?)?renew(?:s|al|ed)?\b[^.\n]{0,200}\b(?:terms?|lease|agreement)\b/gi,
+    /\b(?:(?:automatically|auto-?)\s*)?renew(?:s|al|ed)?\b[^.\n]{0,200}\b(?:terms?|lease|agreement)\b/gi,
     /\b(?:extends?|extension)\b[^.\n]{0,160}\b(?:automatically|unless)\b/gi,
   ];
 
@@ -265,6 +265,10 @@ export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
       while ((match = pattern.exec(text)) !== null) {
         const quote = match[0].replace(/\s+/g, " ").trim();
         if (quote.length < 8) continue;
+        const previousPeriod = text.lastIndexOf(".", Math.max(0, match.index - 1));
+        const previousLineBreak = text.lastIndexOf("\n", Math.max(0, match.index - 1));
+        const clausePrefix = text.slice(Math.max(previousPeriod, previousLineBreak) + 1, match.index);
+        if (!/\brent\b/i.test(quote) && /\b(?:fee|charge|deposit)\b/i.test(clausePrefix)) continue;
         if (/\bpet[-\s]+rent\b|\bper\s+(?:approved\s+)?pets?\b/i.test(quote)) continue;
         matches.push({ page: page.page, quote });
       }

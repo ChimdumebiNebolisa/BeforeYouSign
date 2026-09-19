@@ -2,8 +2,10 @@ import { chromium, devices } from "playwright";
 import fs from "fs";
 import path from "path";
 
-const BASE = "http://localhost:3000";
-const OUT = path.join(process.cwd(), "qa-screenshots", "phase1");
+const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
+const OUT = path.resolve(
+  process.env.QA_OUTPUT_DIR ?? path.join(process.cwd(), "test-results", "browser-qa", "phase1"),
+);
 
 const BANNED = [
   /\brisk score\b/i,

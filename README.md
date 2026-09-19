@@ -43,10 +43,10 @@ cd BeforeYouSign
 ### 2. Install dependencies
 
 ```bash
-npm install
+npm ci
 ```
 
-Use Node.js 22 or newer. CI runs Node.js 22.
+Use Node.js 24. Local development, CI, and Vercel use the version declared in `.nvmrc`.
 
 ### 3. Add environment variables
 
@@ -58,7 +58,6 @@ Create a `.env.local` file in the root (you can start from `.env.local.example`)
 Environment variables used:
 
 ```md
-BYS_OCR_ENABLED: Reserved for a configured OCR adapter; the repository currently ships no OCR provider.
 BYS_TRUST_PROXY_HEADERS: Set to 1 only when the deployment proxy overwrites forwarding headers; otherwise trusted per-client limits are disabled and the global in-process cap still applies.
 BYS_ANALYSIS_EVENTS: Set to 0 to disable metadata-only analysis event logs.
 ```
@@ -189,7 +188,7 @@ flowchart LR
 
 ## Verification
 
-Pull requests and pushes to `main` run CI for lint, typecheck, unit tests, coverage, deterministic evaluation, legal references, a production build, and Playwright browser tests against that production build. The separate QA syntax workflow also verifies the committed QA scripts parse successfully:
+Pull requests and pushes to `main` run one required `ci` check covering a clean install, lint, typecheck, unit tests, coverage, annotated deterministic evaluation, legal-reference metadata, a production build, Playwright browser tests, QA scripts, smoke tests, and a production dependency audit. The same workflow verifies committed support scripts parse successfully:
 
 ```bash
 node --check scripts/phase2-scan-smoke.mjs
@@ -204,10 +203,12 @@ Run unit tests and coverage (critical modules):
 npm test
 npm run test:coverage
 npm run evaluate
-npm run verify:legal
+npm run verify:legal-metadata
 npm run build
 npm run test:e2e
 ```
+
+`verify:legal-metadata` checks reference IDs, review dates, URL syntax, and disclaimer metadata; it does not validate legal meaning. Complete the quarterly source review in [LEGAL_SOURCE_REVIEW.md](LEGAL_SOURCE_REVIEW.md) separately.
 
 Run static linting:
 
@@ -234,7 +235,7 @@ npm run qa:phase1
 npm run qa:phase2
 ```
 
-The browser QA scripts use Playwright and write screenshots under `qa-screenshots/` for visual review.
+The browser QA scripts use Playwright and write ignored screenshots under `test-results/browser-qa/`. CI uploads failed browser artifacts for seven days.
 
 ---
 
@@ -243,5 +244,6 @@ The browser QA scripts use Playwright and write screenshots under `qa-screenshot
 - **No user accounts or persisted reports** — refreshing loses in-session results unless the user runs analysis again.
 - **Single synchronous HTTP request** — very large PDFs or slow extraction may hit hosting timeouts (`maxDuration` on the route is capped for serverless-style deployments).
 - **PDF text extraction is not OCR** — scanned image-only PDFs may yield little or no extractable text.
+- **PDF uploads are capped at 4 MiB** — this leaves multipart overhead below Vercel's 4.5 MB Function payload limit.
 - **Evidence highlighting** uses extracted-text offsets and quote matching; minor mismatches between source text and normalized quotes can prevent a highlight.
 - **No persistent report recovery or background jobs** — analysis is a single synchronous request and results remain in browser state only.

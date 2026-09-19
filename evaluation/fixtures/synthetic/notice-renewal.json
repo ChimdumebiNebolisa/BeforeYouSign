@@ -7,7 +7,13 @@
       "text": "The lease automatically renews for another twelve-month term unless tenant gives written notice at least 60 days before expiration. Notice must be delivered by certified mail."
     }
   ],
+  "annotations": [
+    { "page": 1, "start": 10, "end": 60, "category": "renewal", "text": "automatically renews for another twelve-month term" },
+    { "page": 1, "start": 81, "end": 112, "category": "notice", "text": "written notice at least 60 days" }
+  ],
   "expected": {
-    "topics": []
+    "ruleCategories": ["notice", "renewal"],
+    "texasTopics": [],
+    "riskBand": "medium"
   }
 }

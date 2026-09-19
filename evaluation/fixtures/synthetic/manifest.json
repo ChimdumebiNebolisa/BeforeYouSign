@@ -40,6 +40,22 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Fictional lease with ambiguous clauses"
+    },
+    {
+      "id": "synthetic-cross-clause-percentage",
+      "path": "synthetic/cross-clause-percentage.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "adversarial",
+      "description": "Unrelated percentage and timing language that must not combine into a fee signal"
+    },
+    {
+      "id": "synthetic-category-saturation",
+      "path": "synthetic/category-saturation.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "adversarial",
+      "description": "Many fee clauses plus other categories used to verify diverse prioritization"
     }
   ]
 }

@@ -18,21 +18,31 @@ export function computeDeterministicLeaseRisk(input: {
   unclearPhrases: { page: number; quote: string }[];
 }): DeterministicLeaseRisk {
   const text = input.fullText;
-  const lower = text.toLowerCase();
   let score = 0;
   const reasons: string[] = [];
 
   const renewalAuto = input.findings.some(
-    (f) => f.category === "renewal" && /\b(?:automatic|auto[\s-]?renew(?:al)?)\b/i.test(f.quote),
+    (f) =>
+      f.category === "renewal" &&
+      /\b(?:automatic(?:ally)?|auto[\s-]?renew(?:al)?)\b/i.test(f.quote),
   );
   if (renewalAuto) {
     score += 2;
     reasons.push("This lease may renew automatically unless notice is given.");
   }
 
-  const aggressiveLate =
-    /\b(?:10|15|20)\s*%/i.test(text) && /\b(?:late|rent)\b/i.test(text);
-  const dailyLate = /\bper\s+day\b/i.test(text) && /\b(?:late|fee)\b/i.test(text);
+  const aggressiveLate = input.findings.some((finding) => {
+    if (finding.category !== "fees" || !/\blate\b/i.test(finding.quote)) return false;
+    return Array.from(finding.quote.matchAll(/\b(\d+(?:\.\d+)?)\s*%/g)).some(
+      (match) => Number(match[1]) >= 10,
+    );
+  });
+  const dailyLate = input.findings.some(
+    (finding) =>
+      finding.category === "fees" &&
+      /\blate\b/i.test(finding.quote) &&
+      /\b(?:per|each)\s+day\b|\bdaily\b/i.test(finding.quote),
+  );
   if (aggressiveLate || dailyLate) {
     score += 2;
     reasons.push("Late-fee terms may add costs quickly if rent is late.");
@@ -49,20 +59,32 @@ export function computeDeterministicLeaseRisk(input: {
     reasons.push(`We found ${feeCount} fee clauses that may increase total cost.`);
   }
 
-  const earlyTerminatePenalty =
-    /\bearly\s+terminat/i.test(lower) &&
-    /\b(?:penalty|fee|forfeit|liquidated\s+damages|remainder\s+of\s+(?:the\s+)?rent)\b/i.test(lower);
+  const earlyTerminatePenalty = input.findings.some(
+    (finding) =>
+      finding.category === "fees" &&
+      /\bearly\s+terminat/i.test(finding.quote) &&
+      /\b(?:penalty|fee|forfeit|liquidated\s+damages|remainder\s+of\s+(?:the\s+)?rent)\b/i.test(
+        finding.quote,
+      ),
+  );
   if (earlyTerminatePenalty) {
     score += 2;
     reasons.push("Ending the lease early may trigger extra charges.");
   }
 
   const utilitiesSnips = input.findings.filter((f) => f.category === "utilities");
-  const utilitiesVague =
-    utilitiesSnips.length > 0 &&
-    /\butilities\b/i.test(text) &&
-    !/\btenant\b[^.]{0,200}\b(?:electric|gas|water)\b/i.test(text) &&
-    !/\blandlord\b[^.]{0,200}\b(?:electric|gas|water)\b/i.test(text);
+  const utilitiesVague = utilitiesSnips.some(
+    (finding) =>
+      /\butilities\b/i.test(finding.quote) &&
+      !(
+        /\b(?:tenant|landlord)\b[^.]{0,200}\b(?:responsible(?:\s+for)?|pays?|shall\s+pay|must\s+pay)\b/i.test(
+          finding.quote,
+        ) ||
+        /\b(?:utilities?|electric|gas|water|sewer|trash)\b[^.]{0,200}\b(?:paid\s+by|responsibility\s+of)\s+(?:the\s+)?(?:tenant|landlord)\b/i.test(
+          finding.quote,
+        )
+      ),
+  );
   if (utilitiesVague) {
     score += 1;
     reasons.push("Utility responsibilities are not clearly split.");

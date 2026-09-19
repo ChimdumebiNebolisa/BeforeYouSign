@@ -1,6 +1,6 @@
 import { chromium } from "playwright";
 
-const BASE = "http://localhost:3000";
+const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 
 const BANNED = [
   /\brisk score\b/i,
@@ -48,7 +48,7 @@ async function run() {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 
   await page.goto(BASE, { waitUntil: "networkidle" });
-  note("Landing loads", page.url().includes("localhost:3000"));
+  note("Landing loads", page.url().startsWith(BASE));
   const landingBody = await page.locator("body").innerText();
   note("Landing state-aware lease positioning", /Choose the property state before review|Rental property state/i.test(landingBody));
   note("Landing OCR warning", /Scanned image-only PDFs may not extract correctly/i.test(landingBody));

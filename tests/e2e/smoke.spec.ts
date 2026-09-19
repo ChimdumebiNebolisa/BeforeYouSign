@@ -1,6 +1,14 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("landing smoke", () => {
+  test("does not expose the removed model retry endpoint", async ({ request }) => {
+    const response = await request.post("/api/analyze/retry-model", {
+      data: { documentId: "removed" },
+    });
+
+    expect(response.status()).toBe(404);
+  });
+
   test("shows headline and intake options", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByText("Understand your lease before you sign.")).toBeVisible();

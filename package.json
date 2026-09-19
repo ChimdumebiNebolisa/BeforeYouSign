@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "engines": {
-    "node": ">=22"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "next dev",
@@ -18,17 +18,15 @@
     "test:watch": "vitest",
     "evaluate": "node scripts/evaluate.mjs",
     "test:e2e": "playwright test",
-    "verify:legal": "node scripts/verify-legal-references.mjs",
+    "verify:legal-metadata": "node scripts/verify-legal-metadata.mjs",
     "smoke:scan": "node scripts/run-scan-smoke.mjs",
     "qa:smoke": "node scripts/run-browser-qa.mjs scripts/smoke-test.mjs",
     "qa:phase1": "node scripts/run-browser-qa.mjs scripts/phase1-browser-qa.mjs",
     "qa:phase2": "node scripts/run-browser-qa.mjs scripts/phase2-browser-qa.mjs",
-    "qa:all": "node scripts/run-browser-qa.mjs",
-    "qa:ai": "node scripts/ai-smoke-test.mjs"
+    "qa:all": "node scripts/run-browser-qa.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
-    "@google/generative-ai": "^0.24.1",
     "@napi-rs/canvas": "^0.1.80",
     "@thednp/dommatrix": "^3.0.4",
     "class-variance-authority": "^0.7.1",
@@ -47,7 +45,7 @@
   "devDependencies": {
     "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^22",
+    "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.183.1",

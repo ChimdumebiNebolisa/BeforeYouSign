@@ -9,7 +9,7 @@ import type { StateCode, StateGuidanceStatus } from "@/lib/jurisdiction/states";
 
 export type AnalysisMode = "rules_only";
 
-export type ExtractionMethod = "embedded_text" | "ocr" | "pasted_text";
+export type ExtractionMethod = "embedded_text" | "pasted_text";
 
 export type CoverageStatus = "complete" | "partial" | "unreadable";
 
@@ -19,8 +19,6 @@ export type DocumentExtraction = {
   totalChars: number;
   quality: number;
   coverageStatus: CoverageStatus;
-  ocrPagesAttempted?: number;
-  ocrPagesFailed?: number;
 };
 
 export type NormalizedDocument = {

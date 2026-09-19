@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Verifies Texas legal reference metadata (not legal interpretation).
- * Run: npm run verify:legal
+ * Run: npm run verify:legal-metadata
  */
 
 import { readFileSync } from "node:fs";

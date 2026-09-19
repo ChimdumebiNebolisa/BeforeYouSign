@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
 import { spawn, spawnSync } from "node:child_process";
-import os from "node:os";
 import path from "node:path";
 
 const port = process.env.QA_PORT ?? "3100";
 const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${port}`;
 const outputDir = path.resolve(
-  process.env.QA_OUTPUT_DIR ?? path.join(os.tmpdir(), `beforeyousign-qa-${Date.now()}`),
+  process.env.QA_OUTPUT_DIR ?? path.join(process.cwd(), "test-results", "browser-qa"),
 );
 const requestedScripts = process.argv.slice(2);
 const qaScripts = requestedScripts.length
@@ -16,7 +15,7 @@ const qaScripts = requestedScripts.length
 const nextCli = path.join(process.cwd(), "node_modules", "next", "dist", "bin", "next");
 const server = spawn(process.execPath, [nextCli, "start"], {
   cwd: process.cwd(),
-  env: { ...process.env, PORT: port, BYS_MODEL_ENABLED: "0" },
+  env: { ...process.env, PORT: port },
   stdio: "inherit",
   windowsHide: true,
 });
@@ -47,7 +46,8 @@ function stopServer() {
 try {
   await waitForServer();
   for (const script of qaScripts) {
-    const scriptOutputDir = path.join(outputDir, path.basename(script, ".mjs"));
+    const scriptName = path.basename(script, ".mjs").replace(/-browser-qa$/, "").replace(/-test$/, "");
+    const scriptOutputDir = path.join(outputDir, scriptName);
     const result = spawnSync(process.execPath, [script], {
       cwd: process.cwd(),
       env: { ...process.env, PLAYWRIGHT_BASE_URL: baseUrl, QA_OUTPUT_DIR: scriptOutputDir },

@@ -1,8 +1,12 @@
+import type { RuleBasedFindingCategory } from "@/lib/analysis/rules";
+import type { DeterministicRiskBand } from "@/lib/analysis/scoring";
+import type { TexasRenterTopic } from "@/lib/legal-reference/texas-renter-references";
+
 export type AnnotationSpan = {
   page: number;
   start: number;
   end: number;
-  category: string;
+  category: RuleBasedFindingCategory;
   text: string;
 };
 
@@ -19,17 +23,33 @@ export type EvaluationFixture = {
   id: string;
   text: string;
   pages: { page: number; text: string }[];
-  annotations?: AnnotationSpan[];
-  expected?: {
+  annotations: AnnotationSpan[];
+  expected: {
     rentAmount?: string;
     depositAmount?: string;
-    topics?: string[];
+    ruleCategories: RuleBasedFindingCategory[];
+    texasTopics: TexasRenterTopic[];
+    riskBand?: DeterministicRiskBand;
   };
+};
+
+export type EvaluationMetrics = {
+  groundingRate: number;
+  unsupportedFindingRate: number;
+  expectedValueAccuracy: number;
+  ruleCategoryPrecision: number;
+  ruleCategoryRecall: number;
+  texasTopicPrecision: number;
+  texasTopicRecall: number;
+  annotationSpanRecall: number;
+  riskBandAccuracy: number;
+  ruleFindings: number;
+  texasTopics: number;
 };
 
 export type EvaluationRunResult = {
   fixtureId: string;
   mode: "rules_only";
-  metrics: Record<string, number>;
+  metrics: EvaluationMetrics;
   errors: string[];
 };

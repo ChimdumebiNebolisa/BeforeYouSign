@@ -2,9 +2,7 @@ import { ANALYSIS_LIMITS, createAnalysisProblem } from "@/lib/analysis/limits";
 import type { AnalysisInput, NormalizedDocument } from "@/lib/analysis/pipeline/types";
 import { computeContentIntegrityKey } from "@/lib/analysis/pipeline/content-integrity";
 import { assessExtractionQuality, toDocumentExtraction } from "@/lib/pdf/extraction-quality";
-import { normalizeLeasePageText } from "@/lib/pdf/normalize";
 import type { PdfExtractor } from "@/lib/analysis/pipeline/types";
-import { maybeApplyOcr } from "@/lib/ocr/ocr-document";
 import { PdfExtractionLimitError, type ExtractedTextPage } from "@/lib/pdf/extract-text";
 
 export function validateExtractedPageLimits(pages: ExtractedTextPage[]) {
@@ -90,25 +88,7 @@ export async function analyzeDocument(
     };
   }
 
-  let quality = assessExtractionQuality(extractedPages);
-  let method: NormalizedDocument["extraction"]["method"] = "embedded_text";
-
-  if (quality.likelyScanned && process.env.BYS_OCR_ENABLED === "1") {
-    const ocrResult = await maybeApplyOcr(input.bytes, extractedPages);
-    if (ocrResult.pages.length > 0) {
-      const ocrPages = ocrResult.pages.map((p) => ({
-        page: p.page,
-        text: normalizeLeasePageText(p.text),
-      }));
-      const ocrLimitProblem = validateExtractedPageLimits(ocrPages);
-      if (ocrLimitProblem) {
-        return { ok: false, problem: ocrLimitProblem };
-      }
-      extractedPages = ocrPages;
-      quality = assessExtractionQuality(extractedPages);
-      method = "ocr";
-    }
-  }
+  const quality = assessExtractionQuality(extractedPages);
 
   const totalChars = extractedPages.reduce((sum, p) => sum + p.text.length, 0);
   if (totalChars === 0) {
@@ -133,7 +113,7 @@ export async function analyzeDocument(
   }
 
   const documentId = computeContentIntegrityKey(extractedPages);
-  const extraction = toDocumentExtraction(method, extractedPages, quality);
+  const extraction = toDocumentExtraction("embedded_text", extractedPages, quality);
 
   return {
     ok: true,

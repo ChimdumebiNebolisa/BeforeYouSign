@@ -8,7 +8,7 @@ const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${port}`;
 const nextCli = path.join(process.cwd(), "node_modules", "next", "dist", "bin", "next");
 const server = spawn(process.execPath, [nextCli, "start", "-p", port, "-H", "127.0.0.1"], {
   cwd: process.cwd(),
-  env: { ...process.env, PORT: port, BYS_MODEL_ENABLED: "0" },
+  env: { ...process.env, PORT: port },
   stdio: "inherit",
   windowsHide: true,
 });
@@ -43,7 +43,7 @@ try {
   await waitForServer();
   const result = spawnSync(process.execPath, ["scripts/phase2-scan-smoke.mjs"], {
     cwd: process.cwd(),
-    env: { ...process.env, PLAYWRIGHT_BASE_URL: baseUrl, BYS_MODEL_ENABLED: "0" },
+    env: { ...process.env, PLAYWRIGHT_BASE_URL: baseUrl },
     stdio: "inherit",
     windowsHide: true,
   });

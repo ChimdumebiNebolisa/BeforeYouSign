@@ -360,4 +360,79 @@ describe("buildRuleOnlyFallbackReport", () => {
       }),
     );
   });
+
+  it("keeps severity local to the finding instead of inheriting the report band", () => {
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      ruleBasedFindings: [
+        { category: "deposit", page: 1, quote: "Security deposit is $1,500." },
+        { category: "renewal", page: 1, quote: "The lease renews automatically unless notice is given." },
+      ],
+      deterministicRisk: { score: 7, band: "high", reasons: ["Several unrelated terms need review."] },
+    });
+
+    expect(
+      report.potentialRedFlags.find((finding) => finding.title === "Security deposit needs review")?.severity,
+    ).toBe("minor");
+    expect(report.potentialRedFlags.find((finding) => finding.category === "renewal")?.severity).toBe("moderate");
+  });
+
+  it("marks locally aggressive late fees as critical", () => {
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      ruleBasedFindings: [
+        { category: "fees", page: 1, quote: "A late fee equal to 10% of past-due rent applies after five days." },
+      ],
+      deterministicRisk: { score: 2, band: "medium", reasons: [] },
+    });
+
+    expect(report.potentialRedFlags[0]?.severity).toBe("critical");
+  });
+
+  it("keeps clearly assigned utilities minor and orders equal severities by document position", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "All utilities are paid by Tenant. Tenant handles routine filter replacement.",
+      },
+    ];
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: [
+        { category: "maintenance", page: 1, quote: "Tenant handles routine filter replacement." },
+        { category: "utilities", page: 1, quote: "All utilities are paid by Tenant." },
+      ],
+      deterministicRisk: { score: 7, band: "high", reasons: [] },
+    });
+
+    expect(report.potentialRedFlags.map((finding) => finding.category)).toEqual([
+      "utilities",
+      "maintenance",
+    ]);
+    expect(report.potentialRedFlags.map((finding) => finding.severity)).toEqual(["minor", "minor"]);
+  });
+
+  it("diversifies red flags before filling remaining slots", () => {
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      ruleBasedFindings: [
+        { category: "fees", page: 1, quote: "Application fee is $25." },
+        { category: "fees", page: 1, quote: "Processing fee is $30." },
+        { category: "fees", page: 1, quote: "Parking fee is $50 per month." },
+        { category: "fees", page: 1, quote: "Pet fee is $200." },
+        { category: "fees", page: 1, quote: "Cleaning fee is $150." },
+        { category: "renewal", page: 2, quote: "The lease automatically renews unless notice is given." },
+        { category: "notice", page: 2, quote: "Tenant must provide 60 days written notice." },
+        { category: "utilities", page: 3, quote: "Utilities may be allocated by management." },
+      ],
+      deterministicRisk: { score: 5, band: "high", reasons: [] },
+    });
+
+    expect(report.potentialRedFlags).toHaveLength(4);
+    expect(new Set(report.potentialRedFlags.map((finding) => finding.category)).size).toBeGreaterThan(1);
+    expect(report.potentialRedFlags.map((finding) => finding.category)).toEqual(
+      expect.arrayContaining(["fees", "renewal", "notice", "utilities"]),
+    );
+  });
 });
