@@ -21,7 +21,7 @@ function extractFeeValue(text: string): string | null {
   if (greaterOf) return greaterOf[0];
 
   const percentageOfRent = text.match(
-    /\b\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly|past-due|unpaid)\s+){0,3}(?:rent|balance|amount\s+due)\b/i,
+    /\b\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly|past-due|unpaid)\s+){0,3}(?:rent|balance|amount\s+due)(?:\s+per\s+(?:annum|year|month))?\b/i,
   );
   if (percentageOfRent) return percentageOfRent[0];
 

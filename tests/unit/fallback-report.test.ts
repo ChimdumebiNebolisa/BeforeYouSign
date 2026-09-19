@@ -192,6 +192,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("preserves the monthly cadence of a percentage late charge", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Late charge: Tenant must pay 5% of unpaid rent per month until the balance is paid in full.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Late fee",
+        value: "5% of unpaid rent per month",
+      }),
+    );
+  });
+
   it("extracts a percentage-based payment convenience fee", () => {
     const pages = [
       {
