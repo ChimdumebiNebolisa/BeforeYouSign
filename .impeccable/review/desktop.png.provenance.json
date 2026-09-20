@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "artifact": ".impeccable/review/desktop.png",
+  "mediaType": "image/png",
+  "role": "shipping finish-review raster",
+  "finishReviewDisposition": "SHIP",
+  "capturedOn": "2026-09-19",
+  "captureCommand": "npm run qa:phase1",
+  "represents": "1280px desktop result view",
+  "source": {
+    "path": "test-results/browser-qa/phase1/03-report-desktop.png",
+    "sha256": "f2ce47c81168b252413b6b90233dac18767aec2677c5ae8130764bd2c64a85c6"
+  },
+  "raster": {
+    "width": 1280,
+    "height": 1574,
+    "bytes": 234654,
+    "sha256": "f2ce47c81168b252413b6b90233dac18767aec2677c5ae8130764bd2c64a85c6"
+  },
+  "integrity": "Byte-for-byte identical to the recorded source capture; PNG pixels were not altered.",
+  "direction": {
+    "seed": "pinned-audit-remediation-2026-09-19",
+    "exemption": "User-pinned audit remediation direction; do not replace with an unrelated seed concept."
+  },
+  "finishStatement": "unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance"
+}

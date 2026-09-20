@@ -11,8 +11,8 @@ Lease agreements are long and written in dense legal language. Renters often str
 ## Features
 
 - **PDF lease upload** with server-side text extraction (`pdf-parse`), plus **paste text** and **built-in sample leases** from `public/sample-leases/`.
-- **Structured report UI**: carousel sections for summary, red flags, money and fees, deadlines, responsibilities, questions, next steps, and “not clearly stated” when applicable.
-- **Evidence linking**: clicking report rows can scroll the **extracted text** viewer and highlight matching quotes by page (evidence ID-first when grounded).
+- **Structured report UI**: named report sections for summary, terms to review, money and fees, deadlines, responsibilities, questions, state checks, and “not clearly stated” when applicable.
+- **Evidence linking**: grounded findings show the exact quote inline; an explicit action opens and highlights the same span in the **extracted text** viewer.
 - **Rule-based snippet extraction** (rent, deposit, fees, notice, renewal, maintenance, utilities, vague phrases) and **deterministic risk band** with reasons.
 - **Deterministic narrative report** built from lease pattern matches and extracted text.
 - **Analysis transparency** so users can see how the report was produced.
@@ -23,7 +23,7 @@ See [docs/POLICYINSIGHT_EXTRACTION_AUDIT.md](docs/POLICYINSIGHT_EXTRACTION_AUDIT
 
 ## Tech stack
 
-**Frontend:** Next.js (App Router), React, TypeScript, Tailwind CSS v4, Embla Carousel, Lucide icons, shadcn-style UI primitives (`src/components/ui/`).
+**Frontend:** Next.js (App Router), React, TypeScript, Tailwind CSS v4, Lucide icons, shadcn-style UI primitives (`src/components/ui/`). The supported product theme is light-only.
 
 **Backend:** Next.js Route Handler — `POST /api/analyze` (`src/app/api/analyze/`).
 
@@ -97,7 +97,7 @@ Brief folder layout:
 
 ```txt
 src/app/: App Router — layout, page, favicon/app icons, and POST /api/analyze.
-src/components/beforeyousign/: Intake, report carousel, text viewer, loading shell.
+src/components/beforeyousign/: Intake, named report navigation, text viewer, loading shell.
 src/components/ui/: Shared UI (e.g. Button).
 src/lib/analysis/: Regex rules, scoring, deterministic report assembly, and normalization.
 src/lib/pdf/: PDF extraction (pdf-parse) and text normalization.
@@ -226,7 +226,7 @@ npm run smoke:scan
 Run browser QA smoke checks against a running local server. Install Playwright browser binaries first if you have not run browser QA on this machine:
 
 ```bash
-npx playwright install
+npx playwright install chromium firefox webkit
 ```
 
 ```bash

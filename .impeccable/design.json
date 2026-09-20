@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-19T00:00:00Z",
+  "title": "Design System: BeforeYouSign",
+  "extensions": {
+    "colorMeta": {
+      "paper": { "role": "neutral", "displayName": "Neutral Paper", "canonical": "#f3f4f2", "tonalRamp": ["#20221f", "#3d403b", "#5c6159", "#7d837a", "#a1a69e", "#c4c8c1", "#e1e3df", "#f3f4f2"] },
+      "surface": { "role": "neutral", "displayName": "Clean Surface", "canonical": "#ffffff", "tonalRamp": ["#262626", "#474747", "#686868", "#8a8a8a", "#adadad", "#d0d0d0", "#ededed", "#ffffff"] },
+      "ink-navy": { "role": "neutral", "displayName": "Ink Navy", "canonical": "#182133", "tonalRamp": ["#101521", "#182133", "#2c3b56", "#465875", "#687995", "#94a1b5", "#c7ced8", "#eef0f3"] },
+      "primary-navy": { "role": "primary", "displayName": "Primary Navy", "canonical": "#16385f", "tonalRamp": ["#0c2038", "#16385f", "#25527f", "#3d6da0", "#628bc0", "#8fadda", "#c1d3eb", "#edf5ff"] },
+      "primary-navy-raised": { "role": "primary", "displayName": "Raised Primary Navy", "canonical": "#244c78", "tonalRamp": ["#101f32", "#183451", "#244c78", "#3e6692", "#6384ad", "#8fa7c6", "#bfccdc", "#edf2f8"] },
+      "graphite": { "role": "neutral", "displayName": "Graphite Rule", "canonical": "#c6cac6", "tonalRamp": ["#252825", "#444844", "#646964", "#858b85", "#a7aca7", "#c6cac6", "#e2e4e2", "#f5f6f5"] },
+      "muted-paper": { "role": "neutral", "displayName": "Muted Paper", "canonical": "#e9ebe8", "tonalRamp": ["#252724", "#454844", "#676b66", "#898e88", "#adb1ac", "#cdd0cc", "#e9ebe8", "#f7f8f6"] },
+      "muted-ink": { "role": "neutral", "displayName": "Muted Ink", "canonical": "#4f5a69", "tonalRamp": ["#1d2229", "#333b46", "#4f5a69", "#6c7887", "#8d98a5", "#b0b8c1", "#d2d7dd", "#f1f3f5"] },
+      "evidence-blue": { "role": "primary", "displayName": "Evidence Blue", "canonical": "#215fa8", "tonalRamp": ["#10294a", "#174273", "#215fa8", "#3f7ac2", "#6798d5", "#94b9e4", "#c4d8f0", "#eef6ff"] },
+      "evidence-paper": { "role": "primary", "displayName": "Evidence Paper", "canonical": "#eaf2ff", "tonalRamp": ["#16263d", "#2a466c", "#476a99", "#6d90c0", "#99b7dd", "#c4d8f0", "#eaf2ff", "#f7faff"] },
+      "link-blue": { "role": "primary", "displayName": "Link Blue", "canonical": "#124f91", "tonalRamp": ["#0b2644", "#0e3b6d", "#124f91", "#2f6caf", "#568bc9", "#84addd", "#b8d0ee", "#edf6ff"] },
+      "caution-amber": { "role": "secondary", "displayName": "Caution Amber", "canonical": "#775500", "tonalRamp": ["#2b2100", "#503a00", "#775500", "#9f7414", "#c59a42", "#dfbd78", "#f1ddb1", "#fff6dc"] },
+      "caution-paper": { "role": "secondary", "displayName": "Caution Paper", "canonical": "#fff4ce", "tonalRamp": ["#302800", "#5c4b00", "#876f0e", "#b1972e", "#d1bb62", "#e9d895", "#fff4ce", "#fffaf0"] },
+      "success-green": { "role": "secondary", "displayName": "Success Green", "canonical": "#17624b", "tonalRamp": ["#0b2b22", "#104735", "#17624b", "#328066", "#58a184", "#83c1a7", "#b7dfcc", "#edf9f3"] },
+      "success-paper": { "role": "secondary", "displayName": "Success Paper", "canonical": "#e9f6ef", "tonalRamp": ["#173129", "#2d5646", "#4b7d68", "#72a48d", "#9bc7b1", "#c1e3d2", "#e9f6ef", "#f7fcf9"] },
+      "destructive-red": { "role": "secondary", "displayName": "Destructive Red", "canonical": "#a22636", "tonalRamp": ["#431018", "#711923", "#a22636", "#c94a58", "#df7781", "#eca6ad", "#f5d0d4", "#fff1f2"] },
+      "destructive-paper": { "role": "secondary", "displayName": "Destructive Paper", "canonical": "#fff0f1", "tonalRamp": ["#3b171b", "#6a2d35", "#984752", "#be6872", "#dc9199", "#efbcc1", "#fff0f1", "#fff8f8"] },
+      "annotation-yellow": { "role": "tertiary", "displayName": "Annotation Yellow", "canonical": "#f4dc86", "tonalRamp": ["#342b08", "#645313", "#907922", "#b9a044", "#d8c36a", "#f4dc86", "#faedb9", "#fff9e6"] },
+      "annotation-purple": { "role": "tertiary", "displayName": "Annotation Purple", "canonical": "#dfd4ef", "tonalRamp": ["#2d2438", "#514263", "#77648d", "#9c89b4", "#bdaed1", "#dfd4ef", "#eee7f7", "#faf7fd"] },
+      "annotation-blue": { "role": "tertiary", "displayName": "Annotation Blue", "canonical": "#c7ddf4", "tonalRamp": ["#1b2d40", "#34516d", "#517698", "#739bc0", "#9dc1df", "#c7ddf4", "#e2eef9", "#f5faff"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Outcome Display", "purpose": "Completion and page-level outcomes." },
+      "headline": { "displayName": "Report Headline", "purpose": "Report summaries and major reading landmarks." },
+      "title": { "displayName": "Section Title", "purpose": "Sections, action blocks, and source headings." },
+      "body": { "displayName": "Reading Body", "purpose": "Guidance, findings, lease text, and actions." },
+      "label": { "displayName": "Editorial Label", "purpose": "Short metadata, receipt keys, and page annotations." },
+      "mono": { "displayName": "Technical Mono", "purpose": "Machine-oriented details inside technical disclosure." }
+    },
+    "shadows": [
+      { "name": "float", "value": "0 18px 44px rgb(24 33 51 / 0.08)", "purpose": "Floating navigation and prominent intake panels." },
+      { "name": "modal", "value": "0 20px 48px rgb(24 33 51 / 0.12)", "purpose": "Modal separation only." },
+      { "name": "annotation", "value": "4px 4px 12px rgb(254 240 138 / 0.35)", "purpose": "A small material cast for editorial sticky-note annotations." }
+    ],
+    "motion": [
+      { "name": "state", "value": "200ms ease", "purpose": "Control color, icon, and source-viewer state transitions." },
+      { "name": "evidence-flash", "value": "1.35s ease-in-out 2", "purpose": "Momentarily locates an opened exact source span; disabled when reduced motion is requested." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary journey action with a 44px target.",
+      "html": "<button class=\"ds-btn-primary\">Analyze lease</button>",
+      "css": ".ds-btn-primary{min-height:44px;padding:8px 16px;border:1px solid transparent;border-radius:12px;background:#16385f;color:#fff;font:600 14px Inter,sans-serif;transition:opacity 200ms ease,transform 200ms ease}.ds-btn-primary:hover{opacity:.8}.ds-btn-primary:active{transform:translateY(1px)}.ds-btn-primary:focus-visible{outline:2px solid #215fa8;outline-offset:2px}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action on the report surface.",
+      "html": "<button class=\"ds-btn-outline\">Review another lease</button>",
+      "css": ".ds-btn-outline{min-height:44px;padding:8px 16px;border:1px solid #c6cac6;border-radius:17px;background:#fff;color:#182133;font:500 14px Inter,sans-serif;transition:background 200ms ease}.ds-btn-outline:hover{background:#e9ebe8}.ds-btn-outline:focus-visible{outline:2px solid #215fa8;outline-offset:2px}"
+    },
+    {
+      "name": "Report Section Select",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Mobile replacement for the numbered report rail.",
+      "html": "<label class=\"ds-field-label\">Report section<select class=\"ds-field\"><option>Summary</option><option>Terms to review</option></select></label>",
+      "css": ".ds-field-label{display:grid;gap:8px;color:#182133;font:600 14px Inter,sans-serif}.ds-field{min-height:44px;width:100%;padding:0 12px;border:1px solid #c6cac6;border-radius:12px;background:#fff;color:#182133;font:600 14px Inter,sans-serif}.ds-field:focus-visible{outline:2px solid #215fa8;outline-offset:2px}"
+    },
+    {
+      "name": "Completion Status",
+      "kind": "chip",
+      "refersTo": "status-pill",
+      "description": "Plain-language completion state.",
+      "html": "<span class=\"ds-status-complete\">Analysis complete</span>",
+      "css": ".ds-status-complete{display:inline-flex;padding:4px 12px;border-radius:9999px;background:#e9f6ef;color:#17624b;font:600 12px Inter,sans-serif}"
+    },
+    {
+      "name": "Review Priority",
+      "kind": "chip",
+      "description": "Amber semantic annotation that names both the metric and its value.",
+      "html": "<span class=\"ds-priority\"><span>Review priority</span><span aria-hidden=\"true\">·</span><strong>Higher attention</strong></span>",
+      "css": ".ds-priority{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:9999px;background:#fff4ce;color:#775500;font:600 12px Inter,sans-serif}"
+    },
+    {
+      "name": "Document Receipt",
+      "kind": "card",
+      "description": "Compact document, jurisdiction, and source receipt at the top of a completed review.",
+      "html": "<dl class=\"ds-receipt\"><div><dt>Document</dt><dd>sample-lease.txt</dd></div><div><dt>Rental property</dt><dd>Texas</dd></div><div><dt>Source</dt><dd>1 page</dd></div></dl>",
+      "css": ".ds-receipt{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:8px;padding:12px 16px;border-block:1px solid #c6cac6;background:rgb(233 235 232 / .55);color:#182133;font-family:Inter,sans-serif}.ds-receipt dt{color:#4f5a69;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase}.ds-receipt dd{margin:2px 0 0;font-size:12px;font-weight:600}"
+    },
+    {
+      "name": "Evidence Viewer",
+      "kind": "custom",
+      "description": "Collapsible source document with exact-span evidence styling.",
+      "html": "<section class=\"ds-evidence\"><header><strong>sample-lease.txt</strong><span>1 page</span><button aria-label=\"Collapse extracted text\">⌃</button></header><article><small>Page 1</small><p><mark>Verified source span</mark> remains inside the surrounding lease text.</p></article></section>",
+      "css": ".ds-evidence{overflow:hidden;border:1px solid #c6cac6;border-radius:12px;background:#e9ebe8;color:#182133;font-family:Inter,sans-serif}.ds-evidence header{display:grid;grid-template-columns:1fr auto 44px;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid #c6cac6}.ds-evidence header span,.ds-evidence small{color:#4f5a69;font-size:10px;letter-spacing:.14em;text-transform:uppercase}.ds-evidence button{width:44px;height:44px;border:1px solid #c6cac6;border-radius:10px;background:#fff;color:#4f5a69}.ds-evidence button:focus-visible{outline:2px solid #215fa8;outline-offset:2px}.ds-evidence article{padding:16px;background:#fff;font-size:13px;line-height:1.625}.ds-evidence mark{padding:0 2px;border-radius:4px;background:#eaf2ff;color:#182133;box-shadow:0 0 0 1px rgb(33 95 168 / .2)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Annotated Lease Desk",
+    "overview": "BeforeYouSign feels like a careful review assembled on neutral paper: ink-navy hierarchy, graphite rules, evidence-blue references, and amber cautions. Verified lease evidence leads; the interface is a contract review, not a generic dashboard. Editorial labels, numbered sections, compact receipts, and source-linked annotations make the system feel exact without becoming severe.\n\nThe completed journey tells one story: choose a lease and state, run deterministic analysis, read the report first, verify exact source spans, then act or download. Its identity is intentionally light-only, calm, and dense enough for serious reading while retaining generous separation between decisions.",
+    "keyCharacteristics": [
+      "Report-first information hierarchy with source verification one deliberate action away.",
+      "Neutral paper surfaces, thin graphite rules, and sparse semantic color.",
+      "Manrope headlines paired with Inter body copy and Geist Mono for technical detail.",
+      "Restrained radii, editorial annotations, and visible keyboard focus.",
+      "Plain-language status, limitations, and recovery states that never rely on color alone."
+    ],
+    "rules": [
+      { "name": "Evidence-Leads", "body": "A conclusion may look grounded only when the exact lease span can be opened and verified.", "section": "overview" },
+      { "name": "Finish", "body": "unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance", "section": "overview" },
+      { "name": "Sparse-Semantics", "body": "Never use evidence blue, caution amber, success green, or destructive red as decoration; each color must communicate a state or traceable action.", "section": "colors" },
+      { "name": "Plain-Language", "body": "Visual authority comes from hierarchy and evidence, not legalistic typography or ornamental copy.", "section": "typography" },
+      { "name": "Report-First", "body": "Responsive changes may collapse or stack the source, but they must never place full source text before the report summary and first action.", "section": "layout" },
+      { "name": "Structural-Rule", "body": "Prefer a border or tonal change over a shadow for report structure; shadow signals floating context, not ordinary grouping.", "section": "elevation" },
+      { "name": "Editorial-Container", "body": "A section with readable content should first look like a ruled document region; reserve card shapes for controls, receipts, source viewers, disclosures, and state notices.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do lead completed states with completion, receipt, priority, and a concrete next action.",
+      "Do keep the report before the source at every viewport size.",
+      "Do distinguish verified evidence, unsupported guidance, and legal limitations in words as well as color.",
+      "Do preserve 44px interaction targets, visible focus, reduced-motion behavior, and readable reflow.",
+      "Do attach provenance metadata to every raster that ships as design evidence."
+    ],
+    "donts": [
+      "Don't turn the product into a dashboard, slide carousel, or equal-weight card grid.",
+      "Don't use bright color, large shadows, gradients, or rounded containers as decoration.",
+      "Don't let extracted source text visually outrank the renter-facing report.",
+      "Don't present a conclusion as grounded unless its verified page, offsets, quote, and category relevance are available.",
+      "Don't fabricate testimonials, legal outcomes, customer proof, or unsupported jurisdiction coverage."
+    ]
+  }
+}
