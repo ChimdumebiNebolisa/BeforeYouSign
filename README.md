@@ -2,7 +2,7 @@
 
 ## What this is
 
-**BeforeYouSign** is a Next.js web app that helps renters review **residential lease** documents before signing. Users upload a PDF lease, paste plain text, or load sample lease fixtures. The server extracts text (when needed), runs **regex-based clause detection** and **deterministic risk scoring**, then builds a **structured report** (summary, fees, deadlines, red flags, suggested questions) from the lease text. Results display in the browser with evidence quotes tied to page-level extracted text.
+**BeforeYouSign** is a Next.js web app that helps renters review **residential lease** documents before signing. Users upload a PDF lease, paste plain text, or load sample lease fixtures. The server validates the request, extracts and normalizes lease text, runs **rule-based clause detection** and **deterministic review-priority scoring**, then builds a **structured report** with grounded evidence. Results stay in the browser for the current review and can be exported as Markdown.
 
 ## Problem it solves
 
@@ -11,25 +11,27 @@ Lease agreements are long and written in dense legal language. Renters often str
 ## Features
 
 - **PDF lease upload** with server-side text extraction (`pdf-parse`), plus **paste text** and **built-in sample leases** from `public/sample-leases/`.
-- **Structured report UI**: named report sections for summary, terms to review, money and fees, deadlines, responsibilities, questions, state checks, and “not clearly stated” when applicable.
-- **Evidence linking**: grounded findings show the exact quote inline; an explicit action opens and highlights the same span in the **extracted text** viewer.
-- **Rule-based snippet extraction** (rent, deposit, fees, notice, renewal, maintenance, utilities, vague phrases) and **deterministic risk band** with reasons.
-- **Deterministic narrative report** built from lease pattern matches and extracted text.
-- **Analysis transparency** so users can see how the report was produced.
+- **Structured report UI**: named report sections for summary, terms to review, money and fees, deadlines, responsibilities, questions, state checks, next steps, and “not clearly stated” items when applicable.
+- **Evidence linking**: grounded findings show the exact quote, page, and source span; an explicit action opens and highlights that span in the **extracted text** viewer.
+- **Rule-based snippet extraction** (rent, deposit, fees, notice, renewal, maintenance, utilities, and vague phrases) plus a **deterministic review-priority band** with reasons.
+- **Rule-only analysis**: the current product path has no model call; the report is assembled from lease pattern matches, extracted text, and curated state-reference metadata.
+- **State-aware scope**: all 50 states can be selected; Texas has curated statewide renter references, while other states receive general lease review only.
+- **Analysis transparency** so users can see extraction quality, matched clauses, evidence coverage, and risk signals.
 - **Full report Markdown export** (client-side download) plus existing question checklist export.
-- **Transparency panel** (“How this was analyzed”) showing extraction counts, snippet hits, and heuristic risk signals.
 
-See [docs/POLICYINSIGHT_EXTRACTION_AUDIT.md](docs/POLICYINSIGHT_EXTRACTION_AUDIT.md) for pattern-extraction decisions and deferred scope.
+See the [historical pattern-extraction audit](docs/POLICYINSIGHT_EXTRACTION_AUDIT.md) for decisions and deferred scope. The supported current workflow is deterministic and synchronous.
 
 ## Tech stack
 
-**Frontend:** Next.js (App Router), React, TypeScript, Tailwind CSS v4, Lucide icons, shadcn-style UI primitives (`src/components/ui/`). The supported product theme is light-only.
+**Frontend:** Next.js App Router, React, TypeScript, Tailwind CSS v4, Lucide icons, and shadcn-style UI primitives (`src/components/ui/`). The supported product theme is light-only. `pdf-lib` is used for client-side PDF preview metadata.
 
-**Backend:** Next.js Route Handler — `POST /api/analyze` (`src/app/api/analyze/`).
+**Backend:** Node.js Next.js Route Handler — `POST /api/analyze` (`src/app/api/analyze/`) with request validation, upload limits, in-process concurrency guards, and structured error responses.
 
-**Analysis:** Deterministic lease pattern matching and structured report assembly.
+**Analysis:** Synchronous, rule-only lease pattern matching, risk scoring, Texas topic scanning, evidence registration, and structured report assembly.
 
-**Other tools:** `pdf-parse` + `pdf-lib` (`src/lib/pdf/`), ESLint (`npm run lint`), Playwright QA smoke scripts.
+**Supporting code:** `pdf-parse` for server-side PDF text extraction, `pdf-lib` for browser preview, curated Texas reference metadata, Vitest, and Playwright QA scripts.
+
+There is no database, account system, background job, or runtime call to an external analysis service.
 
 ## Setup
 
@@ -48,27 +50,21 @@ npm ci
 
 Use Node.js 24. Local development, CI, and Vercel use the version declared in `.nvmrc`.
 
-### 3. Add environment variables
+### 3. Configure the environment
 
 Create a `.env.local` file in the root (you can start from `.env.local.example`):
 
 **Windows (cmd):** `copy .env.local.example .env.local`
 **macOS / Linux:** `cp .env.local.example .env.local`
 
-Environment variables used:
+No API key is required for local development. The supported environment variables are:
 
-```md
-BYS_TRUST_PROXY_HEADERS: Set to 1 only when the deployment proxy overwrites forwarding headers; otherwise trusted per-client limits are disabled and the global in-process cap still applies.
-BYS_ANALYSIS_EVENTS: Set to 0 to disable metadata-only analysis event logs.
+```text
+BYS_TRUST_PROXY_HEADERS=0  # Set to 1 only when the deployment proxy overwrites client IP headers.
+BYS_ANALYSIS_EVENTS=1      # Set to 0 to disable metadata-only analysis event logs.
 ```
 
-Optional for development:
-
-```bat
-set BEFOREYOUSIGN_PDF_DEBUG=1
-```
-
-(Unix: `export BEFOREYOUSIGN_PDF_DEBUG=1`) — enables extra PDF extraction logging on the server.
+When proxy headers are not explicitly trusted, the app uses the global in-process concurrency cap. When they are trusted, it also applies a per-client cap. Analysis event logs contain metadata only; lease text is not logged.
 
 ### 4. Run the app locally
 
@@ -84,155 +80,131 @@ Open the local URL shown in the terminal (typically [http://localhost:3000](http
 
 For this project:
 
-1. **Choose intake:** Upload a PDF, paste lease text, or load a sample file from the UI (`src/components/beforeyousign/`).
-2. **Submit analysis:** After choosing the rental property state and confirming the lease, the client sends **`POST /api/analyze`** — **multipart** (`file`, `stateCode`) for PDFs or **JSON** (`leaseText`, `fileName`, `stateCode`) for pasted/sample text (`landing-client.tsx`, `route.ts`). Texas currently has state-specific renter guidance; other states receive general lease review with an explicit disclosure.
-3. **Prepare text:** PDFs are read per page via **`extractPdfTextPages`**; pasted text becomes a single synthetic page. All text passes **`normalizeLeasePageText`** (`src/lib/pdf/`).
-4. **Deterministic pass:** **`rules.ts`** extracts snippet matches; **`scoring.ts`** computes a risk band and reasons; ambiguous phrases are flagged (`findUnclearLeasePhrases`).
-5. **Build report:** **`buildRuleOnlyFallbackReport`** assembles the report from deterministic findings and extracted lease text.
-6. **Render results:** JSON returns **`extractedPages`**, snippet arrays, deterministic risk fields, **`mode`**, and **`report`**. The client shows **`LeaseTextViewer`**, **`LeaseReportView`**, and **`TechnicalDetailsPanel`** (`landing-client.tsx`).
+1. **Choose intake:** Select the rental-property state, then upload a PDF, paste lease text, or load a sample lease from the UI (`src/components/beforeyousign/`).
+2. **Submit analysis:** After the lease confirmation, the client sends **`POST /api/analyze`** — **multipart/form-data** (`file`, `stateCode`) for PDFs or **JSON** (`leaseText`, `fileName`, `stateCode`) for pasted/sample text.
+3. **Validate and admit:** `runAnalysisPipeline` checks the content type, state, request size, PDF signature, page/character limits, and in-flight analysis caps before processing.
+4. **Prepare the document:** PDFs are extracted per page through **`extractPdfTextPages`** and normalized; pasted/sample text is normalized and represented as one synthetic page. Extraction quality and a content-derived `documentId` are recorded.
+5. **Run deterministic analysis:** `runDeterministicAnalysis` calls the rule finders, computes the risk band and reasons, flags unclear phrases, and runs the Texas renter scan only when Texas is selected.
+6. **Assemble grounded results:** `createRuleOnlyAnalyzer` builds the fallback report, registers evidence spans, and returns an evidence index. `assembleSuccessResponse` packages the report, pages, snippets, risk fields, state guidance, and extraction metadata.
+7. **Render and export:** The client keeps the response in memory and renders **`LeaseReportView`**, **`LeaseTextViewer`**, and **`TechnicalDetailsPanel`**. Findings can link back to source text, and the report/checklist can be downloaded as Markdown.
 
 ## Architecture
 
-Brief folder layout:
+The main boundaries are:
 
 ```txt
-src/app/: App Router — layout, page, favicon/app icons, and POST /api/analyze.
-src/components/beforeyousign/: Intake, named report navigation, text viewer, loading shell.
+src/app/: App Router entry points, layout, assets, and POST /api/analyze.
+src/components/beforeyousign/: Intake, loading, report, source-text viewer, details, and export UI.
 src/components/ui/: Shared UI (e.g. Button).
-src/lib/analysis/: Regex rules, scoring, deterministic report assembly, and normalization.
-src/lib/pdf/: PDF extraction (pdf-parse) and text normalization.
-public/: Static assets — sample leases, images.
+src/lib/analysis/pipeline/: Request validation, document preparation, deterministic orchestration, and response assembly.
+src/lib/analysis/: Rule finders, scoring, report schema/normalization, fallback report, and exports.
+src/lib/evidence/: Page segmentation, evidence registry, response index, and source highlighting data.
+src/lib/pdf/: PDF extraction (`pdf-parse`), text normalization, and extraction-quality checks.
+src/lib/jurisdiction/: Supported states and state-guidance status.
+src/lib/legal-reference/: Curated Texas renter references and lease-topic scanner.
+public/sample-leases/: Text fixtures used by the sample-lease flow.
+tests/: Unit, integration, end-to-end, and lease/report fixtures.
+scripts/: Production-server smoke and browser-QA runners.
 ```
 
-System overview:
-
-```txt
-Frontend: React client components; single-page lease intake and results.
-Backend: Next.js Route Handler (Node) — one analyze endpoint; no separate API server.
-External services: none for lease analysis.
-Deployment: Standard Next.js production build (npm run build && npm run start); host per your platform (e.g. Vercel-compatible).
-```
-
-High-level request flow — there is **no database**; results live in client state after the response.
+The request is synchronous. There is **no database or queue**; the report and extracted text live in client state after the response. Texas references are curated static metadata and are not scraped at runtime.
 
 ### End-to-end flow
 
 ```mermaid
-flowchart TB
-  subgraph Client["Browser — React"]
-    LC["LandingClient — intake"]
-    V["LeaseTextViewer"]
-    R["LeaseReportView"]
-    T["TechnicalDetailsPanel"]
-    LC --> V
-    LC --> R
-    LC --> T
-  end
-
-  subgraph Route["POST /api/analyze — src/app/api/analyze/route.ts"]
-    IN{"Body type?"}
-    PDF["extractPdfTextPages — pdf-parse"]
-    TXT["JSON leaseText → normalize → 1 synthetic page"]
-    NORM["normalizeLeasePageText"]
-    RULES["rules.ts — snippet finders"]
-    RISK["scoring.ts — deterministic band + reasons"]
-    RNORM["report-normalization.ts"]
-    FALL["buildRuleOnlyFallbackReport"]
-    OUT["JSON — pages, snippets, risk, report"]
-
-    IN -->|multipart PDF| PDF
-    IN -->|application/json| TXT
-    PDF --> NORM
-    TXT --> NORM
-    NORM --> RULES
-    RULES --> RISK
-    RISK --> FALL
-    FALL --> OUT
-  end
-
-  LC -->|"fetch POST"| IN
-  OUT -->|"response"| LC
-```
-
-### Key modules
-
-```mermaid
 flowchart LR
-  subgraph api["API route"]
-    RT["route.ts"]
+  subgraph Browser["Browser — React client"]
+    Intake["LandingClient<br/>state + PDF / paste / sample"]
+    Request["POST /api/analyze"]
+    Results["LeaseReportView + LeaseTextViewer<br/>TechnicalDetailsPanel"]
+    Export["Markdown report +<br/>question checklist"]
+    Intake --> Request
+    Results --> Export
   end
 
-  subgraph pdf["PDF + text"]
-    EXT["pdf/extract-text.ts"]
-    NOR["pdf/normalize.ts"]
+  subgraph Server["Next.js server — Node.js"]
+    Route["route.ts<br/>POST /api/analyze"]
+    Pipeline["runAnalysisPipeline"]
+    Validate["validate-intake.ts<br/>content type • state • limits • slots"]
+    Document["analyze-document.ts<br/>extract/build pages • quality • documentId"]
+    Deterministic["deterministic.ts<br/>rule snippets • risk • Texas scan"]
+    Engine["rule-only-analyzer.ts<br/>report • evidence registry"]
+    Response["assemble-response.ts<br/>structured JSON response"]
+
+    Route --> Pipeline --> Validate --> Document --> Deterministic --> Engine --> Response
+
+    PDF["pdf/extract-text.ts<br/>pdf-parse per page"]
+    Normalize["pdf/normalize.ts"]
+    Rules["analysis/rules.ts"]
+    Score["analysis/scoring.ts"]
+    Texas["legal-reference/<br/>texas-renter-scan.ts"]
+    Evidence["evidence/registry.ts<br/>index.ts"]
+
+    Document -->|PDF input| PDF --> Normalize
+    Deterministic --> Rules
+    Deterministic --> Score
+    Deterministic --> Texas
+    Engine --> Evidence
   end
 
-  subgraph analysis["Analysis"]
-    RL["rules.ts"]
-    SC["scoring.ts"]
-    REP["report-normalization.ts"]
-  end
-
-  RT --> EXT
-  RT --> NOR
-  RT --> RL
-  RT --> SC
-  RT --> REP
+  Request -->|fetch| Route
+  Response -->|JSON| Results
 ```
 
-**Notes**
-
-- **Paste/sample text** skips PDF extraction and is analyzed as a single virtual page.
+**Flow notes:** pasted/sample text is normalized during intake and skips PDF extraction. `pdf-lib` only supports browser-side preview metadata. The current `AnalysisMode` is `rules_only`; there is no AI/model branch in the supported request path.
 
 ---
 
 ## Verification
 
-Pull requests and pushes to `main` run one required `ci` check covering a clean install, lint, typecheck, unit tests, coverage, annotated deterministic evaluation, legal-reference metadata, a production build, Playwright browser tests, QA scripts, smoke tests, and a production dependency audit. The same workflow verifies committed support scripts parse successfully:
+Pull requests and pushes to `main` run the required [`ci` workflow](.github/workflows/ci.yml): clean install, lint, typecheck, unit tests, coverage, deterministic evaluation, legal-reference metadata checks, a production build, Playwright browser tests, browser-QA scripts, an API smoke test, support-script syntax checks, and a production dependency audit.
+
+Run the same static and analysis checks locally:
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run test:coverage
+npm run evaluate
+npm run verify:legal-metadata
+npm run build
+```
+
+The CI workflow also verifies that committed support scripts parse successfully:
 
 ```bash
 node --check scripts/phase2-scan-smoke.mjs
 node --check scripts/smoke-test.mjs
 node --check scripts/phase1-browser-qa.mjs
 node --check scripts/phase2-browser-qa.mjs
+node --check scripts/run-scan-smoke.mjs
+node --check scripts/evaluate.mjs
+node --check scripts/run-browser-qa.mjs
+node --check scripts/verify-legal-metadata.mjs
 ```
 
-Run unit tests and coverage (critical modules):
+Run production-build browser tests after `npm run build`:
 
 ```bash
-npm test
-npm run test:coverage
-npm run evaluate
-npm run verify:legal-metadata
-npm run build
 npm run test:e2e
 ```
 
 `verify:legal-metadata` checks reference IDs, review dates, URL syntax, and disclaimer metadata; it does not validate legal meaning. Complete the quarterly source review in [LEGAL_SOURCE_REVIEW.md](LEGAL_SOURCE_REVIEW.md) separately.
 
-Run static linting:
+The smoke and browser-QA runners start and stop their own production server. Build first, then run:
 
 ```bash
-npm run lint
-```
-
-Run the API scan smoke test against a running local server:
-
-```bash
-npm run dev
 npm run smoke:scan
-```
-
-Run browser QA smoke checks against a running local server. Install Playwright browser binaries first if you have not run browser QA on this machine:
-
-```bash
-npx playwright install chromium firefox webkit
-```
-
-```bash
 npm run qa:smoke
 npm run qa:phase1
 npm run qa:phase2
+```
+
+Install Playwright browser binaries first if you have not run browser QA on this machine:
+
+```bash
+npx playwright install chromium firefox webkit
 ```
 
 The browser QA scripts use Playwright and write ignored screenshots under `test-results/browser-qa/`. CI uploads failed browser artifacts for seven days.
@@ -241,9 +213,11 @@ The browser QA scripts use Playwright and write ignored screenshots under `test-
 
 ## Known limitations
 
-- **No user accounts or persisted reports** — refreshing loses in-session results unless the user runs analysis again.
-- **Single synchronous HTTP request** — very large PDFs or slow extraction may hit hosting timeouts (`maxDuration` on the route is capped for serverless-style deployments).
+- **No user accounts or persisted reports** — results live in browser memory and are lost when the page is closed or a new review is started.
+- **Rule-only analysis** — regex and heuristic matching can miss clauses, produce false positives, or lack the context a lawyer would apply.
+- **Single synchronous HTTP request** — the route allows up to 60 seconds and the browser waits up to 55 seconds; very large or slow inputs may time out.
 - **PDF text extraction is not OCR** — scanned image-only PDFs may yield little or no extractable text.
-- **PDF uploads are capped at 4 MiB** — this leaves multipart overhead below Vercel's 4.5 MB Function payload limit.
+- **Input limits apply** — PDF files are capped at 4 MiB and 100 pages; extracted or pasted text is capped at 120,000 characters. JSON request bodies are capped at 512 KiB.
+- **State scope is limited** — Texas has curated statewide renter references; other states receive general lease review, and city rules are not checked.
 - **Evidence highlighting** uses extracted-text offsets and quote matching; minor mismatches between source text and normalized quotes can prevent a highlight.
-- **No persistent report recovery or background jobs** — analysis is a single synchronous request and results remain in browser state only.
+- **Concurrency protection is in-process** — the global and optional per-client caps reset with the server instance and are not a substitute for edge/platform rate limiting in a multi-instance deployment.
