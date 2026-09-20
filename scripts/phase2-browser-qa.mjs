@@ -23,18 +23,28 @@ async function runSampleToReport(page) {
   await page.getByText("Local landlord-tenant law was not checked").waitFor({ state: "visible", timeout: 180000 });
 }
 
-async function goToTexasSlide(page) {
-  await page.getByRole("button", { name: "Go to Texas renter check" }).click();
-  const reportSection = page
-    .locator("section.rounded-lg")
-    .filter({ has: page.getByRole("heading", { name: "Texas renter check" }) });
+async function goToReportSection(page, sectionId, label) {
+  const select = page.getByLabel("Report section", { exact: true });
+  if (await select.isVisible().catch(() => false)) {
+    await select.selectOption(sectionId);
+  } else {
+    await page.getByRole("button", { name: new RegExp(label, "i") }).click();
+  }
+  const reportSection = page.locator(`[data-active-report-panel='${sectionId}']`);
   await reportSection.waitFor({ state: "visible", timeout: 10000 });
   return reportSection;
 }
 
+async function goToTexasSection(page) {
+  return goToReportSection(page, "state-check", "Texas renter check");
+}
+
 async function testTexasEvidenceHighlight(page) {
-  const reportSection = await goToTexasSlide(page);
-  const texasCard = reportSection.locator("[data-finding-id^='texas-']").first();
+  const reportSection = await goToTexasSection(page);
+  const texasCard = reportSection
+    .locator("[data-finding-id^='texas-']")
+    .filter({ has: page.getByRole("button", { name: "View in full lease" }) })
+    .first();
   const cardCount = await texasCard.count();
   if (!cardCount) {
     note("Texas card evidence highlight", false, "no texas cards");
@@ -42,11 +52,11 @@ async function testTexasEvidenceHighlight(page) {
   }
 
   await texasCard.waitFor({ state: "visible" });
-  const slideText = await reportSection.innerText();
+  const sectionText = await reportSection.innerText();
   const cardText = await texasCard.innerText();
   const marksBefore = await page.locator("mark").count();
 
-  await texasCard.locator("button").first().click();
+  await texasCard.getByRole("button", { name: "View in full lease" }).click();
 
   try {
     await page.waitForFunction(
@@ -76,7 +86,7 @@ async function testTexasEvidenceHighlight(page) {
 
   if (!ok) {
     console.log("Diagnostics — Texas evidence highlight:");
-    console.log(`  active slide: ${slideText.slice(0, 280).replace(/\s+/g, " ")}`);
+    console.log(`  active section: ${sectionText.slice(0, 280).replace(/\s+/g, " ")}`);
     console.log(`  clicked card: ${cardText.slice(0, 200).replace(/\s+/g, " ")}`);
     console.log(`  marks before click: ${marksBefore}`);
     console.log(`  marks after click: ${marksAfter}`);
@@ -93,7 +103,7 @@ async function run() {
 
   await runSampleToReport(page);
 
-  const reportSection = await goToTexasSlide(page);
+  const reportSection = await goToTexasSection(page);
   const body = await reportSection.innerText();
 
   note("Texas renter check section visible", await reportSection.isVisible());
@@ -108,7 +118,7 @@ async function run() {
   );
   note("Checklist download button", await page.getByRole("button", { name: "Download question checklist" }).isVisible());
 
-  await page.getByRole("button", { name: "Go to Summary" }).click();
+  await goToReportSection(page, "summary", "Summary");
   await page.waitForTimeout(400);
   const summaryBody = await page.locator("body").innerText();
   note("Review priority still present", /Review priority/i.test(summaryBody));
@@ -118,7 +128,7 @@ async function run() {
   const banned = /risk score|red flag|\billegal\b|legal compliance|AI lawyer|hidden traps|High Risk|Texas law requires|enforceable/i;
   note("No banned wording", !banned.test(body + summaryBody));
 
-  await goToTexasSlide(page);
+  await goToTexasSection(page);
   await page.screenshot({ path: path.join(OUT, "01-texas-renter-check.png"), fullPage: true });
 
   await testTexasEvidenceHighlight(page);
@@ -131,9 +141,7 @@ async function run() {
   const mobileBrowser = await chromium.launch({ headless: true });
   const mpage = await mobileBrowser.newPage({ ...devices["iPhone 13"] });
   await runSampleToReport(mpage);
-  const mobileSection = mpage
-    .locator("section.rounded-lg")
-    .filter({ has: mpage.getByRole("heading", { name: "Texas renter check" }) });
+  const mobileSection = await goToTexasSection(mpage);
   await mpage.screenshot({ path: path.join(OUT, "03-mobile-texas.png"), fullPage: true });
   note("Mobile Texas section", await mobileSection.isVisible());
   await mobileBrowser.close();
