@@ -26,7 +26,7 @@ export function DownloadMarkdownButton({
     <button
       type="button"
       onClick={handleDownload}
-      className="inline-flex h-10 items-center gap-2 rounded-full border border-primary/20 bg-card px-4 text-sm font-semibold text-primary shadow-sm transition hover:bg-muted"
+      className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-primary/20 bg-card px-4 text-sm font-semibold text-primary shadow-sm transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <Download className="h-4 w-4" aria-hidden />
       {label}

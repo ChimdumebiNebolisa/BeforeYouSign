@@ -21,14 +21,14 @@ export function LandingHero({ onReviewLease, onRunSample }: LandingHeroProps) {
         <button
           type="button"
           onClick={onReviewLease}
-          className="h-11 rounded-full bys-gradient-cta px-8 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
+          className="h-11 rounded-lg bys-gradient-cta px-8 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           Review a lease
         </button>
         <button
           type="button"
           onClick={onRunSample}
-          className="h-11 rounded-full border border-primary/25 bg-card px-8 text-sm font-semibold text-primary transition hover:bg-muted"
+          className="h-11 rounded-lg border border-primary/25 bg-card px-8 text-sm font-semibold text-primary transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           Run sample lease
         </button>

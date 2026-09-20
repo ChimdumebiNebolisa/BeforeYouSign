@@ -10,7 +10,7 @@ export function LandingNav() {
       <nav className="bys-glass-panel bys-float-shadow flex h-14 items-center justify-center rounded-2xl px-4 sm:px-6">
         <button
           type="button"
-          className="font-[family-name:var(--font-headline)] text-base font-extrabold tracking-tight text-primary sm:text-lg"
+          className="inline-flex min-h-11 items-center rounded-md px-2 font-[family-name:var(--font-headline)] text-base font-extrabold tracking-tight text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-lg"
           onClick={goHome}
         >
           BeforeYouSign

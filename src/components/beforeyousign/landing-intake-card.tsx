@@ -49,7 +49,7 @@ export function LandingIntakeCard({
   return (
     <div
       id="review-intake"
-      className="bys-glass-panel scroll-mt-32 space-y-6 rounded-3xl border border-white/60 p-6 shadow-[0px_24px_48px_rgba(0,32,69,0.08)] sm:p-8 lg:sticky lg:top-28"
+      className="bys-glass-panel bys-float-shadow scroll-mt-32 space-y-6 rounded-2xl border border-border p-6 sm:p-8 lg:sticky lg:top-28"
     >
       <div className="space-y-1 text-center lg:text-left">
         <h2 className="font-[family-name:var(--font-headline)] text-2xl font-bold text-foreground">Review a lease</h2>
@@ -78,7 +78,7 @@ export function LandingIntakeCard({
         </p>
       </div>
 
-      <div className="flex rounded-full bg-muted p-1" role="tablist" aria-label="Lease intake options">
+      <div className="flex rounded-lg bg-muted p-1" role="tablist" aria-label="Lease intake options">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -92,7 +92,7 @@ export function LandingIntakeCard({
             aria-controls="lease-intake-panel"
             tabIndex={activeTab === tab.id ? 0 : -1}
             className={[
-              "flex-1 rounded-full px-3 py-2.5 text-xs font-semibold transition sm:text-sm",
+              "min-h-11 flex-1 rounded-md px-3 py-2.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-sm",
               activeTab === tab.id
                 ? "bg-card text-primary shadow-sm ring-1 ring-primary/20"
                 : "text-muted-foreground hover:text-foreground",

@@ -88,10 +88,10 @@ export function SampleLeaseCta({
         {isLoading ? "Loading sample…" : "Run Sample Lease"}
       </button>
 
-      {loadError ? <p className="mt-2 text-sm font-medium text-[#ba1a1a]">{loadError}</p> : null}
+      {loadError ? <p className="mt-2 text-sm font-medium text-destructive">{loadError}</p> : null}
 
       {hasLoaded ? (
-        <p className="mt-2 text-xs text-[#444651]">Loaded: {SAMPLE_LABEL[sampleKey]}</p>
+        <p className="mt-2 text-xs text-muted-foreground">Loaded: {SAMPLE_LABEL[sampleKey]}</p>
       ) : null}
 
     </div>

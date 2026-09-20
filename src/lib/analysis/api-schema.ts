@@ -10,6 +10,11 @@ export type EvidenceClickArgs = {
   exact?: boolean;
 };
 
+export type EvidenceNavigationTarget = EvidenceClickArgs & {
+  returnFocusId: string;
+  originLabel: string;
+};
+
 export function isAnalysisSuccess(
   response: AnalysisResponse,
 ): response is Extract<AnalysisResponse, { ok: true }> {

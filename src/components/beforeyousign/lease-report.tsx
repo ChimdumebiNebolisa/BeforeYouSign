@@ -1,11 +1,8 @@
 "use client";
 
-import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import type { Dispatch, SetStateAction } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { BeforeYouSignReport } from "@/lib/analysis/schema";
-import type { EvidenceClickArgs } from "@/lib/analysis/api-schema";
+import type { EvidenceNavigationTarget } from "@/lib/analysis/api-schema";
 import {
   clampForScan,
   DeadlinesSection,
@@ -16,7 +13,6 @@ import {
   MAX_AGREE_BULLETS,
   MissingSection,
   MoneySection,
-  NextStepsSection,
   QuestionsSection,
   RedFlagsSection,
   ResponsibilitiesSection,
@@ -24,301 +20,41 @@ import {
   SummarySection,
   TexasRenterCheckSection,
 } from "@/components/beforeyousign/lease-report-slides";
-import { ChecklistDownloadButton } from "@/components/beforeyousign/checklist-download-button";
-import { ReportDownloadButton } from "@/components/beforeyousign/report-download-button";
-import type { AnalysisMode } from "@/lib/analysis/pipeline/types";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 import { getStateGuidanceStatus, getStateName, type StateCode, type StateGuidanceStatus } from "@/lib/jurisdiction/states";
 
-const RED_FLAGS_SLIDE_INDEX = 1;
+type ReportSectionId =
+  | "summary"
+  | "terms"
+  | "money"
+  | "deadlines"
+  | "responsibilities"
+  | "questions"
+  | "state-check"
+  | "missing";
 
-const SLIDE_LABELS_BASE = [
-  "Summary",
-  "Terms to review",
-  "Money and fees",
-  "Deadlines and notices",
-  "Responsibilities",
-  "Questions to ask",
-  "Next steps",
-] as const;
-
-function prefersReducedMotion(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
-function LeaseReportCarousel({
-  report,
-  summaryIntro,
-  agreeBullets,
-  riskNote,
-  expandedFlagEvidence,
-  setExpandedFlagEvidence,
-  expandedMoneyQuotes,
-  setExpandedMoneyQuotes,
-  questionsShown,
-  showAllQuestions,
-  setShowAllQuestions,
-  extraQuestionCount,
-  selectedFindingId,
-  onFlagEvidenceClick,
-  evidenceSourceLabel,
-  texasRenterFindings,
-  stateCode,
-  stateGuidance,
-}: {
-  report: BeforeYouSignReport;
-  texasRenterFindings: TexasRenterFinding[];
-  stateCode: StateCode;
-  stateGuidance: StateGuidanceStatus;
-  summaryIntro: string;
-  agreeBullets: string[];
-  riskNote: string;
-  expandedFlagEvidence: Record<string, boolean>;
-  setExpandedFlagEvidence: Dispatch<SetStateAction<Record<string, boolean>>>;
-  expandedMoneyQuotes: Record<string, boolean>;
-  setExpandedMoneyQuotes: Dispatch<SetStateAction<Record<string, boolean>>>;
-  questionsShown: string[];
-  showAllQuestions: boolean;
-  setShowAllQuestions: Dispatch<SetStateAction<boolean>>;
-  extraQuestionCount: number;
-  selectedFindingId?: string | null;
-  onFlagEvidenceClick: (args: EvidenceClickArgs) => void;
-  evidenceSourceLabel?: EvidenceSourceLabel;
-}) {
-  const hasMissing = report.missingOrUnclear.length > 0;
-  const hasStateSpecificGuidance = stateGuidance === "supported";
-  const stateSlideIndex = hasStateSpecificGuidance ? 6 : -1;
-  const slideLabels = useMemo(
-    (): string[] => {
-      const labels: string[] = [...SLIDE_LABELS_BASE];
-      if (hasStateSpecificGuidance) labels.splice(6, 0, `${getStateName(stateCode)} renter check`);
-      if (hasMissing) labels.push("Not clearly stated");
-      return labels;
-    },
-    [hasMissing, hasStateSpecificGuidance, stateCode],
-  );
-  const slideCount = slideLabels.length;
-
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: "start",
-    loop: false,
-  });
-
-  const [selectedIndex, setSelectedIndex] = useState(0);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    const sync = (api: NonNullable<typeof emblaApi>) => setSelectedIndex(api.selectedScrollSnap());
-    emblaApi.on("init", sync);
-    emblaApi.on("reInit", sync);
-    emblaApi.on("select", sync);
-    return () => {
-      emblaApi.off("init", sync);
-      emblaApi.off("reInit", sync);
-      emblaApi.off("select", sync);
-    };
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    emblaApi.reInit();
-  }, [emblaApi, slideCount]);
-
-  useEffect(() => {
-    if (!emblaApi || !selectedFindingId) return;
-    const hitRedFlag = report.potentialRedFlags.some((f) => f.id === selectedFindingId);
-    const hitStateSpecificFinding =
-      hasStateSpecificGuidance && texasRenterFindings.some((f) => f.id === selectedFindingId);
-    if (!hitRedFlag && !hitStateSpecificFinding) return;
-    const jump = prefersReducedMotion();
-    emblaApi.scrollTo(hitStateSpecificFinding ? stateSlideIndex : RED_FLAGS_SLIDE_INDEX, jump);
-    const id = selectedFindingId;
-    requestAnimationFrame(() => {
-      const el = document.querySelector<HTMLElement>(`[data-finding-id="${CSS.escape(id)}"]`);
-      el?.scrollIntoView({ block: "nearest", behavior: jump ? "auto" : "smooth" });
-    });
-  }, [selectedFindingId, emblaApi, report.potentialRedFlags, stateSlideIndex, texasRenterFindings]);
-
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
-
-  const goTo = useCallback(
-    (i: number) => {
-      if (!emblaApi) return;
-      emblaApi.scrollTo(i, prefersReducedMotion());
-    },
-    [emblaApi],
-  );
-
-  const currentLabel = slideLabels[selectedIndex] ?? slideLabels[0];
-  const announce = `Section ${selectedIndex + 1} of ${slideCount}: ${currentLabel}.`;
-
-  return (
-    <section className="space-y-3" aria-label="Lease analysis report">
-      <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {announce}
-      </div>
-
-      <div className="flex items-center justify-between gap-2 px-0.5">
-        <button
-          type="button"
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#c5c5d3]/40 bg-[#ffffff] text-[#191c1e] shadow-sm transition hover:bg-[#f7f9fb] disabled:pointer-events-none disabled:opacity-40"
-          onClick={scrollPrev}
-          disabled={selectedIndex <= 0}
-          aria-label="Previous section"
-        >
-          <ChevronLeft className="h-5 w-5" aria-hidden />
-        </button>
-        <p className="min-w-0 text-center text-[11px] font-medium uppercase tracking-[0.14em] text-[#757682]">
-          <span className="text-[#191c1e]">{selectedIndex + 1}</span>
-          <span className="mx-1 text-[#c5c5d3]">/</span>
-          <span>{slideCount}</span>
-          <span className="mt-0.5 block font-[family-name:var(--font-headline)] text-[13px] font-semibold normal-case tracking-normal text-[#191c1e]">
-            {currentLabel}
-          </span>
-        </p>
-        <button
-          type="button"
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#c5c5d3]/40 bg-[#ffffff] text-[#191c1e] shadow-sm transition hover:bg-[#f7f9fb] disabled:pointer-events-none disabled:opacity-40"
-          onClick={scrollNext}
-          disabled={selectedIndex >= slideCount - 1}
-          aria-label="Next section"
-        >
-          <ChevronRight className="h-5 w-5" aria-hidden />
-        </button>
-      </div>
-
-      <div className="overflow-hidden rounded-xl" ref={emblaRef}>
-        <div className="flex touch-pan-y">
-          <div className="min-w-0 flex-[0_0_100%] px-0.5">
-            <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
-              <SummarySection
-                report={report}
-                summaryIntro={summaryIntro}
-                agreeBullets={agreeBullets}
-                riskNote={riskNote}
-              />
-            </div>
-          </div>
-          <div className="min-w-0 flex-[0_0_100%] px-0.5">
-            <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
-              <RedFlagsSection
-                report={report}
-                expandedFlagEvidence={expandedFlagEvidence}
-                setExpandedFlagEvidence={setExpandedFlagEvidence}
-                selectedFindingId={selectedFindingId}
-                onFlagEvidenceClick={onFlagEvidenceClick}
-                evidenceSourceLabel={evidenceSourceLabel}
-              />
-            </div>
-          </div>
-          <div className="min-w-0 flex-[0_0_100%] px-0.5">
-            <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
-              <MoneySection
-                report={report}
-                expandedMoneyQuotes={expandedMoneyQuotes}
-                setExpandedMoneyQuotes={setExpandedMoneyQuotes}
-                evidenceSourceLabel={evidenceSourceLabel}
-                onEvidenceClick={onFlagEvidenceClick}
-              />
-            </div>
-          </div>
-          <div className="min-w-0 flex-[0_0_100%] px-0.5">
-            <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
-              <DeadlinesSection
-                report={report}
-                evidenceSourceLabel={evidenceSourceLabel}
-                onEvidenceClick={onFlagEvidenceClick}
-              />
-            </div>
-          </div>
-          <div className="min-w-0 flex-[0_0_100%] px-0.5">
-            <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
-              <ResponsibilitiesSection report={report} />
-            </div>
-          </div>
-          <div className="min-w-0 flex-[0_0_100%] px-0.5">
-            <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
-              <QuestionsSection
-                report={report}
-                questionsShown={questionsShown}
-                showAllQuestions={showAllQuestions}
-                setShowAllQuestions={setShowAllQuestions}
-                extraQuestionCount={extraQuestionCount}
-              />
-            </div>
-          </div>
-          {hasStateSpecificGuidance ? (
-            <div className="min-w-0 flex-[0_0_100%] px-0.5">
-              <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
-                <TexasRenterCheckSection
-                  findings={texasRenterFindings}
-                  selectedFindingId={selectedFindingId}
-                  onEvidenceClick={onFlagEvidenceClick}
-                  evidenceSourceLabel={evidenceSourceLabel}
-                />
-              </div>
-            </div>
-          ) : null}
-          <div className="min-w-0 flex-[0_0_100%] px-0.5">
-            <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
-              <NextStepsSection report={report} />
-            </div>
-          </div>
-          {hasMissing ? (
-            <div className="min-w-0 flex-[0_0_100%] px-0.5">
-              <div className="max-h-[min(72vh,560px)] overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
-                <MissingSection report={report} />
-              </div>
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-      <div className="flex flex-wrap justify-center gap-1.5 px-1" aria-label="Report sections">
-        {slideLabels.map((label, i) => (
-          <button
-            key={label}
-            type="button"
-            aria-current={selectedIndex === i ? "true" : undefined}
-            aria-label={`Go to ${label}`}
-            className={[
-              "h-2 rounded-full transition-[width,background-color] duration-200",
-              selectedIndex === i ? "w-6 bg-[#00246a]" : "w-2 bg-[#c5c5d3]/55 hover:bg-[#c5c5d3]",
-            ].join(" ")}
-            onClick={() => goTo(i)}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
+type ReportSection = {
+  id: ReportSectionId;
+  label: string;
+  content: ReactNode;
+};
 
 export function LeaseReportView({
   report,
   texasRenterFindings = [],
   stateCode = "TX",
   stateGuidance = getStateGuidanceStatus(stateCode),
-  onFlagEvidenceClick,
+  onOpenEvidence,
   selectedFindingId,
   evidenceSourceLabel,
-  fileName,
-  mode,
-  deterministicRiskBand,
-  deterministicRiskReasons,
 }: {
   report: BeforeYouSignReport;
   texasRenterFindings?: TexasRenterFinding[];
   stateCode?: StateCode;
   stateGuidance?: StateGuidanceStatus;
-  onFlagEvidenceClick: (args: EvidenceClickArgs) => void;
+  onOpenEvidence: (target: EvidenceNavigationTarget) => void;
   selectedFindingId?: string | null;
   evidenceSourceLabel?: EvidenceSourceLabel;
-  fileName?: string;
-  mode?: AnalysisMode;
-  deterministicRiskBand?: "low" | "medium" | "high";
-  deterministicRiskReasons?: string[];
 }) {
   const summaryIntro = displaySummaryIntro(report.summary);
   const agreeBullets = report.whatYoureAgreeingTo
@@ -328,59 +64,194 @@ export function LeaseReportView({
 
   const [expandedFlagEvidence, setExpandedFlagEvidence] = useState<Record<string, boolean>>({});
   const [expandedMoneyQuotes, setExpandedMoneyQuotes] = useState<Record<string, boolean>>({});
+  const [expandedInlineEvidence, setExpandedInlineEvidence] = useState<Record<string, boolean>>({});
   const [showAllQuestions, setShowAllQuestions] = useState(false);
+  const [activeSectionId, setActiveSectionId] = useState<ReportSectionId>("summary");
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const focusAfterSelectionRef = useRef(false);
 
   const questionsShown = useMemo(() => {
-    const all = report.questionsToAsk;
-    if (all.length <= INITIAL_QUESTIONS || showAllQuestions) return all;
-    return all.slice(0, INITIAL_QUESTIONS);
+    if (report.questionsToAsk.length <= INITIAL_QUESTIONS || showAllQuestions) return report.questionsToAsk;
+    return report.questionsToAsk.slice(0, INITIAL_QUESTIONS);
   }, [report.questionsToAsk, showAllQuestions]);
 
   const extraQuestionCount = Math.max(0, report.questionsToAsk.length - INITIAL_QUESTIONS);
+  const hasStateSpecificGuidance = stateGuidance === "supported";
+  const hasMissing = report.missingOrUnclear.length > 0;
 
-  const shared = {
-    report,
-    texasRenterFindings,
-    stateCode,
-    stateGuidance,
-    summaryIntro,
-    agreeBullets,
-    riskNote,
-    expandedFlagEvidence,
-    setExpandedFlagEvidence,
-    expandedMoneyQuotes,
-    setExpandedMoneyQuotes,
-    questionsShown,
-    showAllQuestions,
-    setShowAllQuestions,
-    extraQuestionCount,
-    selectedFindingId,
-    onFlagEvidenceClick,
-    evidenceSourceLabel,
+  const sections: ReportSection[] = [
+    {
+      id: "summary",
+      label: "Summary",
+      content: (
+        <SummarySection
+          report={report}
+          summaryIntro={summaryIntro}
+          agreeBullets={agreeBullets}
+          riskNote={riskNote}
+        />
+      ),
+    },
+    {
+      id: "terms",
+      label: "Terms to review",
+      content: (
+        <RedFlagsSection
+          report={report}
+          expandedFlagEvidence={expandedFlagEvidence}
+          setExpandedFlagEvidence={setExpandedFlagEvidence}
+          selectedFindingId={selectedFindingId}
+          onOpenEvidence={onOpenEvidence}
+          evidenceSourceLabel={evidenceSourceLabel}
+          expandedInlineEvidence={expandedInlineEvidence}
+          setExpandedInlineEvidence={setExpandedInlineEvidence}
+        />
+      ),
+    },
+    {
+      id: "money",
+      label: "Money and fees",
+      content: (
+        <MoneySection
+          report={report}
+          expandedMoneyQuotes={expandedMoneyQuotes}
+          setExpandedMoneyQuotes={setExpandedMoneyQuotes}
+          evidenceSourceLabel={evidenceSourceLabel}
+          onOpenEvidence={onOpenEvidence}
+          expandedInlineEvidence={expandedInlineEvidence}
+          setExpandedInlineEvidence={setExpandedInlineEvidence}
+        />
+      ),
+    },
+    {
+      id: "deadlines",
+      label: "Deadlines and notices",
+      content: (
+        <DeadlinesSection
+          report={report}
+          evidenceSourceLabel={evidenceSourceLabel}
+          onOpenEvidence={onOpenEvidence}
+          expandedInlineEvidence={expandedInlineEvidence}
+          setExpandedInlineEvidence={setExpandedInlineEvidence}
+        />
+      ),
+    },
+    {
+      id: "responsibilities",
+      label: "Responsibilities",
+      content: <ResponsibilitiesSection report={report} />,
+    },
+    {
+      id: "questions",
+      label: "Questions to ask",
+      content: (
+        <QuestionsSection
+          report={report}
+          questionsShown={questionsShown}
+          showAllQuestions={showAllQuestions}
+          setShowAllQuestions={setShowAllQuestions}
+          extraQuestionCount={extraQuestionCount}
+        />
+      ),
+    },
+  ];
+
+  if (hasStateSpecificGuidance) {
+    sections.push({
+      id: "state-check",
+      label: `${getStateName(stateCode)} renter check`,
+      content: (
+        <TexasRenterCheckSection
+          findings={texasRenterFindings}
+          selectedFindingId={selectedFindingId}
+          onOpenEvidence={onOpenEvidence}
+          evidenceSourceLabel={evidenceSourceLabel}
+          expandedInlineEvidence={expandedInlineEvidence}
+          setExpandedInlineEvidence={setExpandedInlineEvidence}
+        />
+      ),
+    });
+  }
+
+  if (hasMissing) {
+    sections.push({
+      id: "missing",
+      label: "Not clearly stated",
+      content: <MissingSection report={report} />,
+    });
+  }
+
+  const activeSection = sections.find((section) => section.id === activeSectionId) ?? sections[0];
+
+  useEffect(() => {
+    if (!focusAfterSelectionRef.current) return;
+    focusAfterSelectionRef.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      const heading = panelRef.current?.querySelector<HTMLElement>("h2, h3");
+      if (!heading) return;
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeSectionId]);
+
+  const selectSection = (id: ReportSectionId) => {
+    if (id === activeSectionId) return;
+    focusAfterSelectionRef.current = true;
+    setActiveSectionId(id);
   };
 
   return (
-    <div className="space-y-4">
-      <LeaseReportCarousel {...shared} />
-      <div className="flex flex-wrap justify-end gap-2 border-t border-[#e6e8ea]/80 pt-4">
-        <ReportDownloadButton
-          report={report}
-          texasRenterFindings={texasRenterFindings}
-          stateCode={stateCode}
-          stateGuidance={stateGuidance}
-          fileName={fileName}
-          mode={mode}
-          deterministicRiskBand={deterministicRiskBand}
-          deterministicRiskReasons={deterministicRiskReasons}
-        />
-        <ChecklistDownloadButton
-          report={report}
-          texasRenterFindings={texasRenterFindings}
-          stateCode={stateCode}
-          stateGuidance={stateGuidance}
-          fileName={fileName}
-        />
+    <section className="space-y-3 sm:space-y-4" aria-label="Lease analysis report" data-report-section={activeSection.id}>
+      <div className="lg:hidden">
+        <label htmlFor="report-section-select" className="text-sm font-semibold text-foreground">
+          Report section
+        </label>
+        <select
+          id="report-section-select"
+          value={activeSection.id}
+          onChange={(event) => selectSection(event.target.value as ReportSectionId)}
+          className="mt-2 min-h-11 w-full rounded-lg border border-border bg-card px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+        >
+          {sections.map((section) => (
+            <option key={section.id} value={section.id}>
+              {section.label}
+            </option>
+          ))}
+        </select>
       </div>
-    </div>
+
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[10rem_minmax(0,1fr)]">
+        <nav className="hidden lg:block" aria-label="Report sections">
+          <ol className="space-y-1 border-r border-border/40 pr-4">
+            {sections.map((section, index) => {
+              const selected = section.id === activeSection.id;
+              return (
+                <li key={section.id}>
+                  <button
+                    type="button"
+                    aria-current={selected ? "page" : undefined}
+                    className={[
+                      "flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
+                      selected
+                        ? "bg-accent text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    ].join(" ")}
+                    onClick={() => selectSection(section.id)}
+                  >
+                    <span className="w-5 shrink-0 text-xs tabular-nums text-muted-foreground">{index + 1}</span>
+                    <span>{section.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
+
+        <div ref={panelRef} className="min-w-0" data-active-report-panel={activeSection.id}>
+          {activeSection.content}
+        </div>
+      </div>
+    </section>
   );
 }
