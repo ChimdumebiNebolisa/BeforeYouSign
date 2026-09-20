@@ -17,7 +17,7 @@ const PREVIEW_ITEMS = [
 export function LandingPreviewSection() {
   return (
     <section className="bys-section-gap">
-      <div className="mx-auto max-w-[920px]">
+      <div className="mx-auto max-w-[1080px]">
         <div className="mb-10 text-center lg:text-left">
           <h2 className="font-[family-name:var(--font-headline)] text-2xl font-bold text-foreground sm:text-3xl">
             See what it finds
@@ -27,7 +27,7 @@ export function LandingPreviewSection() {
           </p>
         </div>
 
-        <div className="relative overflow-hidden">
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_14rem]">
           <div className="bys-float-shadow rounded-2xl border border-border bg-card p-8 sm:p-10 lg:p-11">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Sample preview</p>
             <h3 className="mt-2 font-[family-name:var(--font-headline)] text-lg font-semibold text-foreground">
@@ -51,17 +51,25 @@ export function LandingPreviewSection() {
             </div>
           </div>
 
-          <div className="bys-sticky-note-yellow absolute -right-4 top-6 z-10 hidden w-max max-w-[12.5rem] rotate-2 rounded-md py-2.5 pr-10 pl-3 text-[13px] leading-snug text-foreground sm:block">
-            {STICKY_NOTES[0]}
-          </div>
-          <div className="bys-sticky-note-purple absolute -left-4 top-[34%] z-10 hidden w-max -translate-y-1/2 -rotate-1 whitespace-nowrap rounded-md py-2.5 pr-3 pl-10 text-[13px] leading-snug text-foreground sm:block">
-            {STICKY_NOTES[1]}
-          </div>
-          <div className="bys-sticky-note-blue absolute -left-3 bottom-24 z-10 hidden w-max max-w-[12.5rem] rotate-1 rounded-md py-2.5 pr-3 pl-10 text-[13px] leading-snug text-foreground sm:block">
-            {STICKY_NOTES[2]}
-          </div>
-          <div className="bys-sticky-note-yellow absolute -right-4 bottom-6 z-10 hidden w-max max-w-[12.5rem] -rotate-2 rounded-md py-2.5 pr-10 pl-3 text-[13px] leading-snug text-foreground sm:block">
-            {STICKY_NOTES[3]}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1" aria-label="What the review highlights">
+            {STICKY_NOTES.map((note, index) => (
+              <div
+                key={note}
+                className={[
+                  "rounded-lg border border-foreground/10 px-4 py-3 text-[13px] font-medium leading-snug text-foreground",
+                  index === 1
+                    ? "bys-sticky-note-purple"
+                    : index === 2
+                      ? "bys-sticky-note-blue"
+                      : "bys-sticky-note-yellow",
+                ].join(" ")}
+              >
+                <span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.14em] text-primary/75">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                {note}
+              </div>
+            ))}
           </div>
         </div>
       </div>

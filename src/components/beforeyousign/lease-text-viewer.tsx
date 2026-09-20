@@ -344,7 +344,7 @@ function LeasePageBlock({
                 key={`${line.start}-${i}`}
                 className="flex flex-col gap-0.5 rounded-md bg-secondary px-2 py-1.5 text-[13px] leading-snug sm:flex-row sm:gap-3"
               >
-                <span className="shrink-0 font-semibold text-foreground sm:w-32">
+                <span className="shrink-0 font-semibold text-foreground sm:w-28">
                   {renderHighlightedText({
                     text: line.meta.label,
                     start: line.start + line.meta.labelStart,

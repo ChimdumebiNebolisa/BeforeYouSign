@@ -49,7 +49,7 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
         <button
           type="button"
           className={[
-            "relative flex min-h-[12.5rem] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-card p-10 text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            "relative flex min-h-[12.5rem] w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-card px-6 py-8 text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             isDragActive
               ? "border-primary/45 bys-float-shadow"
               : "border-border/35 hover:border-primary/35",
