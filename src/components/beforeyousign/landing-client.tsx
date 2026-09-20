@@ -8,7 +8,10 @@ import { parseBeforeYouSignReportJson, type BeforeYouSignReport } from "@/lib/an
 import type { EvidenceNavigationTarget } from "@/lib/analysis/api-schema";
 import type { AnalysisSuccessResponse } from "@/lib/analysis/pipeline/types";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
-import { AnalysisInProgressView } from "@/components/beforeyousign/analysis-in-progress";
+import {
+  ANALYSIS_MIN_DISPLAY_MS,
+  AnalysisInProgressView,
+} from "@/components/beforeyousign/analysis-in-progress";
 import { IntakeDocumentPreview } from "@/components/beforeyousign/intake-document-preview";
 import { TechnicalDetailsPanel } from "@/components/beforeyousign/technical-details-panel";
 import { LandingHero } from "@/components/beforeyousign/landing-hero";
@@ -216,6 +219,7 @@ export function LandingClient() {
     activeAnalysisControllerRef.current = requestController;
     const requestId = analysisRequestIdRef.current + 1;
     analysisRequestIdRef.current = requestId;
+    const analysisStartedAt = window.performance.now();
     try {
       setIsSubmitting(true);
       setErrorMessage(null);
@@ -271,6 +275,13 @@ export function LandingClient() {
       const data = (await res.json()) as AnalysisSuccessResponse & { report?: unknown; reportError?: string | null };
 
       if (requestId !== analysisRequestIdRef.current) return;
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        const remainingDisplayTime = ANALYSIS_MIN_DISPLAY_MS - (window.performance.now() - analysisStartedAt);
+        if (remainingDisplayTime > 0) {
+          await new Promise((resolve) => window.setTimeout(resolve, remainingDisplayTime));
+        }
+      }
+      if (requestId !== analysisRequestIdRef.current) return;
       applyAnalysisResponse(data);
     } catch (e) {
       if (requestController.signal.aborted || requestId !== analysisRequestIdRef.current) return;
@@ -324,7 +335,7 @@ export function LandingClient() {
     };
 
     return (
-      <div className="mx-auto w-full max-w-6xl px-4 font-sans">
+      <div className="mx-auto w-full max-w-[88rem] px-4 font-sans">
         <section
           aria-labelledby="completed-review-heading"
           className="min-w-0 rounded-2xl border border-border bg-card p-4 sm:p-8"
@@ -338,7 +349,7 @@ export function LandingClient() {
                 ref={completionHeadingRef}
                 id="completed-review-heading"
                 tabIndex={-1}
-                className="mt-1 font-[family-name:var(--font-headline)] text-3xl font-extrabold tracking-[-0.03em] text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:text-4xl"
+                className="mt-1 w-fit rounded-sm font-[family-name:var(--font-headline)] text-3xl font-extrabold tracking-[-0.03em] text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:text-4xl"
               >
                 Your lease review
               </h1>
@@ -378,8 +389,8 @@ export function LandingClient() {
             </p>
           ) : null}
 
-          <div className="mt-5 grid min-w-0 gap-6 sm:mt-8 sm:gap-8 xl:grid-cols-[minmax(0,3fr)_minmax(25rem,2fr)] xl:items-start">
-            <div className="min-w-0 space-y-6">
+          <div className="mt-5 grid min-w-0 gap-6 sm:mt-8 xl:grid-cols-[minmax(0,1.45fr)_minmax(30rem,1fr)] xl:items-start xl:gap-6">
+            <div className="min-w-0">
               {uploadReceipt.reportError ? (
                 <div className="rounded-xl bg-warning-surface p-4 text-sm text-warning">{uploadReceipt.reportError}</div>
               ) : null}
@@ -401,42 +412,6 @@ export function LandingClient() {
                 />
               ) : null}
 
-              {uploadReceipt.report ? (
-                <section aria-labelledby="review-ready-heading" className="border-y border-primary/25 bg-primary px-5 py-5 text-primary-foreground sm:px-6 sm:py-6">
-                  <h2 id="review-ready-heading" className="font-[family-name:var(--font-headline)] text-xl font-bold">
-                    Review ready
-                  </h2>
-                  <ol className="mt-4 space-y-3">
-                    {displayedReviewSteps.map((step, index) => (
-                      <li key={`${index}-${step.slice(0, 24)}`} className="flex gap-3 text-sm leading-relaxed text-primary-foreground/90">
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15 text-xs font-bold tabular-nums">
-                          {index + 1}
-                        </span>
-                        <span>{step}</span>
-                      </li>
-                    ))}
-                  </ol>
-                  <div className="mt-5 flex flex-wrap gap-3 border-t border-primary-foreground/25 pt-5">
-                    <ReportDownloadButton
-                      report={uploadReceipt.report}
-                      texasRenterFindings={uploadReceipt.texasRenterFindings ?? []}
-                      stateCode={completedStateCode}
-                      stateGuidance={uploadReceipt.stateGuidance}
-                      fileName={uploadReceipt.fileName}
-                      mode={uploadReceipt.mode}
-                      deterministicRiskBand={uploadReceipt.deterministicRiskBand}
-                      deterministicRiskReasons={uploadReceipt.deterministicRiskReasons}
-                    />
-                    <ChecklistDownloadButton
-                      report={uploadReceipt.report}
-                      texasRenterFindings={uploadReceipt.texasRenterFindings ?? []}
-                      stateCode={completedStateCode}
-                      stateGuidance={uploadReceipt.stateGuidance}
-                      fileName={uploadReceipt.fileName}
-                    />
-                  </div>
-                </section>
-              ) : null}
             </div>
 
             {uploadReceipt.extractedPages && uploadReceipt.extractedPages.length > 0 ? (
@@ -460,6 +435,48 @@ export function LandingClient() {
               </div>
             ) : null}
           </div>
+
+          {uploadReceipt.report ? (
+            <section
+              aria-labelledby="review-ready-heading"
+              className="mt-8 rounded-xl border border-primary/25 bg-primary px-5 py-6 text-primary-foreground sm:px-7 sm:py-7 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-10"
+            >
+              <div>
+                <h2 id="review-ready-heading" className="font-[family-name:var(--font-headline)] text-2xl font-bold">
+                  Review ready
+                </h2>
+                <ol className="mt-4 grid gap-3 md:grid-cols-3">
+                  {displayedReviewSteps.map((step, index) => (
+                    <li key={`${index}-${step.slice(0, 24)}`} className="flex gap-3 text-sm leading-relaxed text-primary-foreground/90">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15 text-xs font-bold tabular-nums">
+                        {index + 1}
+                      </span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="mt-6 flex flex-wrap gap-3 border-t border-primary-foreground/25 pt-5 lg:mt-0 lg:flex-col lg:border-t-0 lg:pt-0">
+                <ReportDownloadButton
+                  report={uploadReceipt.report}
+                  texasRenterFindings={uploadReceipt.texasRenterFindings ?? []}
+                  stateCode={completedStateCode}
+                  stateGuidance={uploadReceipt.stateGuidance}
+                  fileName={uploadReceipt.fileName}
+                  mode={uploadReceipt.mode}
+                  deterministicRiskBand={uploadReceipt.deterministicRiskBand}
+                  deterministicRiskReasons={uploadReceipt.deterministicRiskReasons}
+                />
+                <ChecklistDownloadButton
+                  report={uploadReceipt.report}
+                  texasRenterFindings={uploadReceipt.texasRenterFindings ?? []}
+                  stateCode={completedStateCode}
+                  stateGuidance={uploadReceipt.stateGuidance}
+                  fileName={uploadReceipt.fileName}
+                />
+              </div>
+            </section>
+          ) : null}
 
           <div className="mt-8 space-y-4 border-t border-border pt-6">
             <TechnicalDetailsPanel receipt={uploadReceipt} />
@@ -598,7 +615,7 @@ export function LandingClient() {
   return (
     <div className="bys-container w-full px-6 font-sans lg:px-8">
       <section className="pt-12 pb-[4.5rem] lg:pt-8 lg:pb-24">
-        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-7">
             <LandingHero
               onReviewLease={scrollToIntake}

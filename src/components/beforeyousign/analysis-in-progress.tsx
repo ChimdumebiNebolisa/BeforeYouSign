@@ -45,6 +45,8 @@ const STEPS_TEXT = [
   ...STEPS_UPLOAD.slice(1),
 ] as const;
 
+export const ANALYSIS_MIN_DISPLAY_MS = 4_200;
+
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(n < 10 * 1024 ? 1 : 0)} KB`;
@@ -83,7 +85,7 @@ export function AnalysisInProgressView({ intake, onCancel }: { intake: Intake; o
   useEffect(() => {
     const id = window.setInterval(() => {
       setStepIndex((i) => Math.min(i + 1, steps.length - 1));
-    }, 2400);
+    }, ANALYSIS_MIN_DISPLAY_MS / steps.length);
     return () => window.clearInterval(id);
   }, [steps.length]);
 

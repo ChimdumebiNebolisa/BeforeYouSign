@@ -221,7 +221,7 @@ export function LeaseReportView({
         </select>
       </div>
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-[10rem_minmax(0,1fr)]">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[10.5rem_minmax(0,1fr)]">
         <nav className="hidden lg:block" aria-label="Report sections">
           <ol className="space-y-1 border-r border-border/40 pr-4">
             {sections.map((section, index) => {

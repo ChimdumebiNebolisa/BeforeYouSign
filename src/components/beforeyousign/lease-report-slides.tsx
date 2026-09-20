@@ -195,7 +195,7 @@ export function riskSurfaceClasses(level: RiskLevel): string {
     case "medium":
       return "bg-warning-surface text-warning";
     case "high":
-      return "bg-warning-surface text-warning";
+      return "bg-destructive-surface text-destructive";
   }
 }
 
@@ -213,12 +213,14 @@ export function SummarySection({
   const [showPriorityInfo, setShowPriorityInfo] = useState(false);
   return (
     <section className={cardBase}>
-      <div className="flex flex-col gap-3">
-        <div className="flex max-w-md flex-col items-center self-center text-center">
+      <div className="flex flex-col gap-5">
+        <div
+          className={`flex w-full flex-col items-start rounded-lg border border-current/15 px-4 py-3 text-left ${riskSurfaceClasses(
+            report.riskLevel,
+          )}`}
+        >
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${riskSurfaceClasses(
-              report.riskLevel,
-            )}`}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold"
           >
             <span>Review priority</span>
             <span aria-hidden="true">·</span>
@@ -229,21 +231,21 @@ export function SummarySection({
             aria-expanded={showPriorityInfo}
             aria-controls="review-priority-info"
             onClick={() => setShowPriorityInfo((v) => !v)}
-            className="inline-flex min-h-11 items-center text-[10px] font-semibold text-primary underline underline-offset-2 hover:text-link focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
+            className="inline-flex min-h-11 items-center text-[10px] font-semibold text-current underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
           >
             {showPriorityInfo ? "Hide explanation" : "What does this mean?"}
           </button>
           {showPriorityInfo ? (
-            <p id="review-priority-info" className="border-y border-border bg-card/60 px-2.5 py-1.5 text-center text-[11px] leading-snug text-muted-foreground">
+            <p id="review-priority-info" className="w-full border-t border-current/15 pt-2 text-left text-[11px] leading-snug text-current">
               Review priority estimates how much attention lease terms may need. Higher means more items worth a closer
               look; lower means fewer notable items were found. This is not legal advice.
             </p>
           ) : null}
           {riskNote ? (
-            <p className="mt-1.5 text-center text-[11px] leading-snug text-muted-foreground">{riskNote}</p>
+            <p className="mt-1.5 text-left text-[11px] leading-snug text-current">{riskNote}</p>
           ) : null}
         </div>
-        <div className="flex w-full min-w-0 flex-col items-center space-y-1.5 text-center">
+        <div className="flex w-full min-w-0 flex-col items-start space-y-1.5 text-left">
           <h2 className="font-[family-name:var(--font-headline)] text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
             What You&apos;re Agreeing To
           </h2>
@@ -251,7 +253,7 @@ export function SummarySection({
             <p className="mt-2 hidden max-w-xl text-sm leading-snug text-muted-foreground sm:block">{summaryIntro}</p>
           ) : null}
           {agreeBullets.length ? (
-            <ul className="mt-3 w-full max-w-xl list-inside list-disc space-y-1.5 text-center text-[13px] leading-snug text-muted-foreground">
+            <ul className="mt-3 w-full list-outside list-disc space-y-1.5 pl-5 text-left text-[13px] leading-snug text-muted-foreground">
               {agreeBullets.map((line, i) => (
                 <li key={`${i}-${line.slice(0, 24)}`}>{line}</li>
               ))}
