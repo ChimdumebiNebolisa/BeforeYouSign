@@ -108,6 +108,7 @@ export type AnalysisEngineResult = {
   reportError: string | null;
   mode: AnalysisMode;
   evidenceIndex?: EvidenceIndex;
+  texasRenterFindings?: TexasRenterFinding[];
 };
 
 export type AnalysisEngine = (input: {

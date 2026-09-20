@@ -1,5 +1,5 @@
 import { classifyLeaseMoneyLabel, normalizeReportForCredibility } from "@/lib/analysis/report-normalization";
-import type { BeforeYouSignReport } from "@/lib/analysis/schema";
+import type { BeforeYouSignReport, FindingCategory } from "@/lib/analysis/schema";
 import type { RuleBasedFinding } from "@/lib/analysis/rules";
 import type { DeterministicLeaseRisk } from "@/lib/analysis/scoring";
 import { FIXED_REPORT_DISCLAIMER } from "@/lib/public-copy";
@@ -8,6 +8,7 @@ import type { EvidenceRegistry } from "@/lib/evidence/types";
 import { registerSpanEvidence } from "@/lib/evidence/registry";
 import { resolveQuoteToChunk } from "@/lib/evidence/segment";
 import type { GroundedEvidenceRef } from "@/lib/evidence/types";
+import { isEvidenceRelevantToFindingCategory } from "@/lib/analysis/evidence-relevance";
 
 function extractCurrencyValue(text: string): string | null {
   const match = text.match(/\$[\d,]+(?:\.\d{2})?/);
@@ -169,14 +170,13 @@ function classifyFallbackClause(
   const q = quote.toLowerCase();
   const feeLabel = classifyLeaseMoneyLabel(quote);
 
-  if (/\blandlord\b[^.\n]{0,140}\b(?:enter|entry)\b|\bentry\b/.test(q)) return "entry";
-  if (/\bsublett?ing\b|\bsublease\b|\bshort-?term rental\b|\bassignment\b/.test(q)) return "subletting";
-  if (/\bguests?\b|\bconsecutive nights?\b|\btotal nights?\b/.test(q)) return "guests";
-  if (category === "renewal" || category === "notice" || /\brenew\b|\bnotice\b|\bmonth-?to-?month\b/.test(q)) {
+  if (category === "maintenance") return "maintenance";
+  if (category === "utilities") return "utilities";
+  if (category === "renewal") return "renewal-notice";
+  if (category === "notice") {
+    if (/\blandlord\b[^.\n]{0,140}\b(?:enter|entry|access)\b|\bentry\b/.test(q)) return "entry";
     return "renewal-notice";
   }
-  if (category === "maintenance" || /\bmaintenance\b|\brepairs?\b|\bupkeep\b/.test(q)) return "maintenance";
-  if (category === "utilities") return "utilities";
 
   switch (feeLabel) {
     case "Monthly rent":
@@ -211,6 +211,32 @@ function classifyFallbackClause(
   }
   if (category === "fees" || category === "deposit") return "general-fee";
   return "general";
+}
+
+function findingCategoryForKind(
+  kind: FallbackClauseKind,
+  sourceCategory: RuleBasedFinding["category"],
+): FindingCategory {
+  switch (kind) {
+    case "pet-fee":
+      return "pets";
+    case "entry":
+      return "entry";
+    case "subletting":
+      return "subletting";
+    case "guests":
+      return "guests";
+    case "early-termination":
+      return "termination";
+    case "maintenance":
+      return "maintenance";
+    case "utilities":
+      return "utilities";
+    case "renewal-notice":
+      return sourceCategory === "renewal" ? "renewal" : "notice";
+    default:
+      return "fees";
+  }
 }
 
 function fallbackFlagTitle(category: RuleBasedFinding["category"], quote: string): string {
@@ -368,25 +394,26 @@ function toEvidence(
   documentId: string,
   finding: RuleBasedFinding,
   pageTexts: Map<number, string>,
+  expectedCategory: FindingCategory,
 ): GroundedEvidenceRef[] {
   if (registry) {
     const chunk = resolveQuoteToChunk(registry.chunks, finding.page, finding.quote);
     if (chunk) {
-      return [hydrateFromChunk(registry, documentId, chunk, finding.quote)];
+      const evidence = hydrateFromChunk(registry, documentId, chunk, finding.quote);
+      return isEvidenceRelevantToFindingCategory(expectedCategory, evidence.quote) ? [evidence] : [];
     }
 
     const pageText = pageTexts.get(finding.page) ?? "";
     const startIndex = pageText.indexOf(finding.quote);
     if (startIndex >= 0) {
-      return [
-        registerSpanEvidence(registry, {
+      const evidence = registerSpanEvidence(registry, {
           documentId,
           page: finding.page,
           startIndex,
           endIndex: startIndex + finding.quote.length,
           text: finding.quote,
-        }),
-      ];
+        });
+      return isEvidenceRelevantToFindingCategory(expectedCategory, evidence.quote) ? [evidence] : [];
     }
   }
 
@@ -464,7 +491,7 @@ export function buildRuleOnlyFallbackReport(input: {
     moneyAndFees.push({
       label: "Monthly rent",
       value: extractCurrencyValue(rentFinding.quote) ?? "See lease clause",
-      evidence: toEvidence(input.evidenceRegistry, input.documentId, rentFinding, pageTexts),
+      evidence: toEvidence(input.evidenceRegistry, input.documentId, rentFinding, pageTexts, "fees"),
     });
   }
 
@@ -473,7 +500,7 @@ export function buildRuleOnlyFallbackReport(input: {
     moneyAndFees.push({
       label: "Security deposit",
       value: extractCurrencyValue(depositFinding.quote) ?? "See lease clause",
-      evidence: toEvidence(input.evidenceRegistry, input.documentId, depositFinding, pageTexts),
+      evidence: toEvidence(input.evidenceRegistry, input.documentId, depositFinding, pageTexts, "fees"),
     });
   }
 
@@ -481,7 +508,7 @@ export function buildRuleOnlyFallbackReport(input: {
     moneyAndFees.push({
       label: feeLabelFromQuote(feeFinding.quote),
       value: extractFeeValue(feeFinding.quote) ?? "See lease clause",
-      evidence: toEvidence(input.evidenceRegistry, input.documentId, feeFinding, pageTexts),
+      evidence: toEvidence(input.evidenceRegistry, input.documentId, feeFinding, pageTexts, "fees"),
     });
   }
 
@@ -490,7 +517,7 @@ export function buildRuleOnlyFallbackReport(input: {
     deadlinesAndNotice.push({
       label: noticeLabelFromQuote(noticeFinding.quote),
       value: extractDeadlineValue(noticeFinding.quote) ?? "Review notice clause",
-      evidence: toEvidence(input.evidenceRegistry, input.documentId, noticeFinding, pageTexts),
+      evidence: toEvidence(input.evidenceRegistry, input.documentId, noticeFinding, pageTexts, "notice"),
     });
   }
   for (const renewalFinding of byCategory.renewal.slice(0, 2)) {
@@ -499,7 +526,7 @@ export function buildRuleOnlyFallbackReport(input: {
       value: /month-?to-?month/i.test(renewalFinding.quote)
         ? "Potential month-to-month renewal"
         : "Review renewal clause",
-      evidence: toEvidence(input.evidenceRegistry, input.documentId, renewalFinding, pageTexts),
+      evidence: toEvidence(input.evidenceRegistry, input.documentId, renewalFinding, pageTexts, "renewal"),
     });
   }
 
@@ -581,16 +608,20 @@ export function buildRuleOnlyFallbackReport(input: {
     }
   }
 
-  const potentialRedFlags = selectedCandidates.map(({ finding, severity }, index) => ({
-    id: `rule-flag-${index + 1}`,
-    category: categoryMap[finding.category],
-    title: fallbackFlagTitle(finding.category, finding.quote),
-    severity,
-    provenance: "deterministic" as const,
-    explanation: fallbackFlagExplanation(finding.category, finding.quote),
-    whyItMatters: fallbackFlagWhyItMatters(finding.category, finding.quote),
-    evidence: toEvidence(input.evidenceRegistry, input.documentId, finding, pageTexts),
-  }));
+  const potentialRedFlags = selectedCandidates.map(({ finding, severity }, index) => {
+    const kind = classifyFallbackClause(finding.category, finding.quote);
+    const category = findingCategoryForKind(kind, finding.category);
+    return {
+      id: `rule-flag-${index + 1}`,
+      category,
+      title: fallbackFlagTitle(finding.category, finding.quote),
+      severity,
+      provenance: "deterministic" as const,
+      explanation: fallbackFlagExplanation(finding.category, finding.quote),
+      whyItMatters: fallbackFlagWhyItMatters(finding.category, finding.quote),
+      evidence: toEvidence(input.evidenceRegistry, input.documentId, finding, pageTexts, category),
+    };
+  });
 
   const questionsToAsk = Array.from(
     new Set([

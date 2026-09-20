@@ -114,6 +114,32 @@ describe("runAnalysisPipeline", () => {
     }
   });
 
+  it("registers exact evidence spans for Texas renter findings", async () => {
+    const { response, httpStatus } = await runAnalysisPipeline({
+      request: makeJsonRequest({ leaseText: sampleText }),
+      extractPdfTextPages: async () => [],
+      analyzer: createRuleOnlyAnalyzer(),
+    });
+
+    expect(httpStatus).toBe(200);
+    expect(response.ok).toBe(true);
+    if (response.ok) {
+      const finding = response.texasRenterFindings.find((item) => item.topic === "securityDeposit");
+      expect(finding?.evidenceId).toBeTruthy();
+      expect(finding?.startIndex).toBeTypeOf("number");
+      expect(finding?.endIndex).toBeTypeOf("number");
+      expect(
+        response.extractedPages[0]?.text.slice(finding?.startIndex, finding?.endIndex),
+      ).toBe(finding?.leaseQuote);
+      expect(response.evidenceIndex?.[finding!.evidenceId!]).toMatchObject({
+        page: finding?.page,
+        quote: finding?.leaseQuote,
+        startIndex: finding?.startIndex,
+        endIndex: finding?.endIndex,
+      });
+    }
+  });
+
   it("rejects PDFs over the page limit before report assembly", async () => {
     const { response, httpStatus } = await runAnalysisPipeline({
       request: makePdfRequest(),
