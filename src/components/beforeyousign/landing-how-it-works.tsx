@@ -26,7 +26,7 @@ export function LandingHowItWorks() {
         {STEPS.map((item) => (
           <div
             key={item.step}
-            className="flex min-h-[160px] flex-col gap-3 rounded-2xl border border-border/40 bg-card p-7 shadow-[0_8px_24px_rgba(0,32,69,0.04)] lg:p-8"
+            className="flex min-h-[160px] flex-col gap-3 rounded-xl border border-border bg-card p-7 shadow-sm lg:p-8"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
               {item.step}

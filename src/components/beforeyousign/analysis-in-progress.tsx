@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, FileText } from "lucide-react";
+import { Clock, FileText, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 type Intake =
@@ -65,11 +65,20 @@ function readySubtitle(intake: Intake): string {
   return `READY FOR ANALYSIS • ${n.toLocaleString()} characters`;
 }
 
-export function AnalysisInProgressView({ intake }: { intake: Intake }) {
+export function AnalysisInProgressView({ intake, onCancel }: { intake: Intake; onCancel: () => void }) {
   const variant = intake.kind === "upload" ? "upload" : "text";
   const steps = useMemo(() => (variant === "upload" ? STEPS_UPLOAD : STEPS_TEXT), [variant]);
   const [stepIndex, setStepIndex] = useState(0);
   const [stepProgress, setStepProgress] = useState(0);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduceMotion(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -79,6 +88,9 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
   }, [steps.length]);
 
   useEffect(() => {
+    if (reduceMotion) {
+      return;
+    }
     const resetId = window.setTimeout(() => {
       setStepProgress(0);
     }, 0);
@@ -89,19 +101,22 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
       window.clearTimeout(resetId);
       window.clearInterval(id);
     };
-  }, [stepIndex]);
+  }, [reduceMotion, stepIndex]);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-3 font-sans sm:px-4">
-      <main className="bys-float-shadow overflow-hidden rounded-[2rem] bg-[#ffffff] shadow-[0px_24px_64px_rgba(25,28,30,0.06)]">
-        <div className="border-b border-[#e8eaef] px-4 py-4 sm:px-6 sm:py-5">
+      <section
+        aria-labelledby="analysis-progress-heading"
+        className="bys-float-shadow overflow-hidden rounded-2xl bg-card"
+      >
+        <div className="border-b border-border px-4 py-4 sm:px-6 sm:py-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="font-[family-name:var(--font-headline)] text-xs font-bold uppercase tracking-[0.22em] text-[#00246a]">
+            <p className="font-[family-name:var(--font-headline)] text-xs font-bold uppercase tracking-[0.22em] text-primary">
               Analysis in progress
             </p>
             <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#00246a]/40 opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#00246a]" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/40 opacity-75 motion-reduce:animate-none" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
             </span>
           </div>
         </div>
@@ -109,40 +124,40 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
         <div className="grid gap-10 px-4 py-8 sm:gap-12 sm:px-6 sm:py-10 lg:grid-cols-2 lg:items-start lg:gap-14">
           <div className="space-y-8">
             <div className="space-y-3">
-              <h1 className="font-[family-name:var(--font-headline)] text-2xl font-extrabold leading-tight tracking-tight text-[#00246a] sm:text-3xl lg:text-[2rem]">
+              <h1 id="analysis-progress-heading" className="font-[family-name:var(--font-headline)] text-2xl font-extrabold leading-tight tracking-tight text-primary sm:text-3xl lg:text-[2rem]">
                 Reviewing your lease
               </h1>
-              <p className="max-w-md text-sm leading-relaxed text-[#505f76] sm:text-base">
+              <p className="max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
                 We&apos;re extracting key terms, checking notable clauses, and generating a plain-English report.
                 Progress below is estimated — not a live server stage.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-[#e8eaef]/80 bg-[#f7f9fb] p-5 shadow-sm">
+            <div className="rounded-2xl border border-border/80 bg-secondary p-5 shadow-sm">
               <div className="flex gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#ffffff] shadow-sm ring-1 ring-[#e8eaef]">
-                  <FileText className="h-6 w-6 text-[#00246a]" strokeWidth={1.75} aria-hidden />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-card shadow-sm ring-1 ring-border">
+                  <FileText className="h-6 w-6 text-primary" strokeWidth={1.75} aria-hidden />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-[family-name:var(--font-headline)] text-sm font-bold text-[#191c1e] sm:text-base">
+                  <p className="font-[family-name:var(--font-headline)] text-sm font-bold text-foreground sm:text-base">
                     {fileLabel(intake)}
                   </p>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#757682]">
+                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                     {readySubtitle(intake)}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 text-sm text-[#505f76]">
-              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-[#00246a]" strokeWidth={1.75} aria-hidden />
+            <div className="flex items-start gap-3 text-sm text-muted-foreground">
+              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-primary" strokeWidth={1.75} aria-hidden />
               <p className="leading-snug">This usually finishes in under a minute.</p>
             </div>
           </div>
 
-          <div className="relative rounded-[1.75rem] bg-[#f2f4f6] p-4 sm:p-5">
+          <div className="relative rounded-[1.75rem] bg-muted p-4 sm:p-5">
             <div
-              className="pointer-events-none absolute inset-0 rounded-[1.75rem] ring-1 ring-[#e0e3e8]/80"
+              className="pointer-events-none absolute inset-0 rounded-[1.75rem] ring-1 ring-border/80"
               aria-hidden
             />
 
@@ -164,7 +179,7 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
                           <span
                             className={[
                               "absolute left-1/2 top-9 bottom-0 w-0.5 -translate-x-1/2 sm:top-10",
-                              done ? "bg-[#00246a]" : "bg-[#d8dce2]",
+                              done ? "bg-primary" : "bg-border",
                             ].join(" ")}
                             aria-hidden
                           />
@@ -172,14 +187,14 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
                         <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center sm:h-10 sm:w-10">
                           {done ? (
                             <span
-                              className="flex h-9 w-9 items-center justify-center rounded-full bg-[#00246a] text-sm font-bold text-white shadow-sm tabular-nums sm:h-10 sm:w-10 sm:text-base"
+                              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-sm tabular-nums sm:h-10 sm:w-10 sm:text-base"
                               aria-label={`Step ${i + 1} complete`}
                             >
                               {i + 1}
                             </span>
                           ) : current ? (
                             <span
-                              className="flex h-9 w-9 items-center justify-center rounded-full bg-[#dbe1ff] text-sm font-bold text-[#00246a] shadow-sm ring-2 ring-[#00246a]/25 tabular-nums sm:h-10 sm:w-10 sm:text-base"
+                              className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-sm font-bold text-primary shadow-sm ring-2 ring-ring/25 tabular-nums sm:h-10 sm:w-10 sm:text-base"
                               aria-current="step"
                               aria-label={`Step ${i + 1} in progress`}
                             >
@@ -187,7 +202,7 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
                             </span>
                           ) : (
                             <span
-                              className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#d8dce2] bg-[#ffffff] text-sm font-bold text-[#9ca3af] tabular-nums sm:h-10 sm:w-10 sm:text-base"
+                              className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-border bg-card text-sm font-bold text-muted-foreground tabular-nums sm:h-10 sm:w-10 sm:text-base"
                               aria-label={`Step ${i + 1} pending`}
                             >
                               {i + 1}
@@ -201,13 +216,13 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
                           <p
                             className={[
                               "font-[family-name:var(--font-headline)] text-sm font-bold sm:text-[15px]",
-                              done || current ? "text-[#00246a]" : "text-[#9ca3af]",
+                              done || current ? "text-primary" : "text-muted-foreground",
                             ].join(" ")}
                           >
                             {step.title}
                           </p>
-                          {current ? (
-                            <span className="text-xs font-bold tabular-nums text-[#00246a]">
+                          {current && !reduceMotion ? (
+                            <span className="text-xs font-bold tabular-nums text-primary">
                               {Math.min(99, Math.round(stepProgress))}%
                             </span>
                           ) : null}
@@ -215,15 +230,15 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
                         <p
                           className={[
                             "mt-1.5 text-[13px] leading-relaxed sm:text-sm",
-                            pending ? "italic text-[#9ca3af]" : "text-[#505f76]",
+                            pending ? "italic text-muted-foreground" : "text-muted-foreground",
                           ].join(" ")}
                         >
                           {sub}
                         </p>
-                        {current ? (
-                          <div className="mt-3 h-2 w-full max-w-md overflow-hidden rounded-full bg-[#e0e3e8]">
+                        {current && !reduceMotion ? (
+                          <div className="mt-3 h-2 w-full max-w-md overflow-hidden rounded-full bg-border">
                             <div
-                              className="h-full rounded-full bg-gradient-to-r from-[#00246a] to-[#3b6fd9] transition-[width] duration-300 ease-out"
+                              className="h-full rounded-full bg-gradient-to-r from-primary to-evidence transition-[width] duration-300 ease-out motion-reduce:transition-none"
                               style={{ width: `${Math.min(99, stepProgress)}%` }}
                             />
                           </div>
@@ -235,18 +250,26 @@ export function AnalysisInProgressView({ intake }: { intake: Intake }) {
               </ol>
             </div>
 
-            <div className="mt-5 flex justify-end sm:mt-6">
-              <div className="flex items-center gap-2 rounded-full border border-[#e8eaef] bg-[#ffffff] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#505f76] shadow-sm">
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 sm:mt-6">
+              <button
+                type="button"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-card px-4 text-sm font-semibold text-foreground hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+                onClick={onCancel}
+              >
+                <X className="h-4 w-4" aria-hidden />
+                Cancel analysis
+              </button>
+              <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground shadow-sm">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#22c55e]/50 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#22c55e]" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success/50 opacity-75 motion-reduce:animate-none" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
                 </span>
                 In progress
               </div>
             </div>
           </div>
         </div>
-      </main>
+      </section>
     </div>
   );
 }

@@ -41,7 +41,7 @@ export function assembleSuccessResponse(input: {
     utilitiesSnippets: input.deterministic.utilitiesSnippets,
     ruleBasedFindings: input.deterministic.ruleBasedFindings,
     unclearLeasePhrases: input.deterministic.unclearLeasePhrases,
-    texasRenterFindings: input.deterministic.texasRenterFindings,
+    texasRenterFindings: input.engine.texasRenterFindings ?? input.deterministic.texasRenterFindings,
     deterministicRiskScore: input.deterministic.deterministicRisk.score,
     deterministicRiskBand: input.deterministic.deterministicRisk.band,
     deterministicRiskReasons: input.deterministic.deterministicRisk.reasons,

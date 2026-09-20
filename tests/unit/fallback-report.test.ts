@@ -413,6 +413,22 @@ describe("buildRuleOnlyFallbackReport", () => {
     expect(report.potentialRedFlags.map((finding) => finding.severity)).toEqual(["minor", "minor"]);
   });
 
+  it("does not relabel a maintenance clause as a guest finding because guests are mentioned incidentally", () => {
+    const quote =
+      "Tenant must keep the unit clean and report problems promptly. Tenant is responsible for minor repairs when damage is caused by Tenant, a guest, or a pet. Landlord is responsible for major structural repairs.";
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages: [{ page: 1, text: quote }],
+      ruleBasedFindings: [{ category: "maintenance", page: 1, quote }],
+      deterministicRisk: { score: 2, band: "medium", reasons: [] },
+    });
+
+    expect(report.potentialRedFlags[0]).toMatchObject({
+      category: "maintenance",
+      title: "Maintenance responsibility may need clarification",
+    });
+  });
+
   it("diversifies red flags before filling remaining slots", () => {
     const report = buildRuleOnlyFallbackReport({
       documentId: "test-document",

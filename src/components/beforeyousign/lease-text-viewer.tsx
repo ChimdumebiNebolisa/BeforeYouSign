@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { EvidenceIndex } from "@/lib/evidence/index";
 import { lookupEvidenceHighlight } from "@/lib/evidence/index";
 
@@ -269,9 +269,9 @@ function renderHighlightedText({
       <mark
         data-bys-quote-highlight
         className={[
-          "rounded-sm px-0.5 text-[#191c1e] transition-colors duration-200",
+          "rounded-sm px-0.5 text-foreground transition-colors duration-200",
           evidenceLinked
-            ? "bys-quote-highlight bg-[#c7d6ff]/95 ring-1 ring-[#00246a]/18"
+            ? "bys-quote-highlight bg-evidence-surface/95 ring-1 ring-ring/20"
             : "bys-quote-highlight",
         ].join(" ")}
       >
@@ -285,14 +285,12 @@ function renderHighlightedText({
 function LeasePageBlock({
   pageNumber,
   text,
-  scrollToPage,
   highlight,
   evidenceLinked,
   evidenceIndex,
 }: {
   pageNumber: number;
   text: string;
-  scrollToPage?: number | null;
   highlight?: {
     page: number;
     quote: string;
@@ -304,29 +302,14 @@ function LeasePageBlock({
   evidenceLinked?: boolean;
   evidenceIndex?: EvidenceIndex;
 }) {
-  const rootRef = useRef<HTMLElement | null>(null);
   const match =
     highlight?.page === pageNumber ? resolveHighlight(text, highlight, evidenceIndex) : null;
   const displayLines = buildDisplayLines(text, match);
 
-  useEffect(() => {
-    if (scrollToPage !== pageNumber || !rootRef.current) return;
-    rootRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [scrollToPage, pageNumber]);
-
-  useEffect(() => {
-    if (!match || !rootRef.current) return;
-    const id = window.setTimeout(() => {
-      const mark = rootRef.current?.querySelector("[data-bys-quote-highlight]");
-      mark?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 320);
-    return () => window.clearTimeout(id);
-  }, [match]);
-
   return (
-    <article ref={rootRef} id={`bys-page-${pageNumber}`} className="mb-6 last:mb-0">
-      <h4 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#757682]">Page {pageNumber}</h4>
-      <div className="mt-3 space-y-1.5 break-words text-left text-sm leading-relaxed text-[#444651]">
+    <article data-page-number={pageNumber} id={`bys-page-${pageNumber}`} className="mb-6 last:mb-0">
+      <h4 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Page {pageNumber}</h4>
+      <div className="mt-3 space-y-1.5 break-words text-left text-sm leading-relaxed text-muted-foreground">
         {displayLines.map((line, i) => {
           if (line.hidden) return null;
 
@@ -334,9 +317,9 @@ function LeasePageBlock({
             return (
               <aside
                 key={`${line.start}-${i}`}
-                className="rounded-lg border border-[#dbe1ff] bg-[#f5f7ff] px-3 py-2.5 text-[11px] leading-relaxed text-[#505f76]"
+                className="rounded-lg border border-evidence/30 bg-evidence-surface px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground"
               >
-                <span className="font-semibold uppercase tracking-[0.1em] text-[#00246a]">Document note</span>
+                <span className="font-semibold uppercase tracking-[0.1em] text-primary">Document note</span>
                 <span className="mt-1 block">
                   {renderHighlightedText({ text: line.text, start: line.start, match, evidenceLinked })}
                 </span>
@@ -348,7 +331,7 @@ function LeasePageBlock({
             return (
               <p
                 key={`${line.start}-${i}`}
-                className="pt-3 first:pt-0 font-[family-name:var(--font-headline)] text-[13px] font-bold leading-snug tracking-tight text-[#191c1e]"
+                className="pt-3 first:pt-0 font-[family-name:var(--font-headline)] text-[13px] font-bold leading-snug tracking-tight text-foreground"
               >
                 {renderHighlightedText({ text: line.text, start: line.start, match, evidenceLinked })}
               </p>
@@ -359,9 +342,9 @@ function LeasePageBlock({
             return (
               <div
                 key={`${line.start}-${i}`}
-                className="flex flex-col gap-0.5 rounded-md bg-[#f7f9fb] px-2 py-1.5 text-[13px] leading-snug sm:flex-row sm:gap-3"
+                className="flex flex-col gap-0.5 rounded-md bg-secondary px-2 py-1.5 text-[13px] leading-snug sm:flex-row sm:gap-3"
               >
-                <span className="shrink-0 font-semibold text-[#191c1e] sm:w-32">
+                <span className="shrink-0 font-semibold text-foreground sm:w-32">
                   {renderHighlightedText({
                     text: line.meta.label,
                     start: line.start + line.meta.labelStart,
@@ -369,7 +352,7 @@ function LeasePageBlock({
                     evidenceLinked,
                   })}
                 </span>
-                <span className="min-w-0 text-[#444651]">
+                <span className="min-w-0 text-muted-foreground">
                   {renderHighlightedText({
                     text: line.meta.value,
                     start: line.start + line.meta.valueStart,
@@ -382,7 +365,7 @@ function LeasePageBlock({
           }
 
           return (
-            <p key={`${line.start}-${i}`} className="text-[13px] leading-relaxed text-[#444651]">
+            <p key={`${line.start}-${i}`} className="text-[13px] leading-relaxed text-muted-foreground">
               {renderHighlightedText({ text: line.text, start: line.start, match, evidenceLinked })}
             </p>
           );
@@ -394,7 +377,6 @@ function LeasePageBlock({
 
 export function LeaseTextViewer({
   pages,
-  scrollToPage,
   highlight,
   evidenceLinked,
   evidenceIndex,
@@ -402,9 +384,10 @@ export function LeaseTextViewer({
   fileLabel,
   textPanelExpanded,
   onTextPanelExpandedChange,
+  returnToFindingLabel,
+  onReturnToFinding,
 }: {
   pages: LeaseTextPage[];
-  scrollToPage?: number | null;
   highlight?: {
     page: number;
     quote: string;
@@ -419,29 +402,57 @@ export function LeaseTextViewer({
   fileLabel?: string;
   textPanelExpanded: boolean;
   onTextPanelExpandedChange: (expanded: boolean) => void;
+  returnToFindingLabel?: string | null;
+  onReturnToFinding?: (() => void) | null;
 }) {
   const sorted = [...pages].sort((a, b) => a.page - b.page);
   const bodyId = useId();
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+  const headingRef = useRef<HTMLHeadingElement | null>(null);
+  const [announcement, setAnnouncement] = useState("");
+
+  useEffect(() => {
+    if (!highlight || !textPanelExpanded) return;
+    const frame = window.requestAnimationFrame(() => {
+      const body = bodyRef.current;
+      const page = body?.querySelector<HTMLElement>(`[data-page-number="${highlight.page}"]`);
+      const target = page?.querySelector<HTMLElement>("[data-bys-quote-highlight]") ?? page;
+      if (!body || !target) return;
+
+      const bodyRect = body.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const targetTop = body.scrollTop + targetRect.top - bodyRect.top - (body.clientHeight - targetRect.height) / 2;
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      body.scrollTo({ top: Math.max(0, targetTop), behavior: reduceMotion ? "auto" : "smooth" });
+      headingRef.current?.focus({ preventScroll: true });
+      setAnnouncement(`Evidence highlighted on page ${highlight.page}.`);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [highlight, textPanelExpanded]);
 
   const headerBody = (
     <div className="min-w-0 flex-1">
       <div className="flex flex-wrap items-center gap-2">
-        <p className="font-[family-name:var(--font-headline)] text-[13px] font-bold tracking-tight text-[#191c1e] truncate">
+        <h2
+          ref={headingRef}
+          tabIndex={-1}
+          className="font-[family-name:var(--font-headline)] text-[13px] font-bold tracking-tight text-foreground truncate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+        >
           {fileLabel ?? "Lease text"}
-        </p>
+        </h2>
         {evidenceLinked ? (
-          <span className="rounded-full bg-[#dbe1ff] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#00246a]">
+          <span className="rounded-full bg-accent px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-primary">
             Linked
           </span>
         ) : null}
       </div>
-      <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-[#757682]">
+      <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
         {sorted.length} page{sorted.length === 1 ? "" : "s"}
         {evidenceLinked ? " · selection below" : ""}
         {textPanelExpanded ? "" : " · text hidden"}
       </p>
       {extractedFromPdf ? (
-        <p className="mt-1.5 text-[10px] font-normal normal-case leading-snug text-[#444651]">
+        <p className="mt-1.5 text-[10px] font-normal normal-case leading-snug text-muted-foreground">
           Extracted text (fallback when precise PDF highlighting isn&apos;t available).
         </p>
       ) : null}
@@ -450,19 +461,29 @@ export function LeaseTextViewer({
 
   return (
     <div
+      data-lease-text-viewer
       className={[
-        "flex flex-col overflow-hidden rounded-lg bg-[#f2f4f6] shadow-sm transition-[box-shadow,max-height,min-height] duration-200",
+        "flex flex-col overflow-hidden rounded-lg border border-border bg-muted transition-[max-height,min-height] duration-200 motion-reduce:transition-none",
         textPanelExpanded
-          ? "max-h-[min(70vh,calc(100vh-140px))] min-h-[200px]"
+          ? "max-h-[70vh] min-h-[200px] xl:h-[70vh] xl:max-h-[70vh]"
           : "min-h-0 max-h-none",
-        evidenceLinked ? "ring-2 ring-[#00246a]/18 shadow-[0px_12px_36px_rgba(0,36,106,0.08)]" : "",
+        evidenceLinked ? "ring-2 ring-ring/20" : "",
       ].join(" ")}
     >
-      <div className="flex shrink-0 items-start gap-3 border-b border-[#e6e8ea]/80 px-3 py-2.5 sm:px-4">
+      <div className="flex shrink-0 items-start gap-3 border-b border-border/80 px-3 py-2.5 sm:px-4">
         {headerBody}
+        {evidenceLinked && onReturnToFinding ? (
+          <button
+            type="button"
+            className="inline-flex min-h-11 shrink-0 items-center rounded-md px-2 text-xs font-semibold text-link underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+            onClick={onReturnToFinding}
+          >
+            Back to {returnToFindingLabel ?? "finding"}
+          </button>
+        ) : null}
         <button
           type="button"
-          className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#e6e8ea] bg-[#ffffff] text-[#757682] shadow-sm transition hover:bg-[#f7f9fb] hover:text-[#191c1e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00246a]/25"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-card text-muted-foreground shadow-sm transition hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/25"
           aria-expanded={textPanelExpanded}
           aria-controls={bodyId}
           aria-label={textPanelExpanded ? "Collapse extracted text" : "Expand extracted text"}
@@ -470,7 +491,7 @@ export function LeaseTextViewer({
         >
           <ChevronDown
             className={[
-              "h-5 w-5 transition-transform duration-200",
+              "h-5 w-5 transition-transform duration-200 motion-reduce:rotate-0 motion-reduce:transition-none",
               textPanelExpanded ? "rotate-180" : "rotate-0",
             ].join(" ")}
             aria-hidden
@@ -480,8 +501,9 @@ export function LeaseTextViewer({
 
       {textPanelExpanded ? (
         <div
+          ref={bodyRef}
           id={bodyId}
-          className="min-h-0 flex-1 overflow-y-auto rounded-b-lg bg-[#ffffff] p-3.5 shadow-inner sm:p-4"
+          className="min-h-0 flex-1 overflow-y-auto rounded-b-lg bg-card p-3.5 sm:p-4"
           aria-label="Extracted lease text"
         >
           {sorted.map((p) => (
@@ -489,7 +511,6 @@ export function LeaseTextViewer({
               key={p.page}
               pageNumber={p.page}
               text={p.text}
-              scrollToPage={scrollToPage}
               highlight={highlight}
               evidenceLinked={evidenceLinked}
               evidenceIndex={evidenceIndex}
@@ -497,6 +518,9 @@ export function LeaseTextViewer({
           ))}
         </div>
       ) : null}
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </p>
     </div>
   );
 }

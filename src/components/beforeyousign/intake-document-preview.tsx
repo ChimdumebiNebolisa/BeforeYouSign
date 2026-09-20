@@ -91,23 +91,23 @@ export function IntakeDocumentPreview({ intake }: { intake: IntakeDocumentPrevie
       : textSnippet(intake.text, 220) || "No text to preview.";
 
   return (
-    <div className="rounded-2xl border border-[#e8eaef]/80 bg-[#f7f9fb] p-5 shadow-sm">
+    <div className="rounded-2xl border border-border/80 bg-secondary p-5 shadow-sm">
       <div className="flex gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#ffffff] shadow-sm ring-1 ring-[#e8eaef]">
-          <FileText className="h-6 w-6 text-[#00246a]" strokeWidth={1.75} aria-hidden />
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-card shadow-sm ring-1 ring-border">
+          <FileText className="h-6 w-6 text-primary" strokeWidth={1.75} aria-hidden />
         </div>
         <div className="min-w-0 flex-1 space-y-3">
           <div>
-            <p className="font-[family-name:var(--font-headline)] text-sm font-bold text-[#191c1e] sm:text-base">
+            <p className="font-[family-name:var(--font-headline)] text-sm font-bold text-foreground sm:text-base">
               {title}
             </p>
-            <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#757682]">{metaLine}</p>
+            <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{metaLine}</p>
           </div>
-          <div className="rounded-xl border border-[#e0e3e8]/90 bg-[#ffffff] px-3 py-2.5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#757682]">{previewLabel}</p>
+          <div className="rounded-xl border border-border/90 bg-card px-3 py-2.5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{previewLabel}</p>
             <p
               className={[
-                "mt-1.5 text-[13px] leading-snug text-[#444651]",
+                "mt-1.5 text-[13px] leading-snug text-muted-foreground",
                 intake.kind === "upload" ? "" : "max-h-[4.5rem] overflow-hidden font-mono text-[12px]",
               ].join(" ")}
             >

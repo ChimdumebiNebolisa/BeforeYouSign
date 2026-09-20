@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LeaseTextViewer } from "@/components/beforeyousign/lease-text-viewer";
 import { LeaseReportView } from "@/components/beforeyousign/lease-report";
 import { parseBeforeYouSignReportJson, type BeforeYouSignReport } from "@/lib/analysis/schema";
-import type { EvidenceClickArgs } from "@/lib/analysis/api-schema";
+import type { EvidenceNavigationTarget } from "@/lib/analysis/api-schema";
 import type { AnalysisSuccessResponse } from "@/lib/analysis/pipeline/types";
 import type { TexasRenterFinding } from "@/lib/legal-reference/texas-renter-scan";
 import { AnalysisInProgressView } from "@/components/beforeyousign/analysis-in-progress";
@@ -23,6 +23,8 @@ import { FixedReportDisclaimer, LocalLawBanner } from "@/components/beforeyousig
 import type { EvidenceIndex } from "@/lib/evidence/index";
 import { OCR_WARNING } from "@/lib/public-copy";
 import { getStateGuidanceStatus, getStateName, type StateCode } from "@/lib/jurisdiction/states";
+import { ReportDownloadButton } from "@/components/beforeyousign/report-download-button";
+import { ChecklistDownloadButton } from "@/components/beforeyousign/checklist-download-button";
 
 type IntakeState =
   | { kind: "upload"; file: File }
@@ -31,18 +33,29 @@ type IntakeState =
 
 const ANALYSIS_REQUEST_TIMEOUT_MS = 55_000;
 
-async function fetchAnalysis(input: RequestInfo | URL, init: RequestInit): Promise<Response> {
+async function fetchAnalysis(
+  input: RequestInfo | URL,
+  init: RequestInit,
+  externalSignal: AbortSignal,
+): Promise<Response> {
   const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), ANALYSIS_REQUEST_TIMEOUT_MS);
+  let timedOut = false;
+  const abortFromExternal = () => controller.abort();
+  externalSignal.addEventListener("abort", abortFromExternal, { once: true });
+  const timeoutId = window.setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, ANALYSIS_REQUEST_TIMEOUT_MS);
   try {
     return await fetch(input, { ...init, signal: controller.signal });
   } catch (error) {
-    if (controller.signal.aborted) {
+    if (timedOut) {
       throw new Error("Analysis took too long to finish. Please retry or paste the lease text instead.");
     }
     throw error;
   } finally {
     window.clearTimeout(timeoutId);
+    externalSignal.removeEventListener("abort", abortFromExternal);
   }
 }
 
@@ -79,24 +92,35 @@ export function LandingClient() {
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [viewerTargetPage, setViewerTargetPage] = useState<number | null>(null);
-  const [viewerHighlight, setViewerHighlight] = useState<EvidenceClickArgs | null>(null);
+  const [viewerHighlight, setViewerHighlight] = useState<EvidenceNavigationTarget | null>(null);
   const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
   const [leaseTextPanelExpanded, setLeaseTextPanelExpanded] = useState(true);
   const [intakeTab, setIntakeTab] = useState<"upload" | "paste" | "sample">("upload");
   const [stateCode, setStateCode] = useState<StateCode>("TX");
   const [stateConfirmed, setStateConfirmed] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const activeAnalysisControllerRef = useRef<AbortController | null>(null);
+  const analysisRequestIdRef = useRef(0);
+  const completionHeadingRef = useRef<HTMLHeadingElement | null>(null);
+  const errorHeadingRef = useRef<HTMLHeadingElement | null>(null);
+  const continueButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const scrollToIntake = () => {
-    document.getElementById("review-intake")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById("review-intake")?.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
   };
 
   useEffect(() => {
     const handleGoHome = () => {
+      activeAnalysisControllerRef.current?.abort();
+      activeAnalysisControllerRef.current = null;
+      analysisRequestIdRef.current += 1;
       setUploadReceipt(null);
       setIsSubmitting(false);
       setErrorMessage(null);
-      setViewerTargetPage(null);
       setViewerHighlight(null);
       setSelectedFindingId(null);
       setLeaseTextPanelExpanded(true);
@@ -104,12 +128,36 @@ export function LandingClient() {
       setIntakeTab("upload");
       setStateCode("TX");
       setStateConfirmed(false);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      setStatusMessage(null);
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
     };
 
     window.addEventListener("bys:go-home", handleGoHome);
     return () => window.removeEventListener("bys:go-home", handleGoHome);
   }, []);
+
+  useEffect(() => {
+    return () => activeAnalysisControllerRef.current?.abort();
+  }, []);
+
+  useEffect(() => {
+    if (!uploadReceipt) return;
+    const frame = window.requestAnimationFrame(() => completionHeadingRef.current?.focus({ preventScroll: true }));
+    return () => window.cancelAnimationFrame(frame);
+  }, [uploadReceipt]);
+
+  useEffect(() => {
+    if (!errorMessage) return;
+    const frame = window.requestAnimationFrame(() => errorHeadingRef.current?.focus({ preventScroll: true }));
+    return () => window.cancelAnimationFrame(frame);
+  }, [errorMessage]);
+
+  useEffect(() => {
+    if (statusMessage !== "Analysis canceled. Your lease is still ready to review.") return;
+    const frame = window.requestAnimationFrame(() => continueButtonRef.current?.focus({ preventScroll: true }));
+    return () => window.cancelAnimationFrame(frame);
+  }, [statusMessage]);
 
   const formatAnalysisError = (raw: string, status: number): string => {
     const trimmed = raw.trim();
@@ -126,14 +174,17 @@ export function LandingClient() {
   };
 
   const resetIntakeUi = () => {
+    activeAnalysisControllerRef.current?.abort();
+    activeAnalysisControllerRef.current = null;
+    analysisRequestIdRef.current += 1;
     setUploadReceipt(null);
     setIsSubmitting(false);
     setErrorMessage(null);
-    setViewerTargetPage(null);
     setViewerHighlight(null);
     setSelectedFindingId(null);
     setLeaseTextPanelExpanded(true);
     setStateConfirmed(false);
+    setStatusMessage(null);
   };
 
   const applyAnalysisResponse = useCallback((data: AnalysisSuccessResponse & {
@@ -150,6 +201,8 @@ export function LandingClient() {
       report,
       reportError: typeof data.reportError === "string" ? data.reportError : null,
     });
+    setLeaseTextPanelExpanded(window.matchMedia("(min-width: 1280px)").matches);
+    setStatusMessage(null);
   }, []);
 
   const runLeaseAnalysis = useCallback(async () => {
@@ -158,14 +211,18 @@ export function LandingClient() {
       setErrorMessage(`Confirm that this is a residential lease for a property in ${getStateName(stateCode)}.`);
       return;
     }
+    const requestController = new AbortController();
+    activeAnalysisControllerRef.current?.abort();
+    activeAnalysisControllerRef.current = requestController;
+    const requestId = analysisRequestIdRef.current + 1;
+    analysisRequestIdRef.current = requestId;
     try {
       setIsSubmitting(true);
       setErrorMessage(null);
       setUploadReceipt(null);
-      setViewerTargetPage(null);
       setViewerHighlight(null);
       setSelectedFindingId(null);
-      setLeaseTextPanelExpanded(true);
+      setStatusMessage(null);
 
       let res: Response;
       if (intake.kind === "upload") {
@@ -175,7 +232,7 @@ export function LandingClient() {
         res = await fetchAnalysis("/api/analyze", {
           method: "POST",
           body: formData,
-        });
+        }, requestController.signal);
       } else {
         res = await fetchAnalysis("/api/analyze", {
           method: "POST",
@@ -185,8 +242,10 @@ export function LandingClient() {
             fileName: intake.kind === "sample" ? "sample-lease.txt" : "pasted-lease.txt",
             stateCode,
           }),
-        });
+        }, requestController.signal);
       }
+
+      if (requestId !== analysisRequestIdRef.current) return;
 
       if (!res.ok) {
         const text = await res.text();
@@ -211,39 +270,233 @@ export function LandingClient() {
 
       const data = (await res.json()) as AnalysisSuccessResponse & { report?: unknown; reportError?: string | null };
 
+      if (requestId !== analysisRequestIdRef.current) return;
       applyAnalysisResponse(data);
     } catch (e) {
+      if (requestController.signal.aborted || requestId !== analysisRequestIdRef.current) return;
       setErrorMessage(e instanceof Error ? e.message : "Failed to run analysis on the server.");
     } finally {
-      setIsSubmitting(false);
+      if (requestId === analysisRequestIdRef.current) {
+        activeAnalysisControllerRef.current = null;
+        setIsSubmitting(false);
+      }
     }
   }, [intake, applyAnalysisResponse, stateCode, stateConfirmed]);
 
+  const cancelAnalysis = useCallback(() => {
+    activeAnalysisControllerRef.current?.abort();
+    activeAnalysisControllerRef.current = null;
+    analysisRequestIdRef.current += 1;
+    setIsSubmitting(false);
+    setErrorMessage(null);
+    setStatusMessage("Analysis canceled. Your lease is still ready to review.");
+  }, []);
+
   if (intake && isSubmitting) {
-    return <AnalysisInProgressView intake={intake} />;
+    return <AnalysisInProgressView intake={intake} onCancel={cancelAnalysis} />;
+  }
+
+  if (intake && uploadReceipt) {
+    const completedStateCode = uploadReceipt.stateCode ?? stateCode;
+    const isPdf =
+      Boolean(uploadReceipt.contentType?.toLowerCase().includes("pdf")) || /\.pdf$/i.test(uploadReceipt.fileName);
+    const extractedCharCount =
+      uploadReceipt.document?.extraction.totalChars ??
+      uploadReceipt.extractedPages?.reduce((total, page) => total + page.text.length, 0) ??
+      0;
+    const coverageStatus = uploadReceipt.document?.extraction.coverageStatus;
+    const showLowExtractionNote =
+      (isPdf && extractedCharCount > 0 && extractedCharCount < 400) ||
+      coverageStatus === "partial" ||
+      coverageStatus === "unreadable";
+    const reviewSteps =
+      uploadReceipt.report?.nextSteps.slice(0, 3).filter(Boolean) ?? [];
+    const fallbackReviewSteps = [
+      "Review the terms marked for attention and compare them with the lease wording.",
+      "Ask the report questions and request written clarification before signing.",
+      "Save your report and consult a tenant resource or attorney if an important term remains unclear.",
+    ];
+    const displayedReviewSteps = reviewSteps.length > 0 ? reviewSteps : fallbackReviewSteps;
+    const reviewAnotherLease = () => {
+      if (!window.confirm("Start another review? This in-memory report will be cleared.")) return;
+      resetIntakeUi();
+      setIntake(null);
+    };
+
+    return (
+      <div className="mx-auto w-full max-w-6xl px-4 font-sans">
+        <section
+          aria-labelledby="completed-review-heading"
+          className="min-w-0 rounded-2xl border border-border bg-card p-4 sm:p-8"
+        >
+          <header className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-start sm:justify-between sm:pb-6">
+            <div>
+              <p className="inline-flex rounded-full bg-success-surface px-3 py-1 text-xs font-semibold text-success">
+                Analysis complete
+              </p>
+              <h1
+                ref={completionHeadingRef}
+                id="completed-review-heading"
+                tabIndex={-1}
+                className="mt-1 font-[family-name:var(--font-headline)] text-3xl font-extrabold tracking-[-0.03em] text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:text-4xl"
+              >
+                Your lease review
+              </h1>
+              <p className="mt-2 hidden max-w-2xl text-sm leading-relaxed text-muted-foreground sm:block">
+                Start with the report, then open the source text when you want to verify a specific finding.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              className="hidden h-11 shrink-0 rounded-xl border-border bg-card text-foreground hover:bg-muted sm:inline-flex"
+              onClick={reviewAnotherLease}
+            >
+              Review another lease
+            </Button>
+          </header>
+
+          <dl className="mt-4 grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] gap-2 border-y border-border bg-muted/55 px-3 py-3 text-xs sm:px-4">
+            <div className="min-w-0">
+              <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Document</dt>
+              <dd className="mt-0.5 truncate font-semibold text-foreground">{uploadReceipt.fileName}</dd>
+            </div>
+            <div className="min-w-0">
+              <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Rental property</dt>
+              <dd className="mt-0.5 truncate font-semibold text-foreground">{getStateName(completedStateCode)}</dd>
+            </div>
+            <div>
+              <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Source</dt>
+              <dd className="mt-0.5 font-semibold text-foreground">
+                {uploadReceipt.extractedPages?.length ?? 0} page{uploadReceipt.extractedPages?.length === 1 ? "" : "s"}
+              </dd>
+            </div>
+          </dl>
+
+          {showLowExtractionNote ? (
+            <p className="mt-4 rounded-lg border border-warning/35 bg-warning-surface px-4 py-3 text-sm leading-relaxed text-warning">
+              {OCR_WARNING}
+            </p>
+          ) : null}
+
+          <div className="mt-5 grid min-w-0 gap-6 sm:mt-8 sm:gap-8 xl:grid-cols-[minmax(0,3fr)_minmax(25rem,2fr)] xl:items-start">
+            <div className="min-w-0 space-y-6">
+              {uploadReceipt.reportError ? (
+                <div className="rounded-xl bg-warning-surface p-4 text-sm text-warning">{uploadReceipt.reportError}</div>
+              ) : null}
+              {uploadReceipt.report ? (
+                <LeaseReportView
+                  report={uploadReceipt.report}
+                  texasRenterFindings={uploadReceipt.texasRenterFindings ?? []}
+                  stateCode={completedStateCode}
+                  stateGuidance={uploadReceipt.stateGuidance}
+                  selectedFindingId={selectedFindingId}
+                  evidenceSourceLabel={
+                    intake.kind === "sample" ? "sample lease" : intake.kind === "paste" ? "pasted text" : undefined
+                  }
+                  onOpenEvidence={(target) => {
+                    setSelectedFindingId(target.findingId ?? null);
+                    setViewerHighlight(target);
+                    setLeaseTextPanelExpanded(true);
+                  }}
+                />
+              ) : null}
+
+              {uploadReceipt.report ? (
+                <section aria-labelledby="review-ready-heading" className="border-y border-primary/25 bg-primary px-5 py-5 text-primary-foreground sm:px-6 sm:py-6">
+                  <h2 id="review-ready-heading" className="font-[family-name:var(--font-headline)] text-xl font-bold">
+                    Review ready
+                  </h2>
+                  <ol className="mt-4 space-y-3">
+                    {displayedReviewSteps.map((step, index) => (
+                      <li key={`${index}-${step.slice(0, 24)}`} className="flex gap-3 text-sm leading-relaxed text-primary-foreground/90">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15 text-xs font-bold tabular-nums">
+                          {index + 1}
+                        </span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <div className="mt-5 flex flex-wrap gap-3 border-t border-primary-foreground/25 pt-5">
+                    <ReportDownloadButton
+                      report={uploadReceipt.report}
+                      texasRenterFindings={uploadReceipt.texasRenterFindings ?? []}
+                      stateCode={completedStateCode}
+                      stateGuidance={uploadReceipt.stateGuidance}
+                      fileName={uploadReceipt.fileName}
+                      mode={uploadReceipt.mode}
+                      deterministicRiskBand={uploadReceipt.deterministicRiskBand}
+                      deterministicRiskReasons={uploadReceipt.deterministicRiskReasons}
+                    />
+                    <ChecklistDownloadButton
+                      report={uploadReceipt.report}
+                      texasRenterFindings={uploadReceipt.texasRenterFindings ?? []}
+                      stateCode={completedStateCode}
+                      stateGuidance={uploadReceipt.stateGuidance}
+                      fileName={uploadReceipt.fileName}
+                    />
+                  </div>
+                </section>
+              ) : null}
+            </div>
+
+            {uploadReceipt.extractedPages && uploadReceipt.extractedPages.length > 0 ? (
+              <div className="min-w-0 xl:sticky xl:top-28">
+                <LeaseTextViewer
+                  pages={uploadReceipt.extractedPages}
+                  highlight={viewerHighlight}
+                  evidenceLinked={Boolean(viewerHighlight)}
+                  evidenceIndex={uploadReceipt.evidenceIndex}
+                  fileLabel={uploadReceipt.fileName}
+                  textPanelExpanded={leaseTextPanelExpanded}
+                  onTextPanelExpandedChange={setLeaseTextPanelExpanded}
+                  returnToFindingLabel={viewerHighlight?.originLabel}
+                  onReturnToFinding={
+                    viewerHighlight
+                      ? () => document.getElementById(viewerHighlight.returnFocusId)?.focus({ preventScroll: false })
+                      : null
+                  }
+                  extractedFromPdf={isPdf}
+                />
+              </div>
+            ) : null}
+          </div>
+
+          <div className="mt-8 space-y-4 border-t border-border pt-6">
+            <TechnicalDetailsPanel receipt={uploadReceipt} />
+            <div className="rounded-lg border border-border/35 bg-secondary px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
+              {(uploadReceipt.stateGuidance ?? getStateGuidanceStatus(completedStateCode)) === "supported"
+                ? `${getStateName(completedStateCode)} renter guidance is included using the supported statewide reference set. City rules are not checked.`
+                : `State-specific renter guidance is not currently available for ${getStateName(completedStateCode)}. This report contains general lease review only.`}
+            </div>
+            <LocalLawBanner />
+            {uploadReceipt.report ? <FixedReportDisclaimer report={uploadReceipt.report} /> : null}
+            <Button
+              variant="outline"
+              className="h-11 w-full rounded-xl border-border bg-card text-foreground hover:bg-muted sm:hidden"
+              onClick={reviewAnotherLease}
+            >
+              Review another lease
+            </Button>
+          </div>
+        </section>
+      </div>
+    );
   }
 
   if (intake) {
     return (
-      <div className="mx-auto w-full max-w-6xl px-4 font-sans">
-        <main
-          className={[
-            "bys-float-shadow flex min-w-0 flex-col gap-6 rounded-[2rem] bg-[#ffffff] p-5 sm:p-8",
-            uploadReceipt ? "" : "max-w-3xl mx-auto",
-          ].join(" ")}
+      <div className="mx-auto w-full max-w-3xl px-4 font-sans">
+        <section
+          aria-labelledby="lease-intake-heading"
+          className="bys-float-shadow flex min-w-0 flex-col gap-6 rounded-2xl border border-border bg-card p-5 sm:p-8"
         >
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#757682]">Lease review</p>
-              <h1 className="mt-1 font-[family-name:var(--font-headline)] text-2xl font-extrabold tracking-tight text-[#191c1e]">
-                Lease intake
-              </h1>
-            </div>
-          </div>
+          <h1 id="lease-intake-heading" className="font-[family-name:var(--font-headline)] text-2xl font-extrabold tracking-tight text-foreground">
+            Confirm your lease
+          </h1>
 
           <IntakeDocumentPreview intake={intake} />
 
-          <div className="rounded-xl border border-[#c5c5d3]/45 bg-[#f7f9fb] p-4">
+          <div className="rounded-xl border border-border/45 bg-secondary p-4">
             <div className="flex items-start gap-3">
               <input
                 id="state-lease-confirmation"
@@ -253,19 +506,25 @@ export function LandingClient() {
                   setStateConfirmed(event.target.checked);
                   if (event.target.checked) setErrorMessage(null);
                 }}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-[#00246a]"
+                className="mt-0.5 h-5 w-5 shrink-0 accent-primary"
               />
-              <label htmlFor="state-lease-confirmation" className="text-sm leading-relaxed text-[#444651]">
+              <label htmlFor="state-lease-confirmation" className="text-sm leading-relaxed text-muted-foreground">
                 I confirm this is a residential lease for a property in {getStateName(stateCode)}. State-specific
                 renter references are shown only when available for the selected state.
               </label>
             </div>
           </div>
 
+          {statusMessage ? (
+            <p role="status" aria-live="polite" className="rounded-lg bg-success-surface px-4 py-3 text-sm font-medium text-success">
+              {statusMessage}
+            </p>
+          ) : null}
+
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <Button
               variant="outline"
-              className="h-11 rounded-xl border-[#c5c5d3]/35 bg-[#f2f4f6] text-[#191c1e] hover:bg-[#eceef0]"
+              className="h-11 rounded-xl border-border/35 bg-muted text-foreground hover:bg-muted"
               onClick={() => {
                 resetIntakeUi();
                 setIntake(null);
@@ -273,131 +532,37 @@ export function LandingClient() {
             >
               Back to landing
             </Button>
-            {!uploadReceipt ? (
-              <Button
-                className="h-11 rounded-xl bys-gradient-cta px-6 text-white shadow-sm hover:opacity-95"
-                onClick={() => void runLeaseAnalysis()}
-                disabled={isSubmitting || !stateConfirmed}
-              >
-                {isSubmitting
-                  ? intake.kind === "upload"
-                    ? "Sending PDF..."
-                    : "Analyzing text..."
-                  : "Continue to analysis"}
-              </Button>
-            ) : null}
+            <Button
+              ref={continueButtonRef}
+              className="h-11 rounded-xl bys-gradient-cta px-6 text-primary-foreground shadow-sm hover:opacity-95"
+              onClick={() => void runLeaseAnalysis()}
+              disabled={isSubmitting || !stateConfirmed}
+            >
+              Continue to analysis
+            </Button>
           </div>
 
-          {uploadReceipt ? (
-            <>
-              {(() => {
-                const isPdf =
-                  Boolean(uploadReceipt.contentType?.toLowerCase().includes("pdf")) ||
-                  /\.pdf$/i.test(uploadReceipt.fileName);
-                const extractedCharCount =
-                  uploadReceipt.document?.extraction.totalChars ??
-                  uploadReceipt.extractedPages?.reduce((total, page) => total + page.text.length, 0) ??
-                  0;
-                const coverageStatus = uploadReceipt.document?.extraction.coverageStatus;
-                const showLowExtractionNote =
-                  (isPdf && extractedCharCount > 0 && extractedCharCount < 400) ||
-                  coverageStatus === "partial" ||
-                  coverageStatus === "unreadable";
-                return showLowExtractionNote ? (
-                  <p className="mt-2 rounded-lg border border-[#c5c5d3]/35 bg-[#f7f9fb] px-4 py-3 text-sm leading-relaxed text-[#444651]">
-                    {OCR_WARNING}
-                  </p>
-                ) : null;
-              })()}
-            <div className="mt-2 flex min-w-0 flex-col gap-8 lg:flex-row lg:items-start">
-              {uploadReceipt.extractedPages && uploadReceipt.extractedPages.length > 0 ? (
-                <div className="w-full min-w-0 lg:sticky lg:top-32 lg:w-[70%] lg:max-w-[70%] lg:shrink-0">
-                  <LeaseTextViewer
-                    pages={uploadReceipt.extractedPages}
-                    scrollToPage={viewerTargetPage}
-                    highlight={viewerHighlight}
-                    evidenceLinked={Boolean(viewerHighlight)}
-                    evidenceIndex={uploadReceipt.evidenceIndex}
-                    fileLabel={uploadReceipt.fileName}
-                    textPanelExpanded={leaseTextPanelExpanded}
-                    onTextPanelExpandedChange={setLeaseTextPanelExpanded}
-                    extractedFromPdf={
-                      Boolean(uploadReceipt.contentType?.toLowerCase().includes("pdf")) ||
-                      /\.pdf$/i.test(uploadReceipt.fileName)
-                    }
-                  />
-                </div>
-              ) : null}
-              <div className="min-w-0 flex-1 space-y-6">
-                {uploadReceipt.reportError ? (
-                  <div className="rounded-xl bg-[#fff7ed] p-4 text-sm text-[#9a3412]">{uploadReceipt.reportError}</div>
-                ) : null}
-                {uploadReceipt.report ? (
-                  <LeaseReportView
-                    report={uploadReceipt.report}
-                    texasRenterFindings={uploadReceipt.texasRenterFindings ?? []}
-                    stateCode={uploadReceipt.stateCode ?? stateCode}
-                    stateGuidance={uploadReceipt.stateGuidance}
-                    fileName={uploadReceipt.fileName}
-                    mode={uploadReceipt.mode}
-                    deterministicRiskBand={uploadReceipt.deterministicRiskBand}
-                    deterministicRiskReasons={uploadReceipt.deterministicRiskReasons}
-                    selectedFindingId={selectedFindingId}
-                    evidenceSourceLabel={
-                      intake.kind === "sample" ? "sample lease" : intake.kind === "paste" ? "pasted text" : undefined
-                    }
-                    onFlagEvidenceClick={({ page, quote, findingId, startIndex, endIndex, evidenceId, exact }) => {
-                      setSelectedFindingId(findingId ?? null);
-                      setViewerTargetPage(page);
-                      setViewerHighlight({
-                        page,
-                        quote,
-                        startIndex,
-                        endIndex,
-                        evidenceId,
-                        exact: exact ?? (startIndex !== undefined && endIndex !== undefined),
-                      });
-                      setLeaseTextPanelExpanded(true);
-                    }}
-                  />
-                ) : null}
-                <TechnicalDetailsPanel receipt={uploadReceipt} />
-                <div className="rounded-lg border border-[#c5c5d3]/35 bg-[#f7f9fb] px-4 py-3 text-[12px] leading-relaxed text-[#444651]">
-                  {((uploadReceipt.stateGuidance ?? getStateGuidanceStatus(uploadReceipt.stateCode ?? stateCode)) ===
-                    "supported")
-                    ? `${getStateName(uploadReceipt.stateCode ?? stateCode)} renter guidance is included using the supported statewide reference set. City rules are not checked.`
-                    : `State-specific renter guidance is not currently available for ${getStateName(uploadReceipt.stateCode ?? stateCode)}. This report contains general lease review only.`}
-                </div>
-                <LocalLawBanner />
-                {uploadReceipt.report ? <FixedReportDisclaimer report={uploadReceipt.report} /> : null}
-              </div>
-            </div>
-            </>
-          ) : null}
-
           {errorMessage ? (
-            <div className="mt-2 rounded-xl border border-[#fecaca] bg-[#fff1f2] p-4 text-sm text-[#991b1b]">
-              <h2 className="font-[family-name:var(--font-headline)] text-base font-bold text-[#7f1d1d]">
+            <div className="mt-2 rounded-xl border border-destructive/30 bg-destructive-surface p-4 text-sm text-destructive">
+              <h2
+                ref={errorHeadingRef}
+                tabIndex={-1}
+                className="font-[family-name:var(--font-headline)] text-base font-bold text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30"
+              >
                 We couldn&apos;t finish analysis
               </h2>
               <p className="mt-2 leading-relaxed">{errorMessage}</p>
-              <p className="mt-2 text-xs text-[#b91c1c]">
-                Your lease text was not changed. You can retry, go back to pick a different file, or paste the text
-                instead.
+              <p className="mt-2 text-xs text-destructive">
+                Your lease text was not changed. You can retry, go back to pick a different file, or paste the text instead.
               </p>
               <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                <Button
-                  className="h-11 rounded-xl bys-gradient-cta text-white"
-                  disabled={isSubmitting}
-                  onClick={() => void runLeaseAnalysis()}
-                >
+                <Button className="h-11 rounded-xl bys-gradient-cta text-primary-foreground" onClick={() => void runLeaseAnalysis()}>
                   Try again
                 </Button>
                 {intake.kind === "upload" ? (
                   <Button
                     variant="outline"
-                    className="h-11 rounded-xl border-[#fecaca] bg-white hover:bg-[#fff7f7]"
-                    disabled={isSubmitting}
+                    className="h-11 rounded-xl border-destructive/30 bg-card hover:bg-destructive-surface"
                     onClick={() => {
                       resetIntakeUi();
                       setIntake(null);
@@ -410,7 +575,7 @@ export function LandingClient() {
               </div>
             </div>
           ) : null}
-        </main>
+        </section>
       </div>
     );
   }

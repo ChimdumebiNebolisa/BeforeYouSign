@@ -119,13 +119,13 @@ async function run() {
   await page.goto(BASE, { waitUntil: "networkidle" });
   await page.getByRole("tab", { name: "Sample" }).click();
   await page.locator("#review-intake").getByRole("button", { name: "Run Sample Lease", exact: true }).click();
-  await page.getByText(/Lease intake/i).waitFor({ timeout: 10000 });
+  await page.getByRole("heading", { name: "Confirm your lease" }).waitFor({ timeout: 10000 });
   await page.locator("header").getByRole("button", { name: "BeforeYouSign" }).click();
   await page.waitForTimeout(600);
   note(
     "Nav: BeforeYouSign returns to landing",
     (await page.getByRole("heading", { name: /Understand your lease/i }).count()) > 0 &&
-      (await page.getByText(/Lease intake/i).count()) === 0,
+      (await page.getByRole("heading", { name: "Confirm your lease" }).count()) === 0,
   );
 
   // Run sample lease from hero
@@ -157,7 +157,7 @@ async function run() {
   await page.locator("#review-intake").getByRole("button", { name: "Run Sample Lease", exact: true }).click();
   await page.waitForTimeout(1500);
   await page.getByRole("button", { name: /Continue to analysis/i }).waitFor({ state: "visible", timeout: 15000 });
-  note("Sample lease reaches intake preview", /Lease intake/i.test(await page.locator("body").innerText()));
+  note("Sample lease reaches intake preview", /Confirm your lease/i.test(await page.locator("body").innerText()));
   await page.screenshot({ path: path.join(OUT, "02-intake-sample.png"), fullPage: true });
 
   await page.getByLabel(/I confirm this is a residential lease for a property in Texas/i).check();
@@ -168,7 +168,7 @@ async function run() {
 
   const reportBody = await page.locator("body").innerText();
   captureSnippet(reportBody, "report-desktop");
-  note("Report carousel renders", await page.getByText("Summary").first().isVisible());
+  note("Named report outline renders", await page.getByRole("navigation", { name: "Report sections" }).isVisible());
   note('Report shows "Review priority"', await page.getByText("Review priority", { exact: true }).first().isVisible());
   note('Report shows "Terms to review"', /Terms to review/i.test(reportBody));
   note("No numeric score in report UI", !/\(score\s|\bscore\s*:\s*\d|\bscore\s+\d/i.test(reportBody));
@@ -183,9 +183,10 @@ async function run() {
   await page.screenshot({ path: path.join(OUT, "04-technical-details.png"), fullPage: true });
 
   // Evidence highlight
-  const flagBtn = page.locator("[data-finding-id]").first();
-  if (await flagBtn.count()) {
-    await flagBtn.click();
+  await page.getByRole("button", { name: /Terms to review/i }).click();
+  const flagCard = page.locator("[data-finding-id]").filter({ has: page.getByRole("button", { name: "View in full lease" }) }).first();
+  if (await flagCard.count()) {
+    await flagCard.getByRole("button", { name: "View in full lease" }).click();
     await page.waitForTimeout(800);
     const markCount = await page.locator("mark").count();
     note("Evidence click highlights lease text", markCount > 0, `mark elements: ${markCount}`);
@@ -201,7 +202,7 @@ async function run() {
     "Monthly rent: $1200 due on the 1st.\nSecurity deposit: $1200.\nLate fee: $50 per day.",
   );
   await page.getByRole("button", { name: /Use pasted text/i }).click();
-  await page.getByText(/pasted-lease\.txt|Lease intake/i).first().waitFor({ timeout: 10000 });
+  await page.getByRole("heading", { name: "Confirm your lease" }).waitFor({ timeout: 10000 });
   note("Paste text reaches intake preview", true);
   await page.screenshot({ path: path.join(OUT, "06-paste-intake.png"), fullPage: true });
 
@@ -210,7 +211,7 @@ async function run() {
   const pdfPath = path.join(process.cwd(), "public", "samples", "lease-standard.pdf");
   const fileInput = page.locator('#review-intake input[type="file"]');
   await fileInput.setInputFiles(pdfPath);
-  await page.getByText(/Lease intake/i).waitFor({ timeout: 10000 });
+  await page.getByRole("heading", { name: "Confirm your lease" }).waitFor({ timeout: 10000 });
   note("PDF upload reaches intake preview", true);
   await page.screenshot({ path: path.join(OUT, "07-pdf-intake.png"), fullPage: true });
 

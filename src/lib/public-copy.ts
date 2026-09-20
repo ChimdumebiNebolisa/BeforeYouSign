@@ -27,6 +27,7 @@ export const OCR_WARNING =
   "Scanned image-only PDFs may not extract correctly. Paste the text if the report looks incomplete.";
 
 export const FOUND_IN_LEASE_BADGE = "Found in lease";
+export const GENERAL_GUIDANCE_BADGE = "General guidance";
 export const TEXAS_RENTER_CHECK_BADGE = "Texas renter check";
 export const MISSING_UNCLEAR_BADGE = "Missing or unclear";
 export const CITY_RULES_NOT_CHECKED_BADGE = "City rules are not checked";
