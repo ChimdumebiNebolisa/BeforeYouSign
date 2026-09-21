@@ -192,6 +192,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("preserves fixed and daily components of a late fee", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Late fee: Tenant must pay $50 plus $10 per day until the unpaid rent is paid in full.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Late fee",
+        value: "$50 plus $10 per day",
+      }),
+    );
+  });
+
   it("preserves the monthly cadence of a percentage late charge", () => {
     const pages = [
       {
