@@ -361,6 +361,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("preserves a per-diem late-fee rate", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Late fee: Tenant must pay $10 per diem until the unpaid rent is paid in full.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Late fee",
+        value: "$10 per diem",
+      }),
+    );
+  });
+
   it("keeps severity local to the finding instead of inheriting the report band", () => {
     const report = buildRuleOnlyFallbackReport({
       documentId: "test-document",
