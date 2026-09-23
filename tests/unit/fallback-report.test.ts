@@ -72,6 +72,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts an ordinal monthly notice deadline", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant must provide written notice on or before the 15th day of the month before the desired move-out date.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.noticeSnippets).toHaveLength(1);
+    expect(report.deadlinesAndNotice).toContainEqual(
+      expect.objectContaining({
+        label: "Notice requirement",
+        value: "the 15th day of the month",
+      }),
+    );
+  });
+
   it("extracts a written-notice deadline stated in hours", () => {
     const pages = [
       {
