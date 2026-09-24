@@ -212,6 +212,10 @@ export function findMaintenanceSnippets(pages: ExtractedTextPage[]): RentSnippet
       while ((match = pattern.exec(text)) !== null) {
         const quote = match[0].replace(/\s+/g, " ").trim();
         if (quote.length < 18) continue;
+        const protectedReturnCondition =
+          /\breturn\b[^.]{0,120}\bclean(?:liness)?\b/i.test(quote) &&
+          /\b(?:ordinary|normal)\s+wear\s+and\s+tear\s+(?:is\s+)?excepted\b/i.test(quote);
+        if (protectedReturnCondition) continue;
         matches.push({ page: page.page, quote });
       }
     }
