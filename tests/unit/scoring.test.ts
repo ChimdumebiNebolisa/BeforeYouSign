@@ -132,8 +132,20 @@ describe("computeDeterministicLeaseRisk", () => {
       findings: [{ category: "utilities", page: 1, quote: "All utilities are paid by Tenant." }],
       unclearPhrases: [],
     });
+    const reimbursed = computeDeterministicLeaseRisk({
+      fullText: "Utilities: Tenant shall reimburse Landlord for all water and sewer charges.",
+      findings: [
+        {
+          category: "utilities",
+          page: 1,
+          quote: "Utilities: Tenant shall reimburse Landlord for all water and sewer charges.",
+        },
+      ],
+      unclearPhrases: [],
+    });
 
     expect(vague.reasons).toContain("Utility responsibilities are not clearly split.");
     expect(assigned.reasons).not.toContain("Utility responsibilities are not clearly split.");
+    expect(reimbursed.reasons).not.toContain("Utility responsibilities are not clearly split.");
   });
 });
