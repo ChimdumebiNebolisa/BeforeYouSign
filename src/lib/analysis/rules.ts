@@ -223,7 +223,7 @@ export function findMaintenanceSnippets(pages: ExtractedTextPage[]): RentSnippet
 export function findUtilitiesSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\butilities\b[^.\n]{0,200}/gi,
-    /\b(?:tenant|landlord)\b[^.\n]{0,120}\b(?:responsible|pays?|payment)\b[^.\n]{0,120}\b(?:electric|gas|water|sewer|trash|internet|cable|heat)\b/gi,
+    /\b(?:tenant|landlord)\b[^.\n]{0,120}\b(?:responsible|pays?|payment|reimburs(?:e|es|ement))\b[^.\n]{0,120}\b(?:electric|gas|water|sewer|trash|internet|cable|heat)\b/gi,
     /\b(?:electric|gas|water|sewer|trash)\b[^.\n]{0,120}\b(?:tenant|landlord)\b/gi,
   ];
 

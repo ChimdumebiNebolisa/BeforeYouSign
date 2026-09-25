@@ -413,6 +413,28 @@ describe("buildRuleOnlyFallbackReport", () => {
     expect(report.potentialRedFlags.map((finding) => finding.severity)).toEqual(["minor", "minor"]);
   });
 
+  it("recognizes tenant utility reimbursement as a clear allocation", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant shall reimburse Landlord for all water, sewer, and trash charges.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.utilitiesSnippets).toHaveLength(1);
+    expect(report.responsibilities).toContain(
+      "Utilities: Tenant shall reimburse Landlord for all water, sewer, and trash",
+    );
+    expect(report.potentialRedFlags.find((finding) => finding.category === "utilities")?.severity).toBe("minor");
+  });
+
   it("does not relabel a maintenance clause as a guest finding because guests are mentioned incidentally", () => {
     const quote =
       "Tenant must keep the unit clean and report problems promptly. Tenant is responsible for minor repairs when damage is caused by Tenant, a guest, or a pet. Landlord is responsible for major structural repairs.";
