@@ -216,6 +216,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("preserves both parts of a fixed-plus-daily late charge", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Late charge: Tenant must pay $50 plus $10 per day until all past-due rent is paid.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Late fee",
+        value: "$50 plus $10 per day",
+      }),
+    );
+  });
+
   it("extracts a percentage-based payment convenience fee", () => {
     const pages = [
       {
