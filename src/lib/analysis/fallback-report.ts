@@ -129,7 +129,7 @@ function noticeLabelFromQuote(quote: string): string {
   if (/\brent increase\b|\bincrease rent\b|\brent may be adjusted\b/.test(q)) {
     return "Rent increase notice";
   }
-  if (/\bmove\s*out\b|\bmove-out\b|\bvacate\b/.test(q)) {
+  if (/\bmove\s*out\b|\bmove-out\b|\bvacat(?:e|ed|ing)\b/.test(q)) {
     return "Move-out notice";
   }
   if (/\brenew\b|\bnon-renew\b|\bend of the initial term\b|\bmonth-to-month\b/.test(q)) {
