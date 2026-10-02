@@ -525,7 +525,7 @@ export function buildRuleOnlyFallbackReport(input: {
       label: "Renewal Terms",
       value: /month-?to-?month/i.test(renewalFinding.quote)
         ? "Potential month-to-month renewal"
-        : "Review renewal clause",
+        : (extractDeadlineValue(renewalFinding.quote) ?? "Review renewal clause"),
       evidence: toEvidence(input.evidenceRegistry, input.documentId, renewalFinding, pageTexts, "renewal"),
     });
   }

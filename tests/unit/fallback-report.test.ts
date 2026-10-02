@@ -72,6 +72,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts a renewal deadline when notice is stated as notifying in writing", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "The lease renews automatically for another one-year term unless Tenant notifies Landlord in writing at least 30 days before the lease ends.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.noticeSnippets).toHaveLength(0);
+    expect(analysis.renewalSnippets).toHaveLength(1);
+    expect(report.deadlinesAndNotice).toContainEqual(
+      expect.objectContaining({
+        value: "30 days",
+      }),
+    );
+  });
+
   it("extracts a written-notice deadline stated in hours", () => {
     const pages = [
       {
