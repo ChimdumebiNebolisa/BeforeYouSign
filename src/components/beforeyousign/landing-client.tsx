@@ -551,7 +551,7 @@ export function LandingClient() {
             </Button>
             <Button
               ref={continueButtonRef}
-              className="h-11 rounded-xl bys-gradient-cta px-6 text-primary-foreground shadow-sm hover:opacity-95"
+              className="h-11 rounded-xl bys-gradient-cta px-6 text-primary-foreground shadow-sm transition-none hover:opacity-95 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
               onClick={() => void runLeaseAnalysis()}
               disabled={isSubmitting || !stateConfirmed}
             >
