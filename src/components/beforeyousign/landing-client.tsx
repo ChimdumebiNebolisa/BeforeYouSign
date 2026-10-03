@@ -87,6 +87,7 @@ export function LandingClient() {
     reportError?: string | null;
      analysisVersion?: number;
     mode?: AnalysisSuccessResponse["mode"];
+    groundingSummary?: AnalysisSuccessResponse["groundingSummary"];
     requestId?: string;
     evidenceIndex?: EvidenceIndex;
     document?: AnalysisSuccessResponse["document"];

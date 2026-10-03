@@ -20,15 +20,17 @@ The product's defining mechanism is evidence traceability: grounded guidance lin
 
 ## Operating Context
 
-The journey runs in one browser session: select a rental-property state, add a lease, confirm the document and jurisdiction, wait for a synchronous deterministic analysis, review the report and extracted text, and download a Markdown report or question checklist. Reports are not persisted across refreshes.
+The journey runs in one browser session: select a rental-property state, add a lease, confirm the document and jurisdiction, wait for synchronous hybrid analysis, review the report and extracted text, and download a Markdown report or question checklist. Reports are not persisted across refreshes.
 
 ## Capabilities and Constraints
 
-- Analysis is deterministic and rule-based through `POST /api/analyze`; no external model service is required.
+- `POST /api/analyze` uses OpenAI to propose candidate lease claims when configured. The server presents a model claim only after deterministic evidence, category, numeric/date, semantic, and polarity checks pass.
+- Deterministic clause scanning, review-priority scoring, and the complete rule-only report remain authoritative and are returned when AI is disabled, unavailable, invalid, or unsupported by the cited source.
 - Inputs are PDF upload, pasted text, and bundled samples. PDF analysis uses embedded text extraction and does not perform OCR.
 - Texas has statewide renter-reference checks. Other states receive general lease review with an explicit disclosure.
 - Reports are educational information, not legal advice, and do not decide whether a term is lawful or whether the renter should sign.
 - Evidence may be presented as found in the lease only when its page, offsets, quote, and category relevance are verified.
+- AI-assisted review sends extracted lease text to OpenAI through the API. The request uses `store: false`; OpenAI does not train on API data by default and may retain content for abuse monitoring under its API data policy.
 - The supported visual theme is light-only.
 - There are no accounts, persisted reports, background jobs, or recovery tokens.
 

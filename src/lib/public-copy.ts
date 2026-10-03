@@ -2,13 +2,13 @@
 
 /** Landing intake/footer — processing only; legal disclaimer lives in hero + footer disclaimer. */
 export const LANDING_PRIVACY_PROCESSING =
-  "We do not save your lease or report after you close the page. Lease text is processed on our server for this one-time review.";
+  "We do not save your lease or report after you close the page. For AI-assisted review, extracted lease text is sent to OpenAI through its API. OpenAI does not train its models on API data by default and may retain API content for up to 30 days for abuse monitoring.";
 
 export const UPLOAD_LIMITS_NOTE =
   "PDF uploads are limited to 4 MB, 100 pages, and 120,000 extracted characters. Pasted text is limited to 120,000 characters.";
 
 export const PRIVACY_CONTINUE_LINE =
-  "By continuing, you submit lease text for one-time analysis. Do not upload documents you are not comfortable processing through this tool.";
+  "By continuing, you submit lease text to BeforeYouSign and OpenAI for this one-time review. Do not upload documents you are not comfortable sending to these services.";
 
 export const FIXED_REPORT_DISCLAIMER =
   "Educational information only. Not legal advice. BeforeYouSign helps you review lease wording and prepare questions, but it does not recommend whether to sign or whether a term is lawful.";
@@ -54,7 +54,7 @@ export const LANDING_FAQ = [
   {
     question: "Do you store my lease?",
     answer:
-      "The app does not use a database or save your report after you close the page. Lease text is processed on the server for the one-time review.",
+      "BeforeYouSign does not use a database or save your report after you close the page. AI-assisted review sends extracted lease text to OpenAI through its API; OpenAI may retain API content for up to 30 days for abuse monitoring.",
   },
   {
     question: "What if my PDF is scanned?",

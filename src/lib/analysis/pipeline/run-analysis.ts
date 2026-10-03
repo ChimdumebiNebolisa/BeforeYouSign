@@ -1,7 +1,7 @@
 import { analyzeDocument } from "@/lib/analysis/pipeline/analyze-document";
 import { assembleSuccessResponse } from "@/lib/analysis/pipeline/assemble-response";
 import { runDeterministicAnalysis } from "@/lib/analysis/pipeline/deterministic";
-import { createRuleOnlyAnalyzer } from "@/lib/analysis/pipeline/rule-only-analyzer";
+import { createOpenAiAnalyzer } from "@/lib/analysis/pipeline/openai-analyzer";
 import type {
   AnalysisEngine,
   AnalysisResponse,
@@ -24,7 +24,7 @@ export async function runAnalysisPipeline(input: {
   const requestId = createRequestId();
   const clientKey = getClientKey(input.request);
   const startedAt = Date.now();
-  const analyzer: AnalysisEngine = input.analyzer ?? createRuleOnlyAnalyzer();
+  const analyzer: AnalysisEngine = input.analyzer ?? createOpenAiAnalyzer();
 
   const slotProblem = acquireClientSlot(clientKey);
   if (slotProblem) {
@@ -115,6 +115,8 @@ export async function runAnalysisPipeline(input: {
       pageCount: documentResult.document.pages.length,
       totalChars: documentResult.document.extraction.totalChars,
       durationMs: Date.now() - startedAt,
+      groundedClaims: engine.groundingSummary?.groundedClaims,
+      droppedClaims: engine.groundingSummary?.droppedClaims,
     });
 
     return {

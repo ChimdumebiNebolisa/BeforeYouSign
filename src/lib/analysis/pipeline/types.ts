@@ -7,7 +7,13 @@ import type { ExtractedTextPage } from "@/lib/pdf/extract-text";
 import type { AnalysisStage } from "@/lib/analysis/pipeline/stages";
 import type { StateCode, StateGuidanceStatus } from "@/lib/jurisdiction/states";
 
-export type AnalysisMode = "rules_only";
+export type AnalysisMode = "model_grounded" | "rules_only";
+
+export type GroundingSummary = {
+  materialClaims: number;
+  groundedClaims: number;
+  droppedClaims: number;
+};
 
 export type ExtractionMethod = "embedded_text" | "pasted_text";
 
@@ -83,6 +89,7 @@ export type AnalysisSuccessResponse = {
   deterministicRiskReasons: string[];
   report: BeforeYouSignReport | null;
   reportError: string | null;
+  groundingSummary?: GroundingSummary;
   evidenceIndex?: EvidenceIndex;
 };
 
@@ -107,6 +114,7 @@ export type AnalysisEngineResult = {
   report: BeforeYouSignReport | null;
   reportError: string | null;
   mode: AnalysisMode;
+  groundingSummary?: GroundingSummary;
   evidenceIndex?: EvidenceIndex;
   texasRenterFindings?: TexasRenterFinding[];
 };
