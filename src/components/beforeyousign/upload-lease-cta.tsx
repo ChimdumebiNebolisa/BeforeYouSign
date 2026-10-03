@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState } from "react";
 import { Upload } from "lucide-react";
+import { OCR_WARNING } from "@/lib/public-copy";
 import { ANALYSIS_LIMITS } from "@/lib/analysis/limits";
 
 export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) => void }) {
@@ -87,6 +88,8 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
           </span>
         </button>
       </div>
+
+      <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{OCR_WARNING}</p>
 
       {errorMessage ? (
         <p className="mt-3 text-sm font-medium text-destructive" role="alert">

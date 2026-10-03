@@ -4,7 +4,7 @@ import { UploadLeaseCta } from "@/components/beforeyousign/upload-lease-cta";
 import { PasteTextDialog } from "@/components/beforeyousign/paste-text-dialog";
 import { SampleLeaseCta } from "@/components/beforeyousign/sample-lease-cta";
 import { STATE_OPTIONS, type StateCode } from "@/lib/jurisdiction/states";
-import { OCR_WARNING, PRIVACY_CONTINUE_LINE, UPLOAD_LIMITS_NOTE } from "@/lib/public-copy";
+import { PRIVACY_CONTINUE_LINE, UPLOAD_LIMITS_NOTE } from "@/lib/public-copy";
 import { useRef } from "react";
 
 export type IntakeTab = "upload" | "paste" | "sample";
@@ -136,7 +136,6 @@ export function LandingIntakeCard({
         <div className="space-y-2 pt-2 leading-relaxed">
           <p>{PRIVACY_CONTINUE_LINE}</p>
           <p>{UPLOAD_LIMITS_NOTE}</p>
-          <p>{OCR_WARNING}</p>
         </div>
       </details>
     </div>
