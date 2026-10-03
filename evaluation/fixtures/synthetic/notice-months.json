@@ -1,0 +1,23 @@
+{
+  "id": "synthetic-notice-months",
+  "text": "Move-out notice deadline stated in months.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant must provide written notice at least two months before the move-out date."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 20,
+      "end": 79,
+      "category": "notice",
+      "text": "written notice at least two months before the move-out date"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["notice"],
+    "texasTopics": []
+  }
+}

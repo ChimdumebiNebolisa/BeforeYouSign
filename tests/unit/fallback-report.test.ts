@@ -120,6 +120,29 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts a move-out notice deadline stated in months", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant must provide written notice at least two months before the move-out date.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.noticeSnippets).toHaveLength(1);
+    expect(report.deadlinesAndNotice).toContainEqual(
+      expect.objectContaining({
+        value: "two months",
+      }),
+    );
+  });
+
   it("preserves both parts of a greater-of late charge", () => {
     const pages = [
       {

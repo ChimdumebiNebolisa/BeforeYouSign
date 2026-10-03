@@ -18,6 +18,14 @@
       "description": "Fictional lease with multiple fee clauses"
     },
     {
+      "id": "synthetic-notice-months",
+      "path": "synthetic/notice-months.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Move-out notice deadline expressed in months"
+    },
+    {
       "id": "synthetic-notice-renewal",
       "path": "synthetic/notice-renewal.json",
       "license": "MIT",
