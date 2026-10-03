@@ -328,6 +328,7 @@ test.describe("audit remediation", () => {
     await page.getByRole("tab", { name: "Paste Text" }).click();
     await page.getByLabel("Lease text to analyze").fill(SOURCE_TEXT);
     await page.getByRole("button", { name: "Use pasted text" }).click();
+    await expectNoA11yViolations(page);
     await page.getByLabel(/I confirm this is a residential lease for a property in Texas/i).check();
     await expectNoA11yViolations(page);
 

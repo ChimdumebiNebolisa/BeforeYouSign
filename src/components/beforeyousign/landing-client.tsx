@@ -551,7 +551,7 @@ export function LandingClient() {
             </Button>
             <Button
               ref={continueButtonRef}
-              className="h-11 rounded-xl bys-gradient-cta px-6 text-primary-foreground shadow-sm hover:opacity-95"
+              className="h-11 rounded-xl bys-gradient-cta px-6 text-primary-foreground shadow-sm transition-none hover:opacity-95 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
               onClick={() => void runLeaseAnalysis()}
               disabled={isSubmitting || !stateConfirmed}
             >
@@ -614,7 +614,15 @@ export function LandingClient() {
 
   return (
     <div className="bys-container w-full px-6 font-sans lg:px-8">
-      <section className="pt-12 pb-[4.5rem] lg:pt-8 lg:pb-24">
+      <section className="relative isolate pb-12 lg:pb-16">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-1/2 -z-10 w-screen -translate-x-1/2 bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "linear-gradient(90deg, rgb(243 244 242 / 88%), rgb(243 244 242 / 80%)), linear-gradient(0deg, rgb(243 244 242 / 82%), rgb(243 244 242 / 42%)), url('/images/apartment-living-room.jpg')",
+          }}
+        />
         <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-7">
             <LandingHero
