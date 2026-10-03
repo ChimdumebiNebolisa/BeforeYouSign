@@ -3,6 +3,8 @@ design/
 # Track committed audit and reference docs; ignore other local notes under docs/
 docs/*
 !docs/POLICYINSIGHT_EXTRACTION_AUDIT.md
+!docs/adr/
+!docs/adr/*.md
 
 # Local environment — never commit secrets
 .env

@@ -2,7 +2,7 @@
 
 ## What this is
 
-**BeforeYouSign** is a Next.js web app that helps renters review **residential lease** documents before signing. Users upload a PDF lease, paste plain text, or load sample lease fixtures. The server validates the request, extracts and normalizes lease text, runs **rule-based clause detection** and **deterministic review-priority scoring**, then builds a **structured report** with grounded evidence. Results stay in the browser for the current review and can be exported as Markdown.
+**BeforeYouSign** is a Next.js web app that helps renters review **residential lease** documents before signing. Users upload a PDF lease, paste plain text, or load sample lease fixtures. The server validates the request, extracts and normalizes lease text, runs **rule-based clause detection** and **deterministic review-priority scoring**, and can ask OpenAI for additional candidate claims. A candidate is shown only after deterministic source checks pass. Results stay in the browser for the current review and can be exported as Markdown.
 
 ## Problem it solves
 
@@ -14,12 +14,13 @@ Lease agreements are long and written in dense legal language. Renters often str
 - **Structured report UI**: named report sections for summary, terms to review, money and fees, deadlines, responsibilities, questions, state checks, next steps, and “not clearly stated” items when applicable.
 - **Evidence linking**: grounded findings show the exact quote, page, and source span; an explicit action opens and highlights that span in the **extracted text** viewer.
 - **Rule-based snippet extraction** (rent, deposit, fees, notice, renewal, maintenance, utilities, and vague phrases) plus a **deterministic review-priority band** with reasons.
-- **Rule-only analysis**: the current product path has no model call; the report is assembled from lease pattern matches, extracted text, and curated state-reference metadata.
+- **Hybrid analysis**: OpenAI proposes evidence-linked candidates while the server independently verifies the evidence ID, exact source span, category relevance, numbers/dates, semantic overlap, and polarity. Invalid claims are omitted.
+- **Deterministic fallback**: review-priority scoring and the complete rule-only report remain available when AI is disabled, unavailable, malformed, or unsupported by its citation.
 - **State-aware scope**: all 50 states can be selected; Texas has curated statewide renter references, while other states receive general lease review only.
 - **Analysis transparency** so users can see extraction quality, matched clauses, evidence coverage, and risk signals.
 - **Full report Markdown export** (client-side download) plus existing question checklist export.
 
-See the [historical pattern-extraction audit](docs/POLICYINSIGHT_EXTRACTION_AUDIT.md) for decisions and deferred scope. The supported current workflow is deterministic and synchronous.
+See the [historical pattern-extraction audit](docs/POLICYINSIGHT_EXTRACTION_AUDIT.md) and [hybrid-analysis ADR](docs/adr/0001-hybrid-ai-with-deterministic-grounding.md) for decisions and deferred scope. The supported workflow is hybrid, grounded, and synchronous.
 
 ## Tech stack
 
@@ -27,11 +28,11 @@ See the [historical pattern-extraction audit](docs/POLICYINSIGHT_EXTRACTION_AUDI
 
 **Backend:** Node.js Next.js Route Handler — `POST /api/analyze` (`src/app/api/analyze/`) with request validation, upload limits, in-process concurrency guards, and structured error responses.
 
-**Analysis:** Synchronous, rule-only lease pattern matching, risk scoring, Texas topic scanning, evidence registration, and structured report assembly.
+**Analysis:** Synchronous deterministic lease scanning and risk scoring, optional OpenAI candidate extraction with `gpt-6-luna`, claim-level evidence validation, Texas topic scanning, and structured report assembly.
 
 **Supporting code:** `pdf-parse` for server-side PDF text extraction, `pdf-lib` for browser preview, curated Texas reference metadata, Vitest, and Playwright QA scripts.
 
-There is no database, account system, background job, or runtime call to an external analysis service.
+There is no database, account system, background job, or persisted report. When configured, the server sends the evidence catalog to the OpenAI Responses API with `store: false`.
 
 ## Setup
 
@@ -57,14 +58,19 @@ Create a `.env.local` file in the root (you can start from `.env.local.example`)
 **Windows (cmd):** `copy .env.local.example .env.local`
 **macOS / Linux:** `cp .env.local.example .env.local`
 
-No API key is required for local development. The supported environment variables are:
+An API key is optional. Without one, the app returns the deterministic report. The supported environment variables are:
 
 ```text
 BYS_TRUST_PROXY_HEADERS=0  # Set to 1 only when the deployment proxy overwrites client IP headers.
 BYS_ANALYSIS_EVENTS=1      # Set to 0 to disable metadata-only analysis event logs.
+OPENAI_API_KEY=             # Server-only OpenAI project key. Never expose it to the browser.
+BYS_AI_ENABLED=1            # Set to 0 to force the deterministic fallback.
+BYS_AI_TIMEOUT_MS=20000     # Provider timeout, capped by the app at 30 seconds.
 ```
 
-When proxy headers are not explicitly trusted, the app uses the global in-process concurrency cap. When they are trusted, it also applies a per-client cap. Analysis event logs contain metadata only; lease text is not logged.
+When proxy headers are not explicitly trusted, the app uses the global in-process concurrency cap. When they are trusted, it also applies a per-client cap. Analysis event logs contain metadata only; lease text is not logged. Keep `.env.local` untracked.
+
+AI-assisted review sends extracted lease text to OpenAI. The API request sets `store: false`. OpenAI states that API data is not used to train models by default and that abuse-monitoring logs may retain content for up to 30 days; see [OpenAI API data controls](https://developers.openai.com/api/docs/guides/your-data).
 
 ### 4. Run the app locally
 
@@ -85,8 +91,9 @@ For this project:
 3. **Validate and admit:** `runAnalysisPipeline` checks the content type, state, request size, PDF signature, page/character limits, and in-flight analysis caps before processing.
 4. **Prepare the document:** PDFs are extracted per page through **`extractPdfTextPages`** and normalized; pasted/sample text is normalized and represented as one synthetic page. Extraction quality and a content-derived `documentId` are recorded.
 5. **Run deterministic analysis:** `runDeterministicAnalysis` calls the rule finders, computes the risk band and reasons, flags unclear phrases, and runs the Texas renter scan only when Texas is selected.
-6. **Assemble grounded results:** `createRuleOnlyAnalyzer` builds the fallback report, registers evidence spans, and returns an evidence index. `assembleSuccessResponse` packages the report, pages, snippets, risk fields, state guidance, and extraction metadata.
-7. **Render and export:** The client keeps the response in memory and renders **`LeaseReportView`**, **`LeaseTextViewer`**, and **`TechnicalDetailsPanel`**. Findings can link back to source text, and the report/checklist can be downloaded as Markdown.
+6. **Generate candidates:** `createOpenAiAnalyzer` builds the deterministic fallback first, then optionally asks `gpt-6-luna` for structured, evidence-linked claim candidates.
+7. **Ground every model claim:** the server verifies the cited chunk, category, factual numbers/dates, semantic overlap, and polarity. Unsupported claims are omitted; deterministic risk remains authoritative.
+8. **Render and export:** `assembleSuccessResponse` packages the selected mode and grounding counts. The client keeps the response in memory and renders **`LeaseReportView`**, **`LeaseTextViewer`**, and **`TechnicalDetailsPanel`**.
 
 ## Architecture
 
@@ -128,10 +135,11 @@ flowchart LR
     Validate["validate-intake.ts<br/>content type • state • limits • slots"]
     Document["analyze-document.ts<br/>extract/build pages • quality • documentId"]
     Deterministic["deterministic.ts<br/>rule snippets • risk • Texas scan"]
-    Engine["rule-only-analyzer.ts<br/>report • evidence registry"]
+    Engine["openai-analyzer.ts<br/>candidate claims • deterministic fallback"]
+    Ground["ground-model-claims.ts<br/>source • category • facts • semantics"]
     Response["assemble-response.ts<br/>structured JSON response"]
 
-    Route --> Pipeline --> Validate --> Document --> Deterministic --> Engine --> Response
+    Route --> Pipeline --> Validate --> Document --> Deterministic --> Engine --> Ground --> Response
 
     PDF["pdf/extract-text.ts<br/>pdf-parse per page"]
     Normalize["pdf/normalize.ts"]
@@ -145,13 +153,14 @@ flowchart LR
     Deterministic --> Score
     Deterministic --> Texas
     Engine --> Evidence
+    Ground --> Evidence
   end
 
   Request -->|fetch| Route
   Response -->|JSON| Results
 ```
 
-**Flow notes:** pasted/sample text is normalized during intake and skips PDF extraction. `pdf-lib` only supports browser-side preview metadata. The current `AnalysisMode` is `rules_only`; there is no AI/model branch in the supported request path.
+**Flow notes:** pasted/sample text is normalized during intake and skips PDF extraction. `pdf-lib` only supports browser-side preview metadata. `AnalysisMode` is `model_grounded` only when at least one model candidate passes every deterministic check; otherwise it is `rules_only`.
 
 ---
 
@@ -214,7 +223,7 @@ The browser QA scripts use Playwright and write ignored screenshots under `test-
 ## Known limitations
 
 - **No user accounts or persisted reports** — results live in browser memory and are lost when the page is closed or a new review is started.
-- **Rule-only analysis** — regex and heuristic matching can miss clauses, produce false positives, or lack the context a lawyer would apply.
+- **AI and rule limitations** — the model and regex rules can miss clauses. Conservative grounding intentionally drops claims that cannot be tied to a verified source chunk.
 - **Single synchronous HTTP request** — the route allows up to 60 seconds and the browser waits up to 55 seconds; very large or slow inputs may time out.
 - **PDF text extraction is not OCR** — scanned image-only PDFs may yield little or no extractable text.
 - **Input limits apply** — PDF files are capped at 4 MiB and 100 pages; extracted or pasted text is capped at 120,000 characters. JSON request bodies are capped at 512 KiB.

@@ -1,6 +1,8 @@
 "use client";
 
 import { displayReviewPriority } from "@/lib/display-labels";
+import { formatAnalysisModeLabel } from "@/lib/analysis-mode-labels";
+import type { AnalysisMode, GroundingSummary } from "@/lib/analysis/pipeline/types";
 
 function truncQuote(text: string, max: number): string {
   const t = text.trim().replace(/\s+/g, " ");
@@ -25,6 +27,8 @@ export type TechnicalDetailsReceipt = {
   deterministicRiskScore?: number;
   deterministicRiskBand?: "low" | "medium" | "high";
   deterministicRiskReasons?: string[];
+  mode?: AnalysisMode;
+  groundingSummary?: GroundingSummary;
 };
 
 const detailLabel = "text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground";
@@ -60,6 +64,18 @@ export function TechnicalDetailsPanel({ receipt }: { receipt: TechnicalDetailsRe
       </summary>
 
       <div className="mt-4 space-y-5 text-xs leading-relaxed">
+        <section>
+          <p className={detailLabel}>Analysis method</p>
+          <p className="mt-2 text-xs text-foreground">{formatAnalysisModeLabel(receipt.mode)}</p>
+          {receipt.groundingSummary ? (
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              {receipt.groundingSummary.groundedClaims} AI candidate claim
+              {receipt.groundingSummary.groundedClaims === 1 ? "" : "s"} passed source checks;{" "}
+              {receipt.groundingSummary.droppedClaims} did not and {receipt.groundingSummary.droppedClaims === 1 ? "was" : "were"} omitted.
+            </p>
+          ) : null}
+        </section>
+
         <section>
           <p className={detailLabel}>Source file</p>
           <dl className="mt-2 grid gap-2 sm:grid-cols-[6.5rem_minmax(0,1fr)] sm:gap-x-3">

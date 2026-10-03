@@ -18,7 +18,7 @@ export function assembleSuccessResponse(input: {
 }): AnalysisSuccessResponse {
   return {
     ok: true,
-    analysisVersion: 2,
+    analysisVersion: 3,
     stage: "completed",
     mode: input.engine.mode,
     requestId: input.requestId,
@@ -47,6 +47,7 @@ export function assembleSuccessResponse(input: {
     deterministicRiskReasons: input.deterministic.deterministicRisk.reasons,
     report: input.engine.report,
     reportError: input.engine.reportError,
+    groundingSummary: input.engine.groundingSummary,
     evidenceIndex: input.engine.evidenceIndex,
   };
 }

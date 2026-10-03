@@ -26,7 +26,7 @@ export type FindingCategory =
 
 export type FindingSeverity = "minor" | "moderate" | "critical";
 
-export type FindingProvenance = "deterministic";
+export type FindingProvenance = "deterministic" | "model";
 
 export type Finding = {
   id: string;
@@ -69,7 +69,7 @@ const FINDING_CATEGORIES = new Set<FindingCategory>([
 ]);
 
 const SEVERITIES = new Set<FindingSeverity>(["minor", "moderate", "critical"]);
-const FINDING_PROVENANCE = new Set<FindingProvenance>(["deterministic"]);
+const FINDING_PROVENANCE = new Set<FindingProvenance>(["deterministic", "model"]);
 
 function isNonEmptyString(v: unknown): v is string {
   return typeof v === "string" && v.trim().length > 0;

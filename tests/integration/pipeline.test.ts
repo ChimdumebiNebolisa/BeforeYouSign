@@ -56,7 +56,7 @@ describe("runAnalysisPipeline", () => {
     expect(httpStatus).toBe(200);
     expect(response.ok).toBe(true);
     if (response.ok) {
-      expect(response.analysisVersion).toBe(2);
+      expect(response.analysisVersion).toBe(3);
       expect(response.stage).toBe("completed");
       expect(response.documentId).toBeTruthy();
       expect(response.mode).toBe("rules_only");
