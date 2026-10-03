@@ -617,7 +617,7 @@ export function LandingClient() {
       <section className="relative isolate pb-12 lg:pb-16">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-1/2 -z-10 w-screen -translate-x-1/2 bg-cover bg-center"
+          className="pointer-events-none absolute -top-24 bottom-0 left-1/2 -z-10 w-screen -translate-x-1/2 bg-cover bg-center"
           style={{
             backgroundImage:
               "linear-gradient(90deg, rgb(243 244 242 / 88%), rgb(243 244 242 / 80%)), linear-gradient(0deg, rgb(243 244 242 / 82%), rgb(243 244 242 / 42%)), url('/images/apartment-living-room.jpg')",
