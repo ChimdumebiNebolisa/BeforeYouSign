@@ -1,5 +1,5 @@
 {
-  "fixtureCount": 7,
+  "fixtureCount": 8,
   "avgGroundingRate": 1,
   "results": [
     {
@@ -88,6 +88,24 @@
         "annotationSpanRecall": 1,
         "riskBandAccuracy": 1,
         "ruleFindings": 2,
+        "texasTopics": 0
+      },
+      "errors": []
+    },
+    {
+      "fixtureId": "synthetic-notice-weeks",
+      "mode": "rules_only",
+      "metrics": {
+        "groundingRate": 1,
+        "unsupportedFindingRate": 0,
+        "expectedValueAccuracy": 1,
+        "ruleCategoryPrecision": 1,
+        "ruleCategoryRecall": 1,
+        "texasTopicPrecision": 1,
+        "texasTopicRecall": 1,
+        "annotationSpanRecall": 1,
+        "riskBandAccuracy": 1,
+        "ruleFindings": 1,
         "texasTopics": 0
       },
       "errors": []

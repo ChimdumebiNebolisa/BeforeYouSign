@@ -26,6 +26,14 @@
       "description": "Fictional lease with notice and renewal clauses"
     },
     {
+      "id": "synthetic-notice-weeks",
+      "path": "synthetic/notice-weeks.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Notice deadline expressed in weeks"
+    },
+    {
       "id": "synthetic-prompt-injection",
       "path": "synthetic/prompt-injection.json",
       "license": "MIT",

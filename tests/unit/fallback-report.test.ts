@@ -120,6 +120,27 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts a written-notice deadline stated in weeks", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant must give written notice at least six weeks before the lease expires.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.noticeSnippets).toHaveLength(1);
+    expect(report.deadlinesAndNotice).toContainEqual(
+      expect.objectContaining({ value: "six weeks" }),
+    );
+  });
+
   it("preserves both parts of a greater-of late charge", () => {
     const pages = [
       {

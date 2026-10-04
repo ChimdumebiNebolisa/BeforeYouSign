@@ -1,0 +1,23 @@
+{
+  "id": "synthetic-notice-weeks",
+  "text": "Written notice deadline stated in weeks.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant must give written notice at least six weeks before the lease expires."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 17,
+      "end": 50,
+      "category": "notice",
+      "text": "written notice at least six weeks"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["notice"],
+    "texasTopics": []
+  }
+}
