@@ -171,6 +171,32 @@ describe("groundModelClaims", () => {
     expect(result.rejectionCounts).toMatchObject({ unsupported_number: 1 });
   });
 
+  it("rejects a rent due date mislabeled as a notice deadline", () => {
+    const { registry, baseReport } = setup(
+      "Tenant shall pay monthly rent of $1,450 on the first day of each month.",
+    );
+    const result = groundModelClaims({
+      candidate: {
+        claims: [
+          claim({
+            id: "rent-deadline",
+            kind: "deadline",
+            category: "notice",
+            label: "Rent due date",
+            value: "First day of each month",
+            explanation: "Monthly rent is due on the first day of each month.",
+            evidenceId: registry.chunks[0]!.id,
+          }),
+        ],
+      },
+      registry,
+      baseReport,
+    });
+
+    expect(result.groundingSummary.groundedClaims).toBe(0);
+    expect(result.rejectionCounts).toMatchObject({ category_mismatch: 1 });
+  });
+
   it("drops an invented citation and a category-mismatched citation", () => {
     const { registry, baseReport } = setup("Monthly rent is $1,450.");
     const result = groundModelClaims({

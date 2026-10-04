@@ -32,6 +32,22 @@
     }
   },
   {
+    "id": "rent-due-date-mislabeled-as-notice",
+    "quote": "Tenant shall pay monthly rent of $1,450 on the first day of each month.",
+    "expectedSupported": false,
+    "claim": {
+      "id": "rent-deadline",
+      "kind": "deadline",
+      "category": "notice",
+      "label": "Rent due date",
+      "value": "First day of each month",
+      "severity": "moderate",
+      "explanation": "Monthly rent is due on the first day of each month.",
+      "whyItMatters": "Missing the payment date could trigger lease consequences.",
+      "evidenceId": "fixture-evidence"
+    }
+  },
+  {
     "id": "valid-pet-approval-paraphrase",
     "quote": "Tenant must obtain the landlord's written consent before keeping an animal.",
     "expectedSupported": true,
