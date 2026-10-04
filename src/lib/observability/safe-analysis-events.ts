@@ -10,6 +10,7 @@ export type SafeAnalysisEvent = {
   failureCode?: string;
   droppedClaims?: number;
   groundedClaims?: number;
+  groundingRejectionCounts?: Record<string, number>;
 };
 
 const SENSITIVE_PATTERNS = [

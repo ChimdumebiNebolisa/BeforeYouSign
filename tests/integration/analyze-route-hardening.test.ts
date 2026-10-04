@@ -1,8 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { POST as analyzePost } from "@/app/api/analyze/route";
 import { ANALYSIS_LIMITS } from "@/lib/analysis/limits";
-import { parseAnalysisInput } from "@/lib/analysis/pipeline/validate-intake";
+import {
+  parseAnalysisInput,
+  resetAnalysisLimitStateForTests,
+} from "@/lib/analysis/pipeline/validate-intake";
+
+afterEach(() => resetAnalysisLimitStateForTests());
 
 function jsonRequest(url: string, body: unknown): Request {
   return new Request(url, {
@@ -91,5 +96,48 @@ describe("analysis route hardening", () => {
       ok: false,
       error: { code: "payload_too_large" },
     });
+  });
+
+  it("returns a computed Retry-After after five trusted-client attempts", async () => {
+    const previousTrustSetting = process.env.BYS_TRUST_PROXY_HEADERS;
+    process.env.BYS_TRUST_PROXY_HEADERS = "1";
+
+    try {
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        const response = await analyzePost(
+          new Request("http://localhost/api/analyze", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-forwarded-for": "203.0.113.8",
+            },
+            body: "not-json",
+          }),
+        );
+        expect(response.status).toBe(400);
+      }
+
+      const response = await analyzePost(
+        new Request("http://localhost/api/analyze", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-forwarded-for": "203.0.113.8",
+          },
+          body: "not-json",
+        }),
+      );
+      const payload = await response.json() as {
+        error: { code: string; retryAfterSeconds: number };
+      };
+
+      expect(response.status).toBe(429);
+      expect(payload.error.code).toBe("rate_limited");
+      expect(payload.error.retryAfterSeconds).toBeGreaterThanOrEqual(599);
+      expect(response.headers.get("Retry-After")).toBe(String(payload.error.retryAfterSeconds));
+    } finally {
+      if (previousTrustSetting === undefined) delete process.env.BYS_TRUST_PROXY_HEADERS;
+      else process.env.BYS_TRUST_PROXY_HEADERS = previousTrustSetting;
+    }
   });
 });

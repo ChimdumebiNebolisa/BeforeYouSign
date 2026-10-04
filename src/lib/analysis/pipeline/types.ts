@@ -115,6 +115,7 @@ export type AnalysisEngineResult = {
   reportError: string | null;
   mode: AnalysisMode;
   groundingSummary?: GroundingSummary;
+  groundingRejectionCounts?: Record<string, number>;
   evidenceIndex?: EvidenceIndex;
   texasRenterFindings?: TexasRenterFinding[];
 };

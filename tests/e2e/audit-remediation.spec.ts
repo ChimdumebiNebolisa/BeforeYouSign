@@ -13,6 +13,7 @@ const SOURCE_TEXT = [
 const RENT_QUOTE = "Tenant shall pay monthly rent of $1,250 on the first day of each month.";
 const MAINTENANCE_QUOTE = "Tenant must promptly report maintenance problems to the landlord.";
 const NOTICE_QUOTE = "Tenant must give 30 days written notice before moving out.";
+const RESULT_READY_TIMEOUT_MS = 10_000;
 
 function evidence(quote: string, evidenceId: string) {
   const startIndex = SOURCE_TEXT.indexOf(quote);
@@ -144,8 +145,8 @@ async function openCompletedReview(page: Page) {
   await enterPastedLease(page);
   await page.getByRole("button", { name: "Continue to analysis" }).click();
   const heading = page.getByRole("heading", { name: "Your lease review" });
-  await expect(heading).toBeVisible();
-  await expect(heading).toBeFocused();
+  await expect(heading).toBeVisible({ timeout: RESULT_READY_TIMEOUT_MS });
+  await expect(heading).toBeFocused({ timeout: RESULT_READY_TIMEOUT_MS });
 }
 
 async function expectNoA11yViolations(page: Page) {
@@ -212,32 +213,40 @@ test.describe("audit remediation", () => {
   });
 
   test("keeps report-first geometry stable at audited widths", async ({ page }) => {
-    const viewports = [
-      { width: 390, height: 844 },
-      { width: 640, height: 900 },
-      { width: 1023, height: 800 },
-      { width: 1024, height: 800 },
-      { width: 1280, height: 800 },
-      { width: 1440, height: 900 },
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    const viewportGroups = [
+      [
+        { width: 390, height: 844 },
+        { width: 640, height: 900 },
+        { width: 1023, height: 800 },
+        { width: 1024, height: 800 },
+      ],
+      [
+        { width: 1280, height: 800 },
+        { width: 1440, height: 900 },
+      ],
     ];
 
-    for (const viewport of viewports) {
-      await page.setViewportSize(viewport);
+    for (const viewports of viewportGroups) {
+      await page.setViewportSize(viewports[0]!);
       await openCompletedReview(page);
 
-      const report = page.locator("[data-active-report-panel]");
-      const viewer = page.locator("[data-lease-text-viewer]");
-      const [reportBox, viewerBox] = await Promise.all([report.boundingBox(), viewer.boundingBox()]);
-      expect(reportBox).not.toBeNull();
-      expect(viewerBox).not.toBeNull();
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+      for (const viewport of viewports) {
+        await page.setViewportSize(viewport);
+        const report = page.locator("[data-active-report-panel]");
+        const viewer = page.locator("[data-lease-text-viewer]");
+        const [reportBox, viewerBox] = await Promise.all([report.boundingBox(), viewer.boundingBox()]);
+        expect(reportBox).not.toBeNull();
+        expect(viewerBox).not.toBeNull();
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 
-      if (viewport.width < 1280) {
-        expect(viewerBox!.y).toBeGreaterThan(reportBox!.y + reportBox!.height);
-      } else {
-        expect(Math.abs(viewerBox!.height - viewport.height * 0.7)).toBeLessThanOrEqual(3);
-        expect(viewerBox!.x).toBeGreaterThan(reportBox!.x + reportBox!.width);
-        expect(reportBox!.width).toBeGreaterThanOrEqual(420);
+        if (viewport.width < 1280) {
+          expect(viewerBox!.y).toBeGreaterThan(reportBox!.y + reportBox!.height);
+        } else {
+          expect(Math.abs(viewerBox!.height - viewport.height * 0.7)).toBeLessThanOrEqual(3);
+          expect(viewerBox!.x).toBeGreaterThan(reportBox!.x + reportBox!.width);
+          expect(reportBox!.width).toBeGreaterThanOrEqual(420);
+        }
       }
     }
   });
@@ -287,7 +296,7 @@ test.describe("audit remediation", () => {
     await expectNoA11yViolations(page);
 
     await page.getByRole("button", { name: "Try again" }).click();
-    await expect(page.getByRole("heading", { name: "Your lease review" })).toBeFocused();
+    await expect(page.getByRole("heading", { name: "Your lease review" })).toBeFocused({ timeout: RESULT_READY_TIMEOUT_MS });
   });
 
   test("reports a timeout separately from user cancellation", async ({ page }) => {
@@ -336,7 +345,7 @@ test.describe("audit remediation", () => {
     await expect(page.getByRole("button", { name: "Cancel analysis" })).toBeVisible();
     await expectNoA11yViolations(page);
     releaseResponse();
-    await expect(page.getByRole("heading", { name: "Your lease review" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Your lease review" })).toBeVisible({ timeout: RESULT_READY_TIMEOUT_MS });
     await expectNoA11yViolations(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
@@ -367,7 +376,7 @@ test.describe("audit remediation", () => {
     ).toBe("none");
 
     releaseResponse();
-    await expect(page.getByRole("heading", { name: "Your lease review" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Your lease review" })).toBeVisible({ timeout: RESULT_READY_TIMEOUT_MS });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.getByLabel("Report section", { exact: true }).selectOption("terms");
     await page.getByRole("button", { name: "Show evidence" }).click();

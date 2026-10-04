@@ -43,6 +43,7 @@ export function createOpenAiAnalyzer(): AnalysisEngine {
       report: grounded.report,
       mode: grounded.groundingSummary.groundedClaims > 0 ? "model_grounded" : "rules_only",
       groundingSummary: grounded.groundingSummary,
+      groundingRejectionCounts: grounded.rejectionCounts,
       evidenceIndex: buildEvidenceIndex(registry),
     };
   };

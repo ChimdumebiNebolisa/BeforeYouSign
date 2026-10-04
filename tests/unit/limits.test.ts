@@ -1,7 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { ANALYSIS_LIMITS, createAnalysisProblem } from "@/lib/analysis/limits";
-import { acquireClientSlot, releaseClientSlot } from "@/lib/analysis/pipeline/validate-intake";
+import {
+  acquireClientSlot,
+  consumeAnalysisAllowance,
+  releaseClientSlot,
+  resetAnalysisLimitStateForTests,
+} from "@/lib/analysis/pipeline/validate-intake";
+
+afterEach(() => resetAnalysisLimitStateForTests());
 
 describe("ANALYSIS_LIMITS", () => {
   it("defines expected upload bounds", () => {
@@ -11,6 +18,35 @@ describe("ANALYSIS_LIMITS", () => {
     expect(ANALYSIS_LIMITS.maxChars).toBe(120_000);
     expect(ANALYSIS_LIMITS.maxConcurrentAnalyses).toBe(4);
     expect(ANALYSIS_LIMITS.maxConcurrentPerClient).toBe(1);
+    expect(ANALYSIS_LIMITS.maxRequestsPerClientWindow).toBe(5);
+    expect(ANALYSIS_LIMITS.maxRequestsPerGlobalWindow).toBe(30);
+  });
+
+  it("limits a trusted client to five attempts per ten-minute window", () => {
+    const now = Date.UTC(2026, 9, 3, 12, 0, 0);
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      expect(consumeAnalysisAllowance("203.0.113.8", now + attempt)).toBeNull();
+    }
+
+    expect(consumeAnalysisAllowance("203.0.113.8", now + 5)).toMatchObject({
+      code: "rate_limited",
+      retryAfterSeconds: 600,
+    });
+    expect(
+      consumeAnalysisAllowance("203.0.113.8", now + ANALYSIS_LIMITS.clientWindowMs + 1),
+    ).toBeNull();
+  });
+
+  it("limits the whole demo to thirty attempts per hour", () => {
+    const now = Date.UTC(2026, 9, 3, 12, 0, 0);
+    for (let attempt = 0; attempt < 30; attempt += 1) {
+      expect(consumeAnalysisAllowance(`client-${attempt}`, now + attempt)).toBeNull();
+    }
+
+    expect(consumeAnalysisAllowance("client-over-limit", now + 30)).toMatchObject({
+      code: "rate_limited",
+      retryAfterSeconds: 3_600,
+    });
   });
 
   it("maps problem codes to HTTP statuses", () => {
