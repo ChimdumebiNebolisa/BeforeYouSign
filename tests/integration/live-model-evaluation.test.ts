@@ -42,6 +42,7 @@ describeLiveModel("live model evaluation", () => {
     let expectedClaims = 0;
     let recalledClaims = 0;
     const unsupportedByFixture = new Map<string, number>();
+    const unsupportedTypesByFixture = new Map<string, Set<string>>();
 
     for (let run = 0; run < 3; run += 1) {
       for (const fixture of LIVE_FIXTURES) {
@@ -72,11 +73,19 @@ describeLiveModel("live model evaluation", () => {
         );
         if (expectedWasRecalled) recalledClaims += 1;
 
-        const unsupported = accepted.filter(
+        const unsupportedClaims = accepted.filter(
           (claim) =>
             claim.kind !== fixture.expected.kind || claim.category !== fixture.expected.category,
-        ).length;
-        if (unsupported > 0) unsupportedByFixture.set(fixture.id, unsupported);
+        );
+        if (unsupportedClaims.length > 0) {
+          unsupportedByFixture.set(
+            fixture.id,
+            (unsupportedByFixture.get(fixture.id) ?? 0) + unsupportedClaims.length,
+          );
+          const types = unsupportedTypesByFixture.get(fixture.id) ?? new Set<string>();
+          unsupportedClaims.forEach((claim) => types.add(`${claim.kind}:${claim.category}`));
+          unsupportedTypesByFixture.set(fixture.id, types);
+        }
       }
     }
 
@@ -85,6 +94,7 @@ describeLiveModel("live model evaluation", () => {
       fixtureIds: LIVE_FIXTURES.map((fixture) => fixture.id),
       runs: 3,
       unsupportedAcceptedClaims: [...unsupportedByFixture.values()].reduce((sum, count) => sum + count, 0),
+      unsupportedTypesByFixture: [...unsupportedTypesByFixture].map(([id, types]) => [id, [...types]]),
       recall,
     }));
     expect([...unsupportedByFixture.entries()]).toEqual([]);
