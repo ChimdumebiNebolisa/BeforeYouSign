@@ -17,6 +17,7 @@
     "test:unit": "vitest run tests/unit",
     "test:watch": "vitest",
     "evaluate": "node scripts/evaluate.mjs",
+    "evaluate:model": "node --env-file-if-exists=.env.local scripts/evaluate-model.mjs",
     "test:e2e": "playwright test",
     "verify:legal-metadata": "node scripts/verify-legal-metadata.mjs",
     "smoke:scan": "node scripts/run-scan-smoke.mjs",

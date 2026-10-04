@@ -45,6 +45,9 @@ describe("groundModelClaims", () => {
       wordingIsSafe: true,
       categoryIsRelevant: true,
       numbersAreSupported: true,
+      partiesAreSupported: true,
+      modalitiesAreSupported: true,
+      kindPolicyIsSupported: true,
       wordingIsSupported: true,
     });
     const result = groundModelClaims({
@@ -95,6 +98,77 @@ describe("groundModelClaims", () => {
     });
 
     expect(result.groundingSummary).toEqual({ materialClaims: 1, groundedClaims: 0, droppedClaims: 1 });
+  });
+
+  it("rejects an invented pet fee when the evidence only requires approval", () => {
+    const { registry, baseReport } = setup("Tenant may keep a pet after written approval.");
+    const result = groundModelClaims({
+      candidate: {
+        claims: [
+          claim({
+            id: "pet-fee",
+            category: "pets",
+            label: "Pet approval",
+            value: "Costs extra",
+            explanation: "Pet approval costs extra.",
+            evidenceId: registry.chunks[0]!.id,
+          }),
+        ],
+      },
+      registry,
+      baseReport,
+    });
+
+    expect(result.groundingSummary).toEqual({ materialClaims: 1, groundedClaims: 0, droppedClaims: 1 });
+    expect(result.rejectionCounts).toMatchObject({ kind_policy_mismatch: 1 });
+  });
+
+  it("rejects a claim that assigns the housing provider's duty to the renter", () => {
+    const { registry, baseReport } = setup("The landlord must repair the plumbing.");
+    const result = groundModelClaims({
+      candidate: {
+        claims: [
+          claim({
+            id: "wrong-party",
+            kind: "concern",
+            category: "maintenance",
+            label: "Renter repair duty",
+            value: "Renter must repair plumbing",
+            explanation: "The renter is responsible for plumbing repairs.",
+            evidenceId: registry.chunks[0]!.id,
+          }),
+        ],
+      },
+      registry,
+      baseReport,
+    });
+
+    expect(result.groundingSummary.groundedClaims).toBe(0);
+    expect(result.rejectionCounts).toMatchObject({ party_mismatch: 1 });
+  });
+
+  it("rejects an unsupported deadline even when the category is relevant", () => {
+    const { registry, baseReport } = setup("Tenant must give written notice before moving out.");
+    const result = groundModelClaims({
+      candidate: {
+        claims: [
+          claim({
+            id: "invented-deadline",
+            kind: "deadline",
+            category: "notice",
+            label: "Move-out notice",
+            value: "30 days",
+            explanation: "The renter must give 30 days' notice before moving out.",
+            evidenceId: registry.chunks[0]!.id,
+          }),
+        ],
+      },
+      registry,
+      baseReport,
+    });
+
+    expect(result.groundingSummary.groundedClaims).toBe(0);
+    expect(result.rejectionCounts).toMatchObject({ unsupported_number: 1 });
   });
 
   it("drops an invented citation and a category-mismatched citation", () => {

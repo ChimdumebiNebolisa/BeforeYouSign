@@ -176,6 +176,7 @@ npm run typecheck
 npm test
 npm run test:coverage
 npm run evaluate
+npm run evaluate:model # opt-in; uses the configured OpenAI key
 npm run verify:legal-metadata
 npm run build
 ```
@@ -229,4 +230,5 @@ The browser QA scripts use Playwright and write ignored screenshots under `test-
 - **Input limits apply** — PDF files are capped at 4 MiB and 100 pages; extracted or pasted text is capped at 120,000 characters. JSON request bodies are capped at 512 KiB.
 - **State scope is limited** — Texas has curated statewide renter references; other states receive general lease review, and city rules are not checked.
 - **Evidence highlighting** uses extracted-text offsets and quote matching; minor mismatches between source text and normalized quotes can prevent a highlight.
-- **Concurrency protection is in-process** — the global and optional per-client caps reset with the server instance and are not a substitute for edge/platform rate limiting in a multi-instance deployment.
+- **Demo traffic protection is in-process** — the app allows five attempts per trusted client per ten minutes, thirty attempts per instance per hour, four concurrent analyses globally, and one concurrent analysis per trusted client. These counters reset with the server instance and are not a substitute for shared edge/platform enforcement in a public multi-instance deployment.
+- **Live AI evaluation is opt-in** — `npm run evaluate:model` makes 15 synthetic model calls and requires zero unsupported accepted claims plus at least 80% annotated-claim recall. It is a controlled-demo release check, not an ordinary CI step.

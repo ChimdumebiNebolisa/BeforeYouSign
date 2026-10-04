@@ -6,7 +6,12 @@
 
 import { spawnSync } from "node:child_process";
 
-const result = spawnSync("npx", ["vitest", "run", "tests/integration/evaluation.test.ts"], {
+const result = spawnSync("npx", [
+  "vitest",
+  "run",
+  "tests/integration/evaluation.test.ts",
+  "tests/integration/model-candidate-evaluation.test.ts",
+], {
   stdio: "inherit",
   shell: true,
 });

@@ -3,8 +3,13 @@ design/
 # Track committed audit and reference docs; ignore other local notes under docs/
 docs/*
 !docs/POLICYINSIGHT_EXTRACTION_AUDIT.md
+!docs/BEFOREYOUSIGN_UI_UX_ACCESSIBILITY_AUDIT_2026-09-19.md
 !docs/adr/
 !docs/adr/*.md
+
+# Generated design exports and review captures
+redesign/
+.impeccable/review/
 
 # Local environment — never commit secrets
 .env

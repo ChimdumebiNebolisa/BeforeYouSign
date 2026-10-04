@@ -9,6 +9,17 @@ export { hashDocumentId, computeContentIntegrityKey } from "@/lib/analysis/pipel
 
 const inFlightByClient = new Map<string, number>();
 let inFlightAnalyses = 0;
+const attemptsByClient = new Map<string, number[]>();
+let globalAttempts: number[] = [];
+
+function activeAttempts(attempts: number[], windowStart: number): number[] {
+  return attempts.filter((attemptedAt) => attemptedAt > windowStart);
+}
+
+function retryAfterSeconds(attempts: number[], windowMs: number, nowMs: number): number {
+  const oldest = attempts[0] ?? nowMs;
+  return Math.max(1, Math.ceil((oldest + windowMs - nowMs) / 1_000));
+}
 
 function parseRequestedState(value: unknown): StateCode | null {
   return parseStateCode(value);
@@ -122,6 +133,59 @@ export function releaseClientSlot(clientKey: string): void {
   const current = inFlightByClient.get(clientKey) ?? 0;
   if (current <= 1) inFlightByClient.delete(clientKey);
   else inFlightByClient.set(clientKey, current - 1);
+}
+
+export function consumeAnalysisAllowance(
+  clientKey: string,
+  nowMs = Date.now(),
+): AnalysisProblem | null {
+  globalAttempts = activeAttempts(globalAttempts, nowMs - ANALYSIS_LIMITS.globalWindowMs);
+  if (globalAttempts.length >= ANALYSIS_LIMITS.maxRequestsPerGlobalWindow) {
+    return createAnalysisProblem(
+      "rate_limited",
+      "The controlled demo has reached its hourly analysis limit. Please try again later.",
+      {
+        retryAfterSeconds: retryAfterSeconds(
+          globalAttempts,
+          ANALYSIS_LIMITS.globalWindowMs,
+          nowMs,
+        ),
+      },
+    );
+  }
+
+  if (clientKey !== "anonymous") {
+    const clientAttempts = activeAttempts(
+      attemptsByClient.get(clientKey) ?? [],
+      nowMs - ANALYSIS_LIMITS.clientWindowMs,
+    );
+    if (clientAttempts.length >= ANALYSIS_LIMITS.maxRequestsPerClientWindow) {
+      attemptsByClient.set(clientKey, clientAttempts);
+      return createAnalysisProblem(
+        "rate_limited",
+        "Too many analysis requests were submitted recently. Please wait and try again.",
+        {
+          retryAfterSeconds: retryAfterSeconds(
+            clientAttempts,
+            ANALYSIS_LIMITS.clientWindowMs,
+            nowMs,
+          ),
+        },
+      );
+    }
+    clientAttempts.push(nowMs);
+    attemptsByClient.set(clientKey, clientAttempts);
+  }
+
+  globalAttempts.push(nowMs);
+  return null;
+}
+
+export function resetAnalysisLimitStateForTests(): void {
+  inFlightByClient.clear();
+  inFlightAnalyses = 0;
+  attemptsByClient.clear();
+  globalAttempts = [];
 }
 
 export async function parseAnalysisInput(request: Request): Promise<

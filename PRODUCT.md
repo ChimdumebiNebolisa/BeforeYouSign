@@ -20,7 +20,7 @@ The product's defining mechanism is evidence traceability: grounded guidance lin
 
 ## Operating Context
 
-The journey runs in one browser session: select a rental-property state, add a lease, confirm the document and jurisdiction, wait for synchronous hybrid analysis, review the report and extracted text, and download a Markdown report or question checklist. Reports are not persisted across refreshes.
+The journey runs in one browser session: select a rental-property state, add a lease, confirm the document and jurisdiction, wait for synchronous hybrid analysis, review the report and extracted text, and download a Markdown report or question checklist. Reports are not persisted across refreshes. The current deployment is a protected, limited-user demonstration; it is not approved for unrestricted public AI traffic.
 
 ## Capabilities and Constraints
 
@@ -56,4 +56,4 @@ Preserve the BeforeYouSign name, existing logos, Inter body type, Manrope headli
 
 ## Accessibility & Inclusion
 
-Target WCAG 2.2 AA for keyboard access, focus order, status communication, contrast, target size, responsive reflow, landmarks, reduced motion, and assistive-technology clarity. Final release verification includes Narrator with Edge and NVDA with Chrome in addition to automated checks.
+Target WCAG 2.2 AA for keyboard access, focus order, status communication, contrast, target size, responsive reflow, landmarks, reduced motion, and assistive-technology clarity. Automated browser checks cover keyboard, focus, status, contrast, target size, reflow, landmarks, and reduced motion. Narrator with Edge and NVDA with Chrome remain separate manual release gates and must be recorded with actual tester and version details.
