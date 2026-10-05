@@ -1,0 +1,23 @@
+{
+  "id": "synthetic-utility-reimbursement",
+  "text": "Tenant reimbursement for submetered utilities.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant shall reimburse Landlord for water and sewer charges based on submeter readings."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 0,
+      "end": 41,
+      "category": "utilities",
+      "text": "Tenant shall reimburse Landlord for water"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["utilities"],
+    "texasTopics": []
+  }
+}

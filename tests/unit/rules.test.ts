@@ -173,6 +173,13 @@ describe("findUtilitiesSnippets", () => {
     expect(hits.length).toBeGreaterThan(0);
     expect(hits.some((h) => /utilities/i.test(h.quote))).toBe(true);
   });
+
+  it("finds tenant reimbursement of submetered utilities", () => {
+    const text = "Tenant shall reimburse Landlord for water and sewer charges based on submeter readings.";
+    const hits = findUtilitiesSnippets([{ page: 1, text }]);
+
+    expect(hits.some((hit) => /tenant shall reimburse landlord for water/i.test(hit.quote))).toBe(true);
+  });
 });
 
 describe("findUnclearLeasePhrases", () => {
