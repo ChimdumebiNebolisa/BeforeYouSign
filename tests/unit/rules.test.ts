@@ -173,6 +173,13 @@ describe("findUtilitiesSnippets", () => {
     expect(hits.length).toBeGreaterThan(0);
     expect(hits.some((h) => /utilities/i.test(h.quote))).toBe(true);
   });
+
+  it("finds a singular utility-charge assignment", () => {
+    const text = "Tenant shall pay utility charges allocated by management each month.";
+    const hits = findUtilitiesSnippets([{ page: 1, text }]);
+
+    expect(hits.some((hit) => /utility charges allocated by management/i.test(hit.quote))).toBe(true);
+  });
 });
 
 describe("findUnclearLeasePhrases", () => {

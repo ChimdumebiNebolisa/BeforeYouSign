@@ -10,6 +10,7 @@ describe("isEvidenceRelevantToFindingCategory", () => {
     ["notice", "Tenant must give 60 days written notice before moving out."],
     ["maintenance", "Landlord is responsible for major structural repairs."],
     ["utilities", "Tenant pays electricity and water."],
+    ["utilities", "Tenant shall pay utility charges allocated by management."],
     ["guests", "Guests may stay no more than seven consecutive nights."],
     ["pets", "Pets require written approval and a monthly pet fee."],
     ["subletting", "Subletting and short-term rentals require consent."],

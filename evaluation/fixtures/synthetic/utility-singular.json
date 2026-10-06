@@ -1,0 +1,23 @@
+{
+  "id": "synthetic-utility-singular",
+  "text": "Utility charge assignment stated in the singular.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant shall pay utility charges allocated by management each month."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 17,
+      "end": 56,
+      "category": "utilities",
+      "text": "utility charges allocated by management"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["utilities"],
+    "texasTopics": []
+  }
+}

@@ -10,6 +10,14 @@
       "description": "Standard fictional residential lease excerpt"
     },
     {
+      "id": "synthetic-utility-singular",
+      "path": "synthetic/utility-singular.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Utility charge assignment phrased in singular"
+    },
+    {
       "id": "synthetic-fee-heavy",
       "path": "synthetic/fee-heavy.json",
       "license": "MIT",

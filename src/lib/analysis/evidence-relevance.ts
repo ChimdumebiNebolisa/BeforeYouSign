@@ -6,7 +6,7 @@ const CATEGORY_SIGNALS: Record<Exclude<FindingCategory, "other">, RegExp> = {
   renewal: /\b(?:renew(?:s|ed|ing|al)?|month[- ]?to[- ]?month|extension|holdover)\b/i,
   notice: /\b(?:notice|notify|notification|vacate|move[- ]?out)\b/i,
   maintenance: /\b(?:maintain|maintenance|repairs?|upkeep|cleanliness|structural|hvac|plumbing|electrical|roof|filter)\b/i,
-  utilities: /\b(?:utilities?|electric|electricity|gas|water|sewer|trash|internet|cable|heat|meter)\b/i,
+  utilities: /\b(?:utilit(?:y|ies)|electric|electricity|gas|water|sewer|trash|internet|cable|heat|meter)\b/i,
   guests: /\bguests?\b|\b(?:consecutive|total)\s+nights?\b/i,
   pets: /\b(?:pets?|animals?)\b/i,
   subletting: /\b(?:sublet|subletting|sublease|assignment|short[- ]?term rental|room rental)\b/i,
