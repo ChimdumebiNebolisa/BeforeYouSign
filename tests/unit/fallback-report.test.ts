@@ -120,6 +120,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts a hyphenated move-out notice deadline", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant must give a 30-day written notice before move-out.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.noticeSnippets).toHaveLength(1);
+    expect(report.deadlinesAndNotice).toContainEqual(
+      expect.objectContaining({
+        label: "Move-out notice",
+        value: "30-day",
+      }),
+    );
+  });
+
   it("preserves both parts of a greater-of late charge", () => {
     const pages = [
       {
