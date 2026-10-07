@@ -10,6 +10,14 @@
       "description": "Standard fictional residential lease excerpt"
     },
     {
+      "id": "synthetic-deposit-fraction",
+      "path": "synthetic/deposit-fraction.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Security deposit expressed as a fractional rent multiple"
+    },
+    {
       "id": "synthetic-fee-heavy",
       "path": "synthetic/fee-heavy.json",
       "license": "MIT",

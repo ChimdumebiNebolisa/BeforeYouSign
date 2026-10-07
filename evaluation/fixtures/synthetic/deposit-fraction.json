@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-deposit-fraction",
+  "text": "Security deposit expressed as a fractional rent multiple.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Security deposit equals one and one-half months' rent."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 0,
+      "end": 53,
+      "category": "deposit",
+      "text": "Security deposit equals one and one-half months' rent"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["deposit"],
+    "texasTopics": ["securityDeposit"],
+    "riskBand": "low"
+  }
+}

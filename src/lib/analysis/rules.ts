@@ -65,7 +65,7 @@ function dedupeSnippets(items: RentSnippet[]): RentSnippet[] {
 export function findDepositSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\bsecurity\s+deposit\b[^.\n]{0,180}\$[\d,]+(?:\.\d{2})?\b/gi,
-    /\bsecurity\s+deposit\b[^.\n]{0,180}\b(?:one(?:\s*\(\s*1\s*\))?|1)\s+month'?s?\s+rent\b[^.\n]{0,120}/gi,
+    /\bsecurity\s+deposit\b[^.\n]{0,180}\b(?:one(?:\s*\(\s*1\s*\))?|1)(?:\s+and\s+(?:one|a)[ -]half|\.5)?\s+months?(?:['’]s?)?\s+rent\b[^.\n]{0,120}/gi,
     /\bdeposit\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}\b(?:as\s+(?:a\s+)?)?(?:security\s+)?deposit\b/gi,
   ];

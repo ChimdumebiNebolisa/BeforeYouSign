@@ -60,6 +60,17 @@ describe("findDepositSnippets", () => {
       quote: "security deposit equals one month's rent and is due before move-in",
     });
   });
+
+  it("finds a security deposit set as one and one-half months' rent", () => {
+    const hits = findDepositSnippets([
+      {
+        page: 1,
+        text: "The security deposit is equal to one and one-half months' rent and is due before move-in.",
+      },
+    ]);
+
+    expect(hits.some((hit) => /security deposit is equal to one and one-half months' rent/i.test(hit.quote))).toBe(true);
+  });
 });
 
 describe("findFeeSnippets", () => {
