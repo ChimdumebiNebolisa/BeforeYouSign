@@ -10,6 +10,14 @@
       "description": "Standard fictional residential lease excerpt"
     },
     {
+      "id": "synthetic-advance-notice",
+      "path": "synthetic/advance-notice.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Notice deadline with advance inserted after the day count"
+    },
+    {
       "id": "synthetic-fee-heavy",
       "path": "synthetic/fee-heavy.json",
       "license": "MIT",

@@ -1,0 +1,23 @@
+{
+  "id": "synthetic-advance-notice",
+  "text": "Move-out notice deadline phrased as advance written notice.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant must provide 30 days' advance written notice before vacating."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 20,
+      "end": 51,
+      "category": "notice",
+      "text": "30 days' advance written notice"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["notice"],
+    "texasTopics": []
+  }
+}

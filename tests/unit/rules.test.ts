@@ -134,6 +134,13 @@ describe("findNoticeSnippets", () => {
     expect(hits).toHaveLength(1);
     expect(hits[0]?.quote).toContain("24-hours’ written notice");
   });
+
+  it("finds advance written notice phrased after the day count", () => {
+    const text = "Tenant must provide 30 days' advance written notice before vacating.";
+    const hits = findNoticeSnippets([{ page: 1, text }]);
+
+    expect(hits.some((hit) => /30 days' advance written notice/i.test(hit.quote))).toBe(true);
+  });
 });
 
 describe("findRenewalSnippets", () => {
