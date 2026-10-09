@@ -1,0 +1,23 @@
+{
+  "id": "synthetic-calendar-month-notice",
+  "text": "Move-out notice deadline expressed as a full calendar month.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant must give at least one full calendar month's written notice before terminating the lease."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 25,
+      "end": 65,
+      "category": "notice",
+      "text": "one full calendar month's written notice"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["notice"],
+    "texasTopics": []
+  }
+}

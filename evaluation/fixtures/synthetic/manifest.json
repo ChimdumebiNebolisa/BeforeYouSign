@@ -64,6 +64,14 @@
       "consent": "synthetic",
       "redaction": "adversarial",
       "description": "Many fee clauses plus other categories used to verify diverse prioritization"
+    },
+    {
+      "id": "synthetic-calendar-month-notice",
+      "path": "synthetic/calendar-month-notice.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Notice deadline expressed as a full calendar month"
     }
   ]
 }

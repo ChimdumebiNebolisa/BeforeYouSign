@@ -141,6 +141,13 @@ describe("findNoticeSnippets", () => {
 
     expect(hits.some((hit) => /30 days' advance written notice/i.test(hit.quote))).toBe(true);
   });
+
+  it("finds a notice deadline expressed as one full calendar month", () => {
+    const text = "Tenant must give at least one full calendar month's written notice before terminating the lease.";
+    const hits = findNoticeSnippets([{ page: 1, text }]);
+
+    expect(hits.some((hit) => /one full calendar month's written notice/i.test(hit.quote))).toBe(true);
+  });
 });
 
 describe("findRenewalSnippets", () => {
