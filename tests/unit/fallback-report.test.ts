@@ -361,6 +361,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("preserves a holdover rate based on the then-current daily rental rate", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Holdover rent: Tenant shall pay 200% of the then-current daily rental rate for each day Tenant remains after the lease term ends.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Holdover rent",
+        value: "200% of the then-current daily rental rate",
+      }),
+    );
+  });
+
   it("preserves the daily rate for dollar-based holdover rent", () => {
     const pages = [
       {
