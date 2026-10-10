@@ -10,6 +10,14 @@
       "description": "Standard fictional residential lease excerpt"
     },
     {
+      "id": "synthetic-holdover-rent-during-period",
+      "path": "synthetic/holdover-rent-during-period.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Percentage holdover rent stated with the period before rent"
+    },
+    {
       "id": "synthetic-fee-heavy",
       "path": "synthetic/fee-heavy.json",
       "license": "MIT",
