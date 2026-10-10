@@ -120,6 +120,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("labels a vacating notice as a move-out notice", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant must give 60 days written notice before vacating the premises.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.noticeSnippets).toHaveLength(1);
+    expect(report.deadlinesAndNotice).toContainEqual(
+      expect.objectContaining({
+        label: "Move-out notice",
+        value: "60 days",
+      }),
+    );
+  });
+
   it("preserves both parts of a greater-of late charge", () => {
     const pages = [
       {
