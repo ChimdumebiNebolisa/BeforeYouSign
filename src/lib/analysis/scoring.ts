@@ -77,7 +77,7 @@ export function computeDeterministicLeaseRisk(input: {
     (finding) =>
       /\butilities\b/i.test(finding.quote) &&
       !(
-        /\b(?:tenant|landlord)\b[^.]{0,200}\b(?:responsible(?:\s+for)?|pays?|shall\s+pay|must\s+pay)\b/i.test(
+        /\b(?:tenant|landlord)\b[^.]{0,200}\b(?:responsible(?:\s+for)?|pays?|shall\s+pay|must\s+pay|reimburs(?:e|es|ement))\b/i.test(
           finding.quote,
         ) ||
         /\b(?:utilities?|electric|gas|water|sewer|trash)\b[^.]{0,200}\b(?:paid\s+by|responsibility\s+of)\s+(?:the\s+)?(?:tenant|landlord)\b/i.test(
