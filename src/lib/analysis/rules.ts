@@ -97,6 +97,8 @@ export function findFeeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
     /\bbreak(?:ing)?\s+(?:the\s+)?lease\b[^.\n]{0,180}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\breturned\s+payment(?:\s*\(nsf\))?\s+fee\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\b(?:returned\s+payment|nsf)\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /\b(?:returned|dishonored|bounced)\s+checks?\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}\b(?:returned|dishonored|bounced)\s+checks?\b/gi,
     /\binsufficient\s+funds\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}\binsufficient\s+funds\b/gi,
     /\butility\s+(?:billing\s+and\s+processing|billing|processing)\s+fee\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?(?:\s*(?:per|\/)\s*(?:month|mo))?\b/gi,
