@@ -361,6 +361,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts holdover rent when the clause states the holdover period first", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "During any holdover, Tenant shall pay rent equal to 150% of the monthly rent.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Holdover rent",
+        value: "150% of the monthly rent",
+      }),
+    );
+  });
+
   it("preserves the daily rate for dollar-based holdover rent", () => {
     const pages = [
       {

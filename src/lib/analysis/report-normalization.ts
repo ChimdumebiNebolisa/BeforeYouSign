@@ -50,7 +50,7 @@ export function classifyLeaseMoneyLabel(text: string): string | null {
   if (/\bsecurity deposit\b|\bdeposit\b[^.]{0,80}\$|\$[\d,]+(?:\.\d{2})?\b[^.]{0,80}\bdeposit\b/.test(q)) {
     return "Security deposit";
   }
-  if (/\bholdover\s+rent\b/.test(q)) {
+  if (/\bholdover\b[^.]{0,160}\brent\b/.test(q)) {
     return "Holdover rent";
   }
   if (/\bearly\s+(?:termination|move-?out)\b|\bbreak(?:ing)?\s+(?:the\s+)?lease\b/.test(q)) {
