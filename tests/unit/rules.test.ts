@@ -165,6 +165,17 @@ describe("findMaintenanceSnippets", () => {
     expect(hits.length).toBeGreaterThan(0);
     expect(hits.some((h) => /maintenance/i.test(h.quote))).toBe(true);
   });
+
+  it("does not flag an ordinary-wear-and-tear return-condition exception", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant shall return the Premises in clean condition, ordinary wear and tear excepted.",
+      },
+    ];
+
+    expect(findMaintenanceSnippets(pages)).toEqual([]);
+  });
 });
 
 describe("findUtilitiesSnippets", () => {
