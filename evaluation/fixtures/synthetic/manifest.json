@@ -18,6 +18,14 @@
       "description": "Percentage holdover rent stated with the period before rent"
     },
     {
+      "id": "synthetic-hvac-filter-maintenance",
+      "path": "synthetic/hvac-filter-maintenance.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Tenant's recurring HVAC filter replacement obligation"
+    },
+    {
       "id": "synthetic-fee-heavy",
       "path": "synthetic/fee-heavy.json",
       "license": "MIT",

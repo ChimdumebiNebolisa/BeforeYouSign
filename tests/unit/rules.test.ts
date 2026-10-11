@@ -165,6 +165,22 @@ describe("findMaintenanceSnippets", () => {
     expect(hits.length).toBeGreaterThan(0);
     expect(hits.some((h) => /maintenance/i.test(h.quote))).toBe(true);
   });
+
+  it("finds tenant obligations to replace HVAC filters", () => {
+    const hits = findMaintenanceSnippets([
+      {
+        page: 1,
+        text: "Tenant shall replace the HVAC air filters every 60 days and keep proof of replacement upon request.",
+      },
+    ]);
+
+    expect(hits).toEqual([
+      {
+        page: 1,
+        quote: "Tenant shall replace the HVAC air filters every 60 days and keep proof of replacement upon request",
+      },
+    ]);
+  });
 });
 
 describe("findUtilitiesSnippets", () => {
