@@ -194,6 +194,7 @@ export function findRenewalSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
 
 export function findMaintenanceSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
+    /\btenant\b[^.\n]{0,120}\b(?:replace|change)\b[^.\n]{0,80}\b(?:air\s+filters?|(?:hvac|furnace)(?:\s+air)?\s+filters?)\b[^.\n]{0,120}/gi,
     /\btenant\b[^.\n]{0,120}\b(?:maintain|maintenance|repair|clean|cleanliness)\b[^.\n]{0,120}/gi,
     /\blandlord\b[^.\n]{0,120}\b(?:maintain|maintenance|repair|structural)\b[^.\n]{0,120}/gi,
     /\b(?:minor|major)\s+repairs?\b[^.\n]{0,160}/gi,
