@@ -305,6 +305,12 @@ export function findUnclearLeasePhrases(pages: ExtractedTextPage[]): RentSnippet
       while ((match = pattern.exec(text)) !== null) {
         const quote = match[0].replace(/\s+/g, " ").trim();
         if (quote.length < 8) continue;
+        const mayApplyWithExplicitCap =
+          /\bfees?\s+may\s+apply\b/i.test(quote) &&
+          /\b(?:up to|not\s+(?:to\s+)?exceed|maximum(?:\s+of)?|capped\s+at)\b[^.\n]{0,40}(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)/i.test(
+            quote,
+          );
+        if (mayApplyWithExplicitCap) continue;
         matches.push({ page: page.page, quote });
       }
     }

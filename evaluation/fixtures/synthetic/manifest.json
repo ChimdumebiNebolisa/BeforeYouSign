@@ -26,6 +26,14 @@
       "description": "Tenant's recurring HVAC filter replacement obligation"
     },
     {
+      "id": "synthetic-capped-late-fee",
+      "path": "synthetic/capped-late-fee.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Conditional late fee with a stated maximum charge"
+    },
+    {
       "id": "synthetic-fee-heavy",
       "path": "synthetic/fee-heavy.json",
       "license": "MIT",
