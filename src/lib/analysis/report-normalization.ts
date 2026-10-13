@@ -89,6 +89,9 @@ export function classifyLeaseMoneyLabel(text: string): string | null {
   if (/\bpackage\b/.test(q)) {
     return "Package fee";
   }
+  if (/\bamenit(?:y|ies)\b/.test(q)) {
+    return "Amenity fee";
+  }
   if (/\blate\b/.test(q)) {
     return "Late fee";
   }
