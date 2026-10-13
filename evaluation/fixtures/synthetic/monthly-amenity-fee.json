@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-monthly-amenity-fee",
+  "text": "A mandatory monthly amenity fee charged separately from rent.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Residents shall pay a mandatory amenity fee of $35 per month in addition to base rent."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 31,
+      "end": 82,
+      "category": "fees",
+      "text": "amenity fee of $35 per month in addition to base rent"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["fees"],
+    "texasTopics": [],
+    "riskBand": "low"
+  }
+}

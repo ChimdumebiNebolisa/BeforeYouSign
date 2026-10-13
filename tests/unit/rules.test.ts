@@ -84,6 +84,18 @@ describe("findFeeSnippets", () => {
     });
     expect(findRentSnippets(pages)).toEqual([]);
   });
+
+  it("finds a required monthly amenity fee stated after its label", () => {
+    const hits = findFeeSnippets([
+      {
+        page: 1,
+        text: "Residents shall pay a mandatory amenity fee of $35 per month in addition to base rent.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("amenity fee of $35 per month");
+  });
 });
 
 describe("findNoticeSnippets", () => {

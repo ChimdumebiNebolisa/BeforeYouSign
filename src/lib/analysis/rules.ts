@@ -101,6 +101,7 @@ export function findFeeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
     /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}\binsufficient\s+funds\b/gi,
     /\butility\s+(?:billing\s+and\s+processing|billing|processing)\s+fee\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?(?:\s*(?:per|\/)\s*(?:month|mo))?\b/gi,
     /\bmarketing\s+fee\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /\bamenity\s+fee\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,80}/gi,
     /\bpackage(?:\s+acceptance)?\s+fee\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?(?:\s*(?:per|\/)\s*package)?\b/gi,
     /\breserved\s+parking(?:\s+stall)?\s+fee\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?(?:\s*(?:per|\/)\s*(?:month|mo|vehicle))?\b/gi,
     /\bpet[-\s]+rent\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}/gi,

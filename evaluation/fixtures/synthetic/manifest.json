@@ -34,6 +34,14 @@
       "description": "Conditional late fee with a stated maximum charge"
     },
     {
+      "id": "synthetic-monthly-amenity-fee",
+      "path": "synthetic/monthly-amenity-fee.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Mandatory recurring amenity fee stated separately from rent"
+    },
+    {
       "id": "synthetic-fee-heavy",
       "path": "synthetic/fee-heavy.json",
       "license": "MIT",
