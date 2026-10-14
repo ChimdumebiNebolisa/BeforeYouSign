@@ -146,6 +146,18 @@ describe("findNoticeSnippets", () => {
     expect(hits).toHaveLength(1);
     expect(hits[0]?.quote).toContain("24-hours’ written notice");
   });
+
+  it("finds an entry deadline phrased as advance notice", () => {
+    const hits = findNoticeSnippets([
+      {
+        page: 1,
+        text: "Landlord may enter the unit after providing at least 24 hours' advance notice.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("24 hours' advance notice");
+  });
 });
 
 describe("findRenewalSnippets", () => {
