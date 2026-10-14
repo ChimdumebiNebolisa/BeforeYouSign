@@ -58,6 +58,14 @@
       "description": "Fictional lease with notice and renewal clauses"
     },
     {
+      "id": "synthetic-entry-advance-notice",
+      "path": "synthetic/entry-advance-notice.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Landlord entry clause stating advance notice after the notice period"
+    },
+    {
       "id": "synthetic-prompt-injection",
       "path": "synthetic/prompt-injection.json",
       "license": "MIT",
