@@ -1,5 +1,5 @@
 {
-  "fixtureCount": 12,
+  "fixtureCount": 13,
   "avgGroundingRate": 1,
   "results": [
     {
@@ -197,6 +197,24 @@
         "riskBandAccuracy": 1,
         "ruleFindings": 3,
         "texasTopics": 1
+      },
+      "errors": []
+    },
+    {
+      "fixtureId": "synthetic-rent-credit",
+      "mode": "rules_only",
+      "metrics": {
+        "groundingRate": 1,
+        "unsupportedFindingRate": 0,
+        "expectedValueAccuracy": 1,
+        "ruleCategoryPrecision": 1,
+        "ruleCategoryRecall": 1,
+        "texasTopicPrecision": 1,
+        "texasTopicRecall": 1,
+        "annotationSpanRecall": 1,
+        "riskBandAccuracy": 1,
+        "ruleFindings": 0,
+        "texasTopics": 0
       },
       "errors": []
     },

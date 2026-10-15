@@ -268,6 +268,7 @@ export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
       while ((match = pattern.exec(text)) !== null) {
         const quote = match[0].replace(/\s+/g, " ").trim();
         if (quote.length < 8) continue;
+        if (/\brent\s+credit\b/i.test(quote)) continue;
         const previousPeriod = text.lastIndexOf(".", Math.max(0, match.index - 1));
         const previousLineBreak = text.lastIndexOf("\n", Math.max(0, match.index - 1));
         const clausePrefix = text.slice(Math.max(previousPeriod, previousLineBreak) + 1, match.index);
