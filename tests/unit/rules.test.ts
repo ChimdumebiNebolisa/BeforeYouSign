@@ -37,6 +37,17 @@ describe("findRentSnippets", () => {
       findRentSnippets([{ page: 1, text: "Parking fee is $50 per month." }]),
     ).toEqual([]);
   });
+
+  it("does not mistake a one-time rent credit for the recurring rent amount", () => {
+    expect(
+      findRentSnippets([
+        {
+          page: 1,
+          text: "A one-time rent credit of $500 will be applied to the first month's balance.",
+        },
+      ]),
+    ).toEqual([]);
+  });
 });
 
 describe("findDepositSnippets", () => {

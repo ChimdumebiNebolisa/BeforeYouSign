@@ -74,6 +74,14 @@
       "description": "Synthetic adversarial lease text containing prompt-injection instructions"
     },
     {
+      "id": "synthetic-rent-credit",
+      "path": "synthetic/rent-credit.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "One-time rent credit that must not be reported as recurring rent"
+    },
+    {
       "id": "synthetic-ambiguous-language",
       "path": "synthetic/ambiguous-language.json",
       "license": "MIT",
