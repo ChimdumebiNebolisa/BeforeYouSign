@@ -71,6 +71,30 @@ describe("findDepositSnippets", () => {
       quote: "security deposit equals one month's rent and is due before move-in",
     });
   });
+
+  it("finds a security-deposit return deadline when the amount is stated elsewhere", () => {
+    const hits = findDepositSnippets([
+      {
+        page: 1,
+        text: "After Tenant surrenders possession, Landlord shall return the security deposit within 30 days.",
+      },
+      {
+        page: 2,
+        text: "The security deposit will be refunded within 30 days after move-out.",
+      },
+    ]);
+
+    expect(hits).toEqual([
+      {
+        page: 1,
+        quote: "return the security deposit within 30 days",
+      },
+      {
+        page: 2,
+        quote: "security deposit will be refunded within 30 days",
+      },
+    ]);
+  });
 });
 
 describe("findFeeSnippets", () => {
