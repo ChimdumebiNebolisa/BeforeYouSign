@@ -82,6 +82,14 @@
       "description": "One-time rent credit that must not be reported as recurring rent"
     },
     {
+      "id": "synthetic-security-deposit-return-deadline",
+      "path": "synthetic/security-deposit-return-deadline.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Security-deposit return deadline stated separately from the amount"
+    },
+    {
       "id": "synthetic-ambiguous-language",
       "path": "synthetic/ambiguous-language.json",
       "license": "MIT",

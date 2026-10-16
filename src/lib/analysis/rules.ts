@@ -66,6 +66,8 @@ export function findDepositSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\bsecurity\s+deposit\b[^.\n]{0,180}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\bsecurity\s+deposit\b[^.\n]{0,180}\b(?:one(?:\s*\(\s*1\s*\))?|1)\s+month'?s?\s+rent\b[^.\n]{0,120}/gi,
+    /\b(?:return(?:ed)?|refund(?:ed)?)\b[^.\n]{0,100}\b(?:security\s+)?deposit\b[^.\n]{0,80}\bwithin\s+\d{1,3}\s+days?\b/gi,
+    /\b(?:security\s+)?deposit\b[^.\n]{0,100}\b(?:return(?:ed)?|refund(?:ed)?)\b[^.\n]{0,80}\bwithin\s+\d{1,3}\s+days?\b/gi,
     /\bdeposit\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}\b(?:as\s+(?:a\s+)?)?(?:security\s+)?deposit\b/gi,
   ];
