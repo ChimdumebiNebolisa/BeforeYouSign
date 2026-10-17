@@ -112,6 +112,14 @@
       "consent": "synthetic",
       "redaction": "adversarial",
       "description": "Many fee clauses plus other categories used to verify diverse prioritization"
+    },
+    {
+      "id": "synthetic-unpaid-rent-charge",
+      "path": "synthetic/unpaid-rent-charge.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Rent penalty described as a charge on unpaid rent rather than a late fee"
     }
   ]
 }
