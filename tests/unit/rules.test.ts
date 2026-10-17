@@ -131,6 +131,18 @@ describe("findFeeSnippets", () => {
     expect(hits).toHaveLength(1);
     expect(hits[0]?.quote).toContain("amenity fee of $35 per month");
   });
+
+  it("finds a rent penalty described as a charge on unpaid rent", () => {
+    const hits = findFeeSnippets([
+      {
+        page: 1,
+        text: "Unpaid rent will incur a charge equal to 10% of the monthly rent.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("charge equal to 10%");
+  });
 });
 
 describe("findNoticeSnippets", () => {
