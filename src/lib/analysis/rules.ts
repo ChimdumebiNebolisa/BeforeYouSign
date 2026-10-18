@@ -255,6 +255,7 @@ export function findUtilitiesSnippets(pages: ExtractedTextPage[]): RentSnippet[]
 
 export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
+    /\bmonthly\s+installments?\s+(?:of|at)\s+\$[\d,]+(?:\.\d{2})?\b/gi,
     /(?<!pet[\s-])\brent\b[^.\n]{0,200}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,200}\b(per\s+month|monthly|\/mo|each\s+month)\b/gi,
   ];
@@ -271,6 +272,16 @@ export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
       while ((match = pattern.exec(text)) !== null) {
         const quote = match[0].replace(/\s+/g, " ").trim();
         if (quote.length < 8) continue;
+        const amountMatch = /\$[\d,]+(?:\.\d{2})?\b/.exec(match[0]);
+        const amountIndex = amountMatch ? match.index + amountMatch.index : -1;
+        const beforeAmount = amountIndex >= 0 ? text.slice(Math.max(0, amountIndex - 50), amountIndex) : "";
+        const afterAmount = amountMatch
+          ? text.slice(amountIndex + amountMatch[0].length, amountIndex + amountMatch[0].length + 50)
+          : "";
+        const annualRate =
+          /\b(?:annual(?:ly)?|yearly|per\s+annum)\b[^.!?\n]{0,40}$/i.test(beforeAmount) ||
+          /^[^.!?\n]{0,40}\b(?:per\s+year|a\s+year|annually|yearly|per\s+annum)\b/i.test(afterAmount);
+        if (annualRate) continue;
         if (/\brent\s+credit\b/i.test(quote)) continue;
         const previousPeriod = text.lastIndexOf(".", Math.max(0, match.index - 1));
         const previousLineBreak = text.lastIndexOf("\n", Math.max(0, match.index - 1));
