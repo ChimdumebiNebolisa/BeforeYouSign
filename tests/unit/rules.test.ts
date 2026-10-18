@@ -48,6 +48,26 @@ describe("findRentSnippets", () => {
       ]),
     ).toEqual([]);
   });
+
+  it("uses the monthly installment instead of an explicitly annual rent rate", () => {
+    expect(
+      findRentSnippets([
+        {
+          page: 1,
+          text: "The annual base rent is $24,000 per year, payable in monthly installments of $2,000.",
+        },
+        {
+          page: 2,
+          text: "Annual rent is $24,000 per year.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "monthly installments of $2,000",
+      },
+    ]);
+  });
 });
 
 describe("findDepositSnippets", () => {
