@@ -225,6 +225,18 @@ describe("findNoticeSnippets", () => {
     expect(hits).toHaveLength(1);
     expect(hits[0]?.quote).toContain("24 hours' advance notice");
   });
+
+  it("finds written notification deadlines phrased with notify rather than notice", () => {
+    const hits = findNoticeSnippets([
+      {
+        page: 1,
+        text: "Resident must notify management in writing no fewer than 60 days before the lease expiration date to avoid automatic renewal.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("notify management in writing no fewer than 60 days before");
+  });
 });
 
 describe("findRenewalSnippets", () => {
