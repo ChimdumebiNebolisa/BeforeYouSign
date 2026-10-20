@@ -106,6 +106,14 @@
       "description": "Security-deposit return deadline stated separately from the amount"
     },
     {
+      "id": "synthetic-security-deposit-return-deadline-words",
+      "path": "synthetic/security-deposit-return-deadline-words.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Security-deposit return deadline with a word number and parenthetical numeral"
+    },
+    {
       "id": "synthetic-ambiguous-language",
       "path": "synthetic/ambiguous-language.json",
       "license": "MIT",
