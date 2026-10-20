@@ -115,6 +115,18 @@ describe("findDepositSnippets", () => {
       },
     ]);
   });
+
+  it("finds a deposit deadline stated with a word number and parenthetical numeral", () => {
+    const hits = findDepositSnippets([
+      {
+        page: 1,
+        text: "The security deposit will be returned within thirty (30) days after Tenant surrenders possession.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("returned within thirty (30) days");
+  });
 });
 
 describe("findFeeSnippets", () => {
