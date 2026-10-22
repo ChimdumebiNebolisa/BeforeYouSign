@@ -343,6 +343,18 @@ describe("findUnclearLeasePhrases", () => {
     });
   });
 
+  it("flags charges controlled by a fee schedule that may be revised", () => {
+    const hits = findUnclearLeasePhrases([
+      {
+        page: 1,
+        text: "Tenant shall pay charges listed in Management's current fee schedule, which may be revised from time to time.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("fee schedule, which may be revised");
+  });
+
   it("returns empty for clear text", () => {
     expect(findUnclearLeasePhrases([{ page: 1, text: "Rent is $1,200 due on the 1st." }])).toEqual([]);
   });
