@@ -152,6 +152,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Rent penalty described as a charge on unpaid rent rather than a late fee"
+    },
+    {
+      "id": "synthetic-tenant-pest-control-responsibility",
+      "path": "synthetic/tenant-pest-control-responsibility.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Pest control and extermination responsibilities assigned to the tenant"
     }
   ]
 }

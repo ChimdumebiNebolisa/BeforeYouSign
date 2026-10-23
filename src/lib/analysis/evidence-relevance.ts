@@ -5,7 +5,7 @@ const CATEGORY_SIGNALS: Record<Exclude<FindingCategory, "other">, RegExp> = {
     /\b(?:rent|deposit|fees?|charges?|costs?|payment|damages|interest|parking|cleaning|package|processing|application)\b|\$|\b\d+(?:\.\d+)?\s*%/i,
   renewal: /\b(?:renew(?:s|ed|ing|al)?|month[- ]?to[- ]?month|extension|holdover)\b/i,
   notice: /\b(?:notice|notify|notification|vacate|move[- ]?out)\b/i,
-  maintenance: /\b(?:maintain|maintenance|repairs?|upkeep|cleanliness|structural|hvac|plumbing|electrical|roof|filter)\b/i,
+  maintenance: /\b(?:maintain|maintenance|repairs?|upkeep|cleanliness|structural|hvac|plumbing|electrical|roof|filter|pest\s+control|extermination)\b/i,
   utilities: /\b(?:utilities?|electric|electricity|gas|water|sewer|trash|internet|cable|heat|meter)\b/i,
   guests: /\bguests?\b|\b(?:consecutive|total)\s+nights?\b/i,
   pets: /\b(?:pets?|animals?)\b/i,
