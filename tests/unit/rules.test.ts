@@ -296,6 +296,22 @@ describe("findMaintenanceSnippets", () => {
       },
     ]);
   });
+
+  it("finds pest-control responsibilities assigned to the tenant", () => {
+    const hits = findMaintenanceSnippets([
+      {
+        page: 1,
+        text: "Tenant is responsible for all pest control and extermination services during the lease.",
+      },
+    ]);
+
+    expect(hits).toEqual([
+      {
+        page: 1,
+        quote: "Tenant is responsible for all pest control and extermination services during the lease",
+      },
+    ]);
+  });
 });
 
 describe("findUtilitiesSnippets", () => {

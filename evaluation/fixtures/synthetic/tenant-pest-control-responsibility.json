@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-tenant-pest-control-responsibility",
+  "text": "A residential lease assigning pest-control costs and treatment responsibilities to the tenant.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant is responsible for all pest control and extermination services during the lease."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 0,
+      "end": 86,
+      "category": "maintenance",
+      "text": "Tenant is responsible for all pest control and extermination services during the lease"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["maintenance"],
+    "texasTopics": [],
+    "riskBand": "low"
+  }
+}
