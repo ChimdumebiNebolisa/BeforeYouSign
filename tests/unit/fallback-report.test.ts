@@ -337,6 +337,31 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts an early-termination fee stated as two months' rent", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant may terminate early upon payment of an early termination fee equal to two months' rent.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(analysis.deterministicRisk.reasons).toContain("Ending the lease early may trigger extra charges.");
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Early termination fee",
+        value: "two months' rent",
+      }),
+    );
+  });
+
   it("extracts percentage-based holdover rent", () => {
     const pages = [
       {
