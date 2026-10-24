@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-entry-advance-notice",
+  "text": "A residential lease entry clause with a stated advance-notice period.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Landlord may enter the unit after providing at least 24 hours' advance notice."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 53,
+      "end": 77,
+      "category": "notice",
+      "text": "24 hours' advance notice"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["notice"],
+    "texasTopics": ["landlordEntry"],
+    "riskBand": "low"
+  }
+}
