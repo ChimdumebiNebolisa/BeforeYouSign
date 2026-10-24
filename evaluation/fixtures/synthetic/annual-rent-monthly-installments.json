@@ -1,0 +1,25 @@
+{
+  "id": "synthetic-annual-rent-monthly-installments",
+  "text": "Annual rent rate with the actual monthly installment also stated.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Base annual rent is $24,000 per year, payable in monthly installments of $2,000."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 46,
+      "end": 74,
+      "category": "rent",
+      "text": "monthly installments of $2,000"
+    }
+  ],
+  "expected": {
+    "rentAmount": "$2,000",
+    "ruleCategories": ["rent"],
+    "texasTopics": [],
+    "riskBand": "low"
+  }
+}

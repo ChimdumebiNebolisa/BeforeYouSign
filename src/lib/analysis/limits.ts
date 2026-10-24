@@ -7,6 +7,10 @@ export const ANALYSIS_LIMITS = {
   maxEvidenceChunks: 500,
   maxConcurrentAnalyses: 4,
   maxConcurrentPerClient: 1,
+  maxRequestsPerClientWindow: 5,
+  clientWindowMs: 10 * 60 * 1_000,
+  maxRequestsPerGlobalWindow: 30,
+  globalWindowMs: 60 * 60 * 1_000,
   lowExtractionCharThreshold: 400,
   partialCoverageQualityThreshold: 0.35,
 } as const;
@@ -34,7 +38,7 @@ export type AnalysisProblem = {
 export function createAnalysisProblem(
   code: AnalysisProblemCode,
   message: string,
-  options?: { limit?: number; actual?: number },
+  options?: { limit?: number; actual?: number; retryAfterSeconds?: number },
 ): AnalysisProblem {
   const httpStatus = (() => {
     switch (code) {
@@ -59,7 +63,7 @@ export function createAnalysisProblem(
     code,
     message,
     httpStatus,
-    ...(code === "rate_limited" ? { retryAfterSeconds: 2 } : {}),
+    ...(code === "rate_limited" ? { retryAfterSeconds: options?.retryAfterSeconds ?? 2 } : {}),
     ...options,
   };
 }
