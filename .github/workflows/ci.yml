@@ -73,6 +73,7 @@ jobs:
           node --check scripts/phase2-browser-qa.mjs
           node --check scripts/run-scan-smoke.mjs
           node --check scripts/evaluate.mjs
+          node --check scripts/evaluate-model.mjs
           node --check scripts/run-browser-qa.mjs
           node --check scripts/verify-legal-metadata.mjs
 

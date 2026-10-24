@@ -16,6 +16,10 @@ describe("classifyLeaseMoneyLabel", () => {
     expect(classifyLeaseMoneyLabel("Late fee of $75")).toBe("Late fee");
   });
 
+  it("classifies an amenity fee", () => {
+    expect(classifyLeaseMoneyLabel("Amenity fee of $35 per month")).toBe("Amenity fee");
+  });
+
   it("returns null for unrecognized text", () => {
     expect(classifyLeaseMoneyLabel("Random clause text")).toBeNull();
   });
