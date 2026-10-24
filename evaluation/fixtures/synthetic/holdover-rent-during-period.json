@@ -1,0 +1,23 @@
+{
+  "id": "synthetic-holdover-rent-during-period",
+  "text": "Percentage holdover rent stated with the holdover period first.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "During any holdover, Tenant shall pay rent equal to 150% of the monthly rent."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 0,
+      "end": 77,
+      "category": "fees",
+      "text": "During any holdover, Tenant shall pay rent equal to 150% of the monthly rent"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["fees"],
+    "texasTopics": []
+  }
+}

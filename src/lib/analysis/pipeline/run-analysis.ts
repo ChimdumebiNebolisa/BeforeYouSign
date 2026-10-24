@@ -1,7 +1,7 @@
 import { analyzeDocument } from "@/lib/analysis/pipeline/analyze-document";
 import { assembleSuccessResponse } from "@/lib/analysis/pipeline/assemble-response";
 import { runDeterministicAnalysis } from "@/lib/analysis/pipeline/deterministic";
-import { createRuleOnlyAnalyzer } from "@/lib/analysis/pipeline/rule-only-analyzer";
+import { createOpenAiAnalyzer } from "@/lib/analysis/pipeline/openai-analyzer";
 import type {
   AnalysisEngine,
   AnalysisResponse,
@@ -9,6 +9,7 @@ import type {
 } from "@/lib/analysis/pipeline/types";
 import {
   acquireClientSlot,
+  consumeAnalysisAllowance,
   createRequestId,
   getClientKey,
   parseAnalysisInput,
@@ -24,7 +25,7 @@ export async function runAnalysisPipeline(input: {
   const requestId = createRequestId();
   const clientKey = getClientKey(input.request);
   const startedAt = Date.now();
-  const analyzer: AnalysisEngine = input.analyzer ?? createRuleOnlyAnalyzer();
+  const analyzer: AnalysisEngine = input.analyzer ?? createOpenAiAnalyzer();
 
   const slotProblem = acquireClientSlot(clientKey);
   if (slotProblem) {
@@ -46,6 +47,29 @@ export async function runAnalysisPipeline(input: {
   }
 
   try {
+    const allowanceProblem = consumeAnalysisAllowance(clientKey);
+    if (allowanceProblem) {
+      emitSafeAnalysisEvent({
+        requestId,
+        stage: "validating_input",
+        failureCode: allowanceProblem.code,
+        durationMs: Date.now() - startedAt,
+      });
+      return {
+        httpStatus: allowanceProblem.httpStatus,
+        response: {
+          ok: false,
+          requestId,
+          stage: "validating_input",
+          error: {
+            code: allowanceProblem.code,
+            message: allowanceProblem.message,
+            retryAfterSeconds: allowanceProblem.retryAfterSeconds,
+          },
+        },
+      };
+    }
+
     const parsed = await parseAnalysisInput(input.request);
     if (!parsed.ok) {
       emitSafeAnalysisEvent({
@@ -115,6 +139,9 @@ export async function runAnalysisPipeline(input: {
       pageCount: documentResult.document.pages.length,
       totalChars: documentResult.document.extraction.totalChars,
       durationMs: Date.now() - startedAt,
+      groundedClaims: engine.groundingSummary?.groundedClaims,
+      droppedClaims: engine.groundingSummary?.droppedClaims,
+      groundingRejectionCounts: engine.groundingRejectionCounts,
     });
 
     return {

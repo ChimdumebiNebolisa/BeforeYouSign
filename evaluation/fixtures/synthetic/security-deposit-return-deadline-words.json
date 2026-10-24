@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-security-deposit-return-deadline-words",
+  "text": "A residential lease with a security-deposit return deadline written in words and numerals.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Landlord shall return the security deposit within thirty (30) days after Tenant surrenders possession."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 15,
+      "end": 66,
+      "category": "deposit",
+      "text": "return the security deposit within thirty (30) days"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["deposit"],
+    "texasTopics": ["securityDeposit"],
+    "riskBand": "low"
+  }
+}

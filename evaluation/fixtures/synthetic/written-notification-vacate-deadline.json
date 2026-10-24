@@ -1,0 +1,31 @@
+{
+  "id": "synthetic-written-notification-vacate-deadline",
+  "text": "A residential lease requiring written notification before the lease expires.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Resident must notify management in writing no fewer than 60 days before the lease expiration date to avoid automatic renewal."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 14,
+      "end": 98,
+      "category": "notice",
+      "text": "notify management in writing no fewer than 60 days before"
+    },
+    {
+      "page": 1,
+      "start": 107,
+      "end": 124,
+      "category": "renewal",
+      "text": "automatic renewal"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["notice", "renewal"],
+    "texasTopics": [],
+    "riskBand": "medium"
+  }
+}

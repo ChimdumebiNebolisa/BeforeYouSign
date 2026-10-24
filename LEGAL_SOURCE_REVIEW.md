@@ -20,4 +20,5 @@ Repeat this review before a public release whenever the application displays a s
 
 | Review date | Reviewer | Result | Notes |
 |---|---|---|---|
+| 2026-10-03 | Codex automated source review | Changes required; human legal review pending | Confirmed the official Chapter 92 and landlord-entry sources and found two moved TexasLawHelp supplemental pages. Updated those URLs and titles. This was a source-availability and summary-scope check, not legal advice or a substitute for the required human review. |
 | _YYYY-MM-DD_ | _Name_ | _Pass / changes required_ | _Source or summary changes_ |

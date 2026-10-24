@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-unpaid-rent-charge",
+  "text": "Unpaid rent penalty described as an additional charge rather than a late fee.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Unpaid rent will incur a charge equal to 10% of the monthly rent."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 0,
+      "end": 64,
+      "category": "fees",
+      "text": "Unpaid rent will incur a charge equal to 10% of the monthly rent."
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["fees"],
+    "texasTopics": [],
+    "riskBand": "low"
+  }
+}
