@@ -146,7 +146,7 @@ export function findNoticeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
     /\b(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?(?:[-\s\u2010-\u2015])*(?:(?:calendar|business)\s+)?(?:days?|hours?)['’]?\s+(?:advance|prior)\s+(?:written\s+)?notice\b[^.\n]{0,120}/gi,
     /\bwritten\s+notice\b[^.\n]{0,160}\b(?:at\s+least\s+)?(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?(?:[-\s\u2010-\u2015])*(?:(?:calendar|business)\s+)?(?:days?|hours?)(?:\b|['’](?=\s|[.,;:]|$))/gi,
     /\b(?:notify|notifies|notified)\b[^.\n]{0,100}\b(?:in\s+writing|written)\b[^.\n]{0,100}\b(?:(?:at\s+least|no\s+fewer\s+than|no\s+less\s+than|not\s+less\s+than)\s+)?(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?(?:[-\s\u2010-\u2015])*(?:(?:calendar|business)\s+)?days?\b[^.\n]{0,100}\b(?:before|prior\s+to)\b[^.\n]{0,80}/gi,
-    /\b(?:written\s+)?notice\b[^.\n]{0,160}\b(?:no\s+later\s+than|on\s+or\s+before|by)\s+(?:(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?|(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[12]\d|3[01])\/\d{2,4})\b/gi,
+    /\b(?:written\s+)?notice\b[^.\n]{0,160}\b(?:no\s+later\s+than|on\s+or\s+before|by)\s+(?:(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?|(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[12]\d|3[01])\/\d{2,4}|(?:the\s+)?\d{1,2}(?:st|nd|rd|th)\s+day\s+of\s+(?:the\s+)?month)\b/gi,
     /\bnotice\s+period\b[^.\n]{0,160}/gi,
     /\b(?:terminate|termination)\b[^.\n]{0,120}\b\d{1,3}\s*days?'?\s+(?:written\s+)?notice\b/gi,
   ];
