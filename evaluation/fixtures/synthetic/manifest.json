@@ -2,12 +2,60 @@
   "version": 1,
   "fixtures": [
     {
+      "id": "synthetic-annual-rent-monthly-installments",
+      "path": "synthetic/annual-rent-monthly-installments.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Annual rent rate with monthly installments stated separately"
+    },
+    {
+      "id": "synthetic-written-notification-vacate-deadline",
+      "path": "synthetic/written-notification-vacate-deadline.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Move-out deadline phrased as notifying management in writing"
+    },
+    {
       "id": "synthetic-standard",
       "path": "synthetic/standard-lease.json",
       "license": "MIT",
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Standard fictional residential lease excerpt"
+    },
+    {
+      "id": "synthetic-holdover-rent-during-period",
+      "path": "synthetic/holdover-rent-during-period.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Percentage holdover rent stated with the period before rent"
+    },
+    {
+      "id": "synthetic-hvac-filter-maintenance",
+      "path": "synthetic/hvac-filter-maintenance.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Tenant's recurring HVAC filter replacement obligation"
+    },
+    {
+      "id": "synthetic-capped-late-fee",
+      "path": "synthetic/capped-late-fee.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Conditional late fee with a stated maximum charge"
+    },
+    {
+      "id": "synthetic-monthly-amenity-fee",
+      "path": "synthetic/monthly-amenity-fee.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Mandatory recurring amenity fee stated separately from rent"
     },
     {
       "id": "synthetic-fee-heavy",
@@ -26,12 +74,60 @@
       "description": "Fictional lease with notice and renewal clauses"
     },
     {
+      "id": "synthetic-entry-advance-notice",
+      "path": "synthetic/entry-advance-notice.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Landlord entry clause stating advance notice after the notice period"
+    },
+    {
+      "id": "synthetic-early-termination-two-months-rent",
+      "path": "synthetic/early-termination-two-months-rent.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Early-termination fee expressed as two months' rent"
+    },
+    {
       "id": "synthetic-prompt-injection",
       "path": "synthetic/prompt-injection.json",
       "license": "MIT",
       "consent": "synthetic",
       "redaction": "adversarial",
       "description": "Synthetic adversarial lease text containing prompt-injection instructions"
+    },
+    {
+      "id": "synthetic-rent-credit",
+      "path": "synthetic/rent-credit.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "One-time rent credit that must not be reported as recurring rent"
+    },
+    {
+      "id": "synthetic-security-deposit-return-deadline",
+      "path": "synthetic/security-deposit-return-deadline.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Security-deposit return deadline stated separately from the amount"
+    },
+    {
+      "id": "synthetic-security-deposit-return-deadline-words",
+      "path": "synthetic/security-deposit-return-deadline-words.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Security-deposit return deadline with a word number and parenthetical numeral"
+    },
+    {
+      "id": "synthetic-revisable-management-fee-schedule",
+      "path": "synthetic/revisable-management-fee-schedule.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Undetermined charges incorporated from a schedule management may revise"
     },
     {
       "id": "synthetic-ambiguous-language",
@@ -56,6 +152,22 @@
       "consent": "synthetic",
       "redaction": "adversarial",
       "description": "Many fee clauses plus other categories used to verify diverse prioritization"
+    },
+    {
+      "id": "synthetic-unpaid-rent-charge",
+      "path": "synthetic/unpaid-rent-charge.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Rent penalty described as a charge on unpaid rent rather than a late fee"
+    },
+    {
+      "id": "synthetic-tenant-pest-control-responsibility",
+      "path": "synthetic/tenant-pest-control-responsibility.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Pest control and extermination responsibilities assigned to the tenant"
     }
   ]
 }

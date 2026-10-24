@@ -107,6 +107,30 @@ describe("computeDeterministicLeaseRisk", () => {
     expect(risk.band).toBe("low");
   });
 
+  it("does not treat a numerically capped late fee as open-ended", () => {
+    const text = "A late fee may apply, but will not exceed $50 per occurrence.";
+    const unclear = findUnclearLeasePhrases([{ page: 1, text }]);
+    const fees = findFeeSnippets([{ page: 1, text }]);
+    const findings = buildRuleBasedFindings({
+      rent: [],
+      deposit: [],
+      fees,
+      notice: [],
+      renewal: [],
+      maintenance: [],
+      utilities: [],
+    });
+    const risk = computeDeterministicLeaseRisk({ fullText: text, findings, unclearPhrases: unclear });
+
+    expect(fees).toHaveLength(1);
+    expect(unclear).toEqual([]);
+    expect(risk.band).toBe("low");
+    expect(risk.reasons).not.toContain("Some fee or policy terms appear open-ended.");
+    expect(
+      findUnclearLeasePhrases([{ page: 1, text: "A cleaning fee may apply if needed." }]),
+    ).toHaveLength(1);
+  });
+
   it.each([
     "A late fee equal to 10% of past-due rent applies after five days.",
     "A late fee of $25 per day applies until rent is paid.",

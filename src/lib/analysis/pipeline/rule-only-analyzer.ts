@@ -49,8 +49,13 @@ function registerTexasFindingEvidence(
 }
 
 export function createRuleOnlyAnalyzer(): AnalysisEngine {
-  return async ({ document, deterministic }) => {
-    const registry = createEvidenceRegistry(document.documentId, document.pages);
+  return async (input) => buildRuleOnlyAnalysisResult(input);
+}
+
+export function buildRuleOnlyAnalysisResult(
+  { document, deterministic }: Parameters<AnalysisEngine>[0],
+  registry = createEvidenceRegistry(document.documentId, document.pages),
+): AnalysisEngineResult {
     const report = buildRuleOnlyFallbackReport({
       documentId: document.documentId,
       pages: document.pages,
@@ -71,5 +76,4 @@ export function createRuleOnlyAnalyzer(): AnalysisEngine {
       mode: "rules_only",
       texasRenterFindings,
     });
-  };
 }
