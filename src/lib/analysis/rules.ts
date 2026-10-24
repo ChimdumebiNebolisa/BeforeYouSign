@@ -223,6 +223,10 @@ export function findMaintenanceSnippets(pages: ExtractedTextPage[]): RentSnippet
       while ((match = pattern.exec(text)) !== null) {
         const quote = match[0].replace(/\s+/g, " ").trim();
         if (quote.length < 18) continue;
+        const protectedReturnCondition =
+          /\breturn\b[^.]{0,120}\bclean(?:liness)?\b/i.test(quote) &&
+          /\b(?:ordinary|normal)\s+wear\s+and\s+tear\s+(?:is\s+)?excepted\b/i.test(quote);
+        if (protectedReturnCondition) continue;
         matches.push({ page: page.page, quote });
       }
     }
@@ -234,7 +238,7 @@ export function findMaintenanceSnippets(pages: ExtractedTextPage[]): RentSnippet
 export function findUtilitiesSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\butilities\b[^.\n]{0,200}/gi,
-    /\b(?:tenant|landlord)\b[^.\n]{0,120}\b(?:responsible|pays?|payment)\b[^.\n]{0,120}\b(?:electric|gas|water|sewer|trash|internet|cable|heat)\b/gi,
+    /\b(?:tenant|landlord)\b[^.\n]{0,120}\b(?:responsible|pays?|payment|reimburs(?:e|es|ement))\b[^.\n]{0,120}\b(?:electric|gas|water|sewer|trash|internet|cable|heat)\b/gi,
     /\b(?:electric|gas|water|sewer|trash)\b[^.\n]{0,120}\b(?:tenant|landlord)\b/gi,
   ];
 
