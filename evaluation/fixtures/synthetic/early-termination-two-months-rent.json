@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-early-termination-two-months-rent",
+  "text": "An early-termination fee calculated as a multiple of monthly rent.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant may terminate early upon payment of an early termination fee equal to two months' rent."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 46,
+      "end": 93,
+      "category": "fees",
+      "text": "early termination fee equal to two months' rent"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["fees"],
+    "texasTopics": [],
+    "riskBand": "medium"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "synthetic-revisable-management-fee-schedule",
+  "text": "A residential lease incorporating a fee schedule that management can revise.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant shall pay charges listed in Management's current fee schedule, which may be revised from time to time."
+    }
+  ],
+  "annotations": [],
+  "expected": {
+    "ruleCategories": [],
+    "texasTopics": [],
+    "riskBand": "medium"
+  }
+}

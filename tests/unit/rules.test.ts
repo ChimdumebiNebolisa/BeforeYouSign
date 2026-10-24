@@ -37,6 +37,37 @@ describe("findRentSnippets", () => {
       findRentSnippets([{ page: 1, text: "Parking fee is $50 per month." }]),
     ).toEqual([]);
   });
+
+  it("does not mistake a one-time rent credit for the recurring rent amount", () => {
+    expect(
+      findRentSnippets([
+        {
+          page: 1,
+          text: "A one-time rent credit of $500 will be applied to the first month's balance.",
+        },
+      ]),
+    ).toEqual([]);
+  });
+
+  it("uses the monthly installment instead of an explicitly annual rent rate", () => {
+    expect(
+      findRentSnippets([
+        {
+          page: 1,
+          text: "The annual base rent is $24,000 per year, payable in monthly installments of $2,000.",
+        },
+        {
+          page: 2,
+          text: "Annual rent is $24,000 per year.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "monthly installments of $2,000",
+      },
+    ]);
+  });
 });
 
 describe("findDepositSnippets", () => {
@@ -59,6 +90,42 @@ describe("findDepositSnippets", () => {
       page: 1,
       quote: "security deposit equals one month's rent and is due before move-in",
     });
+  });
+
+  it("finds a security-deposit return deadline when the amount is stated elsewhere", () => {
+    const hits = findDepositSnippets([
+      {
+        page: 1,
+        text: "After Tenant surrenders possession, Landlord shall return the security deposit within 30 days.",
+      },
+      {
+        page: 2,
+        text: "The security deposit will be refunded within 30 days after move-out.",
+      },
+    ]);
+
+    expect(hits).toEqual([
+      {
+        page: 1,
+        quote: "return the security deposit within 30 days",
+      },
+      {
+        page: 2,
+        quote: "security deposit will be refunded within 30 days",
+      },
+    ]);
+  });
+
+  it("finds a deposit deadline stated with a word number and parenthetical numeral", () => {
+    const hits = findDepositSnippets([
+      {
+        page: 1,
+        text: "The security deposit will be returned within thirty (30) days after Tenant surrenders possession.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("returned within thirty (30) days");
   });
 });
 
@@ -83,6 +150,46 @@ describe("findFeeSnippets", () => {
       quote: "Pet rent of $35 per approved pet per month is due with the monthly rent",
     });
     expect(findRentSnippets(pages)).toEqual([]);
+  });
+
+  it("finds a required monthly amenity fee stated after its label", () => {
+    const hits = findFeeSnippets([
+      {
+        page: 1,
+        text: "Residents shall pay a mandatory amenity fee of $35 per month in addition to base rent.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("amenity fee of $35 per month");
+  });
+
+  it("finds a rent penalty described as a charge on unpaid rent", () => {
+    const hits = findFeeSnippets([
+      {
+        page: 1,
+        text: "Unpaid rent will incur a charge equal to 10% of the monthly rent.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("charge equal to 10%");
+  });
+
+  it("finds an early-termination fee stated as a multiple of monthly rent", () => {
+    const hits = findFeeSnippets([
+      {
+        page: 1,
+        text: "Tenant may terminate early upon payment of an early termination fee equal to two months' rent.",
+      },
+    ]);
+
+    expect(hits).toEqual([
+      {
+        page: 1,
+        quote: "early termination fee equal to two months' rent",
+      },
+    ]);
   });
 });
 
@@ -134,6 +241,30 @@ describe("findNoticeSnippets", () => {
     expect(hits).toHaveLength(1);
     expect(hits[0]?.quote).toContain("24-hours’ written notice");
   });
+
+  it("finds an entry deadline phrased as advance notice", () => {
+    const hits = findNoticeSnippets([
+      {
+        page: 1,
+        text: "Landlord may enter the unit after providing at least 24 hours' advance notice.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("24 hours' advance notice");
+  });
+
+  it("finds written notification deadlines phrased with notify rather than notice", () => {
+    const hits = findNoticeSnippets([
+      {
+        page: 1,
+        text: "Resident must notify management in writing no fewer than 60 days before the lease expiration date to avoid automatic renewal.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("notify management in writing no fewer than 60 days before");
+  });
 });
 
 describe("findRenewalSnippets", () => {
@@ -175,6 +306,38 @@ describe("findMaintenanceSnippets", () => {
     ];
 
     expect(findMaintenanceSnippets(pages)).toEqual([]);
+  });
+
+  it("finds tenant obligations to replace HVAC filters", () => {
+    const hits = findMaintenanceSnippets([
+      {
+        page: 1,
+        text: "Tenant shall replace the HVAC air filters every 60 days and keep proof of replacement upon request.",
+      },
+    ]);
+
+    expect(hits).toEqual([
+      {
+        page: 1,
+        quote: "Tenant shall replace the HVAC air filters every 60 days and keep proof of replacement upon request",
+      },
+    ]);
+  });
+
+  it("finds pest-control responsibilities assigned to the tenant", () => {
+    const hits = findMaintenanceSnippets([
+      {
+        page: 1,
+        text: "Tenant is responsible for all pest control and extermination services during the lease.",
+      },
+    ]);
+
+    expect(hits).toEqual([
+      {
+        page: 1,
+        quote: "Tenant is responsible for all pest control and extermination services during the lease",
+      },
+    ]);
   });
 });
 
@@ -221,6 +384,18 @@ describe("findUnclearLeasePhrases", () => {
       page: 1,
       quote: "fees in amounts determined by Management from time to time",
     });
+  });
+
+  it("flags charges controlled by a fee schedule that may be revised", () => {
+    const hits = findUnclearLeasePhrases([
+      {
+        page: 1,
+        text: "Tenant shall pay charges listed in Management's current fee schedule, which may be revised from time to time.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("fee schedule, which may be revised");
   });
 
   it("returns empty for clear text", () => {

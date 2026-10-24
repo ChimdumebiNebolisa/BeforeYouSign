@@ -192,6 +192,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("preserves fixed and daily components of a late fee", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Late fee: Tenant must pay $50 plus $10 per day until the unpaid rent is paid in full.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Late fee",
+        value: "$50 plus $10 per day",
+      }),
+    );
+  });
+
   it("preserves the monthly cadence of a percentage late charge", () => {
     const pages = [
       {
@@ -313,11 +337,60 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts an early-termination fee stated as two months' rent", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant may terminate early upon payment of an early termination fee equal to two months' rent.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(analysis.deterministicRisk.reasons).toContain("Ending the lease early may trigger extra charges.");
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Early termination fee",
+        value: "two months' rent",
+      }),
+    );
+  });
+
   it("extracts percentage-based holdover rent", () => {
     const pages = [
       {
         page: 1,
         text: "Holdover rent: Tenant shall pay 150% of the monthly rent for each month Tenant remains after the lease term ends.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Holdover rent",
+        value: "150% of the monthly rent",
+      }),
+    );
+  });
+
+  it("extracts holdover rent when the clause states the holdover period first", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "During any holdover, Tenant shall pay rent equal to 150% of the monthly rent.",
       },
     ];
     const analysis = runDeterministicAnalysis(pages);
