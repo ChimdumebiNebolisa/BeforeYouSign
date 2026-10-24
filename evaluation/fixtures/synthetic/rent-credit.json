@@ -1,0 +1,16 @@
+{
+  "id": "synthetic-rent-credit",
+  "text": "A one-time rent credit applied to the first month's balance.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "A one-time rent credit of $500 will be applied to the first month's balance."
+    }
+  ],
+  "annotations": [],
+  "expected": {
+    "ruleCategories": [],
+    "texasTopics": [],
+    "riskBand": "low"
+  }
+}

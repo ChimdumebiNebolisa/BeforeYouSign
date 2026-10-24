@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-hvac-filter-maintenance",
+  "text": "Tenant maintenance clause for periodic HVAC filter replacement.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant shall replace the HVAC air filters every 60 days and keep proof of replacement upon request."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 0,
+      "end": 99,
+      "category": "maintenance",
+      "text": "Tenant shall replace the HVAC air filters every 60 days and keep proof of replacement upon request"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["maintenance"],
+    "texasTopics": ["repairs"],
+    "riskBand": "low"
+  }
+}
