@@ -95,6 +95,7 @@ export function findDepositSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
 export function findFeeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\bearly\s+(?:termination|move-?out)\b[^.\n]{0,180}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /\bearly\s+(?:termination|move-?out)\b[^.\n]{0,120}\b(?:fee|penalty|liquidated\s+damages)\b[^.\n]{0,100}\b(?:(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)(?:\s*\(\s*\d{1,2}\s*\))?|\d{1,2})\s+months?'?\s+rent\b[^.\n]{0,80}/gi,
     /\bearly\s+(?:termination|move-?out)\b[^.\n]{0,180}\bliquidated\s+damages\b[^.\n]{0,120}/gi,
     /\bbreak(?:ing)?\s+(?:the\s+)?lease\b[^.\n]{0,180}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\breturned\s+payment(?:\s*\(nsf\))?\s+fee\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?\b/gi,

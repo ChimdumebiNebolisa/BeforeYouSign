@@ -82,6 +82,14 @@
       "description": "Landlord entry clause stating advance notice after the notice period"
     },
     {
+      "id": "synthetic-early-termination-two-months-rent",
+      "path": "synthetic/early-termination-two-months-rent.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Early-termination fee expressed as two months' rent"
+    },
+    {
       "id": "synthetic-prompt-injection",
       "path": "synthetic/prompt-injection.json",
       "license": "MIT",

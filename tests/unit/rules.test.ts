@@ -175,6 +175,22 @@ describe("findFeeSnippets", () => {
     expect(hits).toHaveLength(1);
     expect(hits[0]?.quote).toContain("charge equal to 10%");
   });
+
+  it("finds an early-termination fee stated as a multiple of monthly rent", () => {
+    const hits = findFeeSnippets([
+      {
+        page: 1,
+        text: "Tenant may terminate early upon payment of an early termination fee equal to two months' rent.",
+      },
+    ]);
+
+    expect(hits).toEqual([
+      {
+        page: 1,
+        quote: "early termination fee equal to two months' rent",
+      },
+    ]);
+  });
 });
 
 describe("findNoticeSnippets", () => {
