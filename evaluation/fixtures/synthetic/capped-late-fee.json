@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-capped-late-fee",
+  "text": "A conditional late fee with an explicit dollar cap.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "A late fee may apply, but will not exceed $50 per occurrence."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 0,
+      "end": 60,
+      "category": "fees",
+      "text": "A late fee may apply, but will not exceed $50 per occurrence"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["fees"],
+    "texasTopics": ["lateFees"],
+    "riskBand": "low"
+  }
+}
