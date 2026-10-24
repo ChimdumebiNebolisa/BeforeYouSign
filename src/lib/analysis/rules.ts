@@ -165,7 +165,7 @@ export function findNoticeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
           const sentenceStart = Math.max(text.lastIndexOf(".", match.index), text.lastIndexOf("\n", match.index)) + 1;
           const sentenceEnd = text.indexOf(".", match.index);
           const sentence = text.slice(sentenceStart, sentenceEnd < 0 ? text.length : sentenceEnd);
-          if (/\b(?:renew\w*\s+automatically|automatic(?:ally)?\s+renew\w*|auto-?renew\w*)\b/i.test(sentence)) {
+          if (/\b(?:lease|agreement|term)\b[^.\n]{0,60}\b(?:renew\w*\s+automatically|automatically\s+renew\w*)\b[^.\n]{0,120}\bunless\b/i.test(sentence)) {
             continue;
           }
         }
