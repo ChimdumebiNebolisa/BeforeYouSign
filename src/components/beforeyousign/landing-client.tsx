@@ -18,7 +18,6 @@ import { LandingHero } from "@/components/beforeyousign/landing-hero";
 import { LandingIntakeCard } from "@/components/beforeyousign/landing-intake-card";
 import { LandingPreviewSection } from "@/components/beforeyousign/landing-preview-section";
 import { LandingHowItWorks } from "@/components/beforeyousign/landing-how-it-works";
-import { LandingWhatItChecks } from "@/components/beforeyousign/landing-what-it-checks";
 import { LandingLimitations } from "@/components/beforeyousign/landing-limitations";
 import { LandingFaq } from "@/components/beforeyousign/landing-faq";
 import { LandingFooter } from "@/components/beforeyousign/landing-footer";
@@ -614,18 +613,10 @@ export function LandingClient() {
   };
 
   return (
-    <div className="bys-container w-full px-6 font-sans lg:px-8">
-      <section className="relative isolate pb-12 lg:pb-16">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-24 bottom-0 left-1/2 -z-10 w-screen -translate-x-1/2 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "linear-gradient(90deg, rgb(243 244 242 / 88%), rgb(243 244 242 / 80%)), linear-gradient(0deg, rgb(243 244 242 / 82%), rgb(243 244 242 / 42%)), url('/images/apartment-living-room.jpg')",
-          }}
-        />
-        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-7">
+    <div className="bys-landing w-full font-sans">
+      <section className="bys-landing-hero">
+        <div className="bys-landing-container bys-hero-layout">
+          <div className="bys-hero-copy">
             <LandingHero
               onReviewLease={scrollToIntake}
               onRunSample={() => {
@@ -635,30 +626,27 @@ export function LandingClient() {
             />
           </div>
 
-          <div className="flex justify-center lg:col-span-5 lg:justify-center">
-            <div className="w-full max-w-[480px]">
-              <LandingIntakeCard
-                onStartUpload={startUpload}
-                onStartPaste={startPaste}
-                onStartSample={startSample}
-                pasteOpenRequestVersion={pasteOpenNonce}
-                activeTab={intakeTab}
-                onTabChange={setIntakeTab}
-                stateCode={stateCode}
-                onStateChange={(nextState) => {
-                  setStateCode(nextState);
-                  setStateConfirmed(false);
-                  setErrorMessage(null);
-                }}
-              />
-            </div>
+          <div className="bys-hero-intake">
+            <LandingIntakeCard
+              onStartUpload={startUpload}
+              onStartPaste={startPaste}
+              onStartSample={startSample}
+              pasteOpenRequestVersion={pasteOpenNonce}
+              activeTab={intakeTab}
+              onTabChange={setIntakeTab}
+              stateCode={stateCode}
+              onStateChange={(nextState) => {
+                setStateCode(nextState);
+                setStateConfirmed(false);
+                setErrorMessage(null);
+              }}
+            />
           </div>
         </div>
       </section>
 
       <LandingPreviewSection />
       <LandingHowItWorks />
-      <LandingWhatItChecks />
       <LandingLimitations />
       <LandingFaq />
       <LandingFooter />

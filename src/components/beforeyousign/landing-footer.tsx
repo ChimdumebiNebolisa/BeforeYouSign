@@ -1,4 +1,4 @@
-import { FIXED_REPORT_DISCLAIMER, LANDING_PRIVACY_PROCESSING } from "@/lib/public-copy";
+import { LANDING_PRIVACY_PROCESSING } from "@/lib/public-copy";
 
 const FOOTER_LINKS = [
   { href: "#how-it-works", label: "How it works" },
@@ -7,17 +7,20 @@ const FOOTER_LINKS = [
 
 export function LandingFooter() {
   return (
-    <footer className="bys-section-gap border-t border-border/50 pb-10 pt-12 text-center lg:text-left">
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-        <div className="mx-auto max-w-[42rem] space-y-4 lg:mx-0">
+    <footer className="bys-landing-container bys-landing-footer">
+      <div className="bys-footer-main">
+        <div className="max-w-[42rem] space-y-2">
           <div>
-            <p className="font-[family-name:var(--font-headline)] text-lg font-bold text-primary">BeforeYouSign</p>
-            <p className="mt-1 text-sm text-muted-foreground">Residential lease review for students and renters.</p>
+            <p className="font-[family-name:var(--font-headline)] text-base font-bold text-foreground">BeforeYouSign</p>
+            <p className="mt-2 text-xs text-muted-foreground">Residential lease review for students and renters.</p>
           </div>
-          <p className="text-xs leading-relaxed text-muted-foreground">{FIXED_REPORT_DISCLAIMER}</p>
-          <p className="text-xs leading-relaxed text-muted-foreground">{LANDING_PRIVACY_PROCESSING}</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">Understand the wording. Prepare your questions. For education, not legal advice.</p>
+          <details className="bys-footer-privacy">
+            <summary>Privacy &amp; processing</summary>
+            <p>{LANDING_PRIVACY_PROCESSING}</p>
+          </details>
         </div>
-        <nav className="flex flex-col items-center gap-3 text-sm lg:min-w-[10rem] lg:items-start">
+        <nav className="bys-footer-links" aria-label="Footer">
           {FOOTER_LINKS.map((link) => (
             <a key={link.href} href={link.href} className="text-muted-foreground hover:text-foreground">
               {link.label}
@@ -25,7 +28,7 @@ export function LandingFooter() {
           ))}
         </nav>
       </div>
-      <p className="mt-8 text-center text-[11px] text-muted-foreground/80 lg:text-left">
+      <p className="mt-6 text-[11px] text-muted-foreground">
         © {new Date().getFullYear()} BeforeYouSign.
       </p>
     </footer>

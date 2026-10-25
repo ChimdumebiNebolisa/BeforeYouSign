@@ -59,7 +59,7 @@ export function buildReportMarkdown(input: {
     stateGuidance = getStateGuidanceStatus(stateCode),
   } = input;
   const lines: string[] = [
-    "# BeforeYouSign — Lease analysis report",
+    "# BeforeYouSign: Lease analysis report",
     "",
     FIXED_REPORT_DISCLAIMER,
     "",
@@ -82,7 +82,7 @@ export function buildReportMarkdown(input: {
   lines.push(
     "## Review priority",
     "",
-    `**${displayReviewPriority(report.riskLevel)}** — ${escapeMd(safeText(report.riskReason))}`,
+    `**${displayReviewPriority(report.riskLevel)}**: ${escapeMd(safeText(report.riskReason))}`,
     "",
   );
 
