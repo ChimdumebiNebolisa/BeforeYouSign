@@ -38,6 +38,17 @@ describe("findRentSnippets", () => {
     ).toEqual([]);
   });
 
+  it("does not capture a semicolon-separated late fee as rent", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Rent is due on the first day of each month; a $75 late fee applies after the fifth.",
+      },
+    ];
+
+    expect(findRentSnippets(pages)).toEqual([]);
+  });
+
   it("does not mistake a one-time rent credit for the recurring rent amount", () => {
     expect(
       findRentSnippets([
