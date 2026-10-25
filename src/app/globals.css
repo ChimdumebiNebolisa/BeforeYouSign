@@ -447,6 +447,8 @@
 }
 
 .bys-process h2 { margin-block-start: 1rem; }
+.bys-process > .bys-landing-label,
+.bys-process > h2 { text-align: center; }
 .bys-process-list {
   position: relative;
   display: grid;
@@ -535,6 +537,9 @@
   color: var(--muted-foreground);
 }
 
+.bys-landing-faq > h2,
+.bys-faq-intro { text-align: center; }
+
 .bys-faq-surface {
   margin-block-start: 1.5rem;
   border: 1px solid color-mix(in srgb, var(--border) 65%, white);
@@ -615,8 +620,8 @@
     border-block-start: 1px solid color-mix(in srgb, var(--primary) 45%, white);
   }
   .bys-process-step { grid-row: span 3; grid-template-columns: minmax(0, 1fr); grid-template-rows: subgrid; row-gap: 1.75rem; }
-  .bys-process-step > div { display: grid; grid-row: span 2; grid-template-rows: subgrid; row-gap: 0.5rem; }
-  .bys-process-step p { margin-block-start: 0; }
+  .bys-process-step > div { display: grid; grid-row: span 2; grid-template-rows: subgrid; row-gap: 0.5rem; text-align: center; }
+  .bys-process-step p { margin-block-start: 0; margin-inline: auto; }
   .bys-process-step:not(:last-child)::after { content: none; }
   .bys-process-node { position: relative; justify-self: center; }
 }
