@@ -95,10 +95,13 @@ export function findDepositSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
 export function findFeeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\bearly\s+(?:termination|move-?out)\b[^.\n]{0,180}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /\bearly\s+(?:termination|move-?out)\b[^.\n]{0,120}\b(?:fee|penalty|liquidated\s+damages)\b[^.\n]{0,100}\b(?:(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)(?:\s*\(\s*\d{1,2}\s*\))?|\d{1,2})\s+months?'?\s+rent\b[^.\n]{0,80}/gi,
     /\bearly\s+(?:termination|move-?out)\b[^.\n]{0,180}\bliquidated\s+damages\b[^.\n]{0,120}/gi,
     /\bbreak(?:ing)?\s+(?:the\s+)?lease\b[^.\n]{0,180}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\breturned\s+payment(?:\s*\(nsf\))?\s+fee\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\b(?:returned\s+payment|nsf)\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /\b(?:returned|dishonored|bounced)\s+checks?\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}\b(?:returned|dishonored|bounced)\s+checks?\b/gi,
     /\binsufficient\s+funds\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}\binsufficient\s+funds\b/gi,
     /\butility\s+(?:billing\s+and\s+processing|billing|processing)\s+fee\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?(?:\s*(?:per|\/)\s*(?:month|mo))?\b/gi,
@@ -145,7 +148,7 @@ export function findNoticeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
     /\b(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?(?:[-\s\u2010-\u2015])*(?:(?:calendar|business)\s+)?(?:days?|hours?)['’]?\s+(?:advance|prior)\s+(?:written\s+)?notice\b[^.\n]{0,120}/gi,
     /\bwritten\s+notice\b[^.\n]{0,160}\b(?:at\s+least\s+)?(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?(?:[-\s\u2010-\u2015])*(?:(?:calendar|business)\s+)?(?:days?|hours?)(?:\b|['’](?=\s|[.,;:]|$))/gi,
     /\b(?:notify|notifies|notified)\b[^.\n]{0,100}\b(?:in\s+writing|written)\b[^.\n]{0,100}\b(?:(?:at\s+least|no\s+fewer\s+than|no\s+less\s+than|not\s+less\s+than)\s+)?(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?(?:[-\s\u2010-\u2015])*(?:(?:calendar|business)\s+)?days?\b[^.\n]{0,100}\b(?:before|prior\s+to)\b[^.\n]{0,80}/gi,
-    /\b(?:written\s+)?notice\b[^.\n]{0,160}\b(?:no\s+later\s+than|on\s+or\s+before|by)\s+(?:(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?|(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[12]\d|3[01])\/\d{2,4})\b/gi,
+    /\b(?:written\s+)?notice\b[^.\n]{0,160}\b(?:no\s+later\s+than|on\s+or\s+before|by)\s+(?:(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?|(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[12]\d|3[01])\/\d{2,4}|(?:the\s+)?\d{1,2}(?:st|nd|rd|th)\s+day\s+of\s+(?:the\s+)?month)\b/gi,
     /\bnotice\s+period\b[^.\n]{0,160}/gi,
     /\b(?:terminate|termination)\b[^.\n]{0,120}\b\d{1,3}\s*days?'?\s+(?:written\s+)?notice\b/gi,
   ];
@@ -160,6 +163,14 @@ export function findNoticeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
       pattern.lastIndex = 0;
       let match: RegExpExecArray | null;
       while ((match = pattern.exec(text)) !== null) {
+        if (pattern === patterns[3]) {
+          const sentenceStart = Math.max(text.lastIndexOf(".", match.index), text.lastIndexOf("\n", match.index)) + 1;
+          const sentenceEnd = text.indexOf(".", match.index);
+          const sentence = text.slice(sentenceStart, sentenceEnd < 0 ? text.length : sentenceEnd);
+          if (/\b(?:lease|agreement|term)\b[^.\n]{0,60}\b(?:renew\w*\s+automatically|automatically\s+renew\w*)\b[^.\n]{0,120}\bunless\b/i.test(sentence)) {
+            continue;
+          }
+        }
         const quote = match[0].replace(/\s+/g, " ").trim();
         if (quote.length < 15) continue;
         matches.push({ page: page.page, quote });
@@ -202,6 +213,7 @@ export function findMaintenanceSnippets(pages: ExtractedTextPage[]): RentSnippet
   const patterns: RegExp[] = [
     /\btenant\b[^.\n]{0,120}\b(?:replace|change)\b[^.\n]{0,80}\b(?:air\s+filters?|(?:hvac|furnace)(?:\s+air)?\s+filters?)\b[^.\n]{0,120}/gi,
     /\btenant\b[^.\n]{0,120}\b(?:maintain|maintenance|repair|clean|cleanliness)\b[^.\n]{0,120}/gi,
+    /\btenant\b[^.\n]{0,120}\bresponsible\s+for\b[^.\n]{0,120}\b(?:pest\s+control|extermination)\b[^.\n]{0,120}/gi,
     /\blandlord\b[^.\n]{0,120}\b(?:maintain|maintenance|repair|structural)\b[^.\n]{0,120}/gi,
     /\b(?:minor|major)\s+repairs?\b[^.\n]{0,160}/gi,
     /\bmaintenance\s+and\s+repairs?\b[^.\n]{0,160}/gi,
@@ -219,6 +231,10 @@ export function findMaintenanceSnippets(pages: ExtractedTextPage[]): RentSnippet
       while ((match = pattern.exec(text)) !== null) {
         const quote = match[0].replace(/\s+/g, " ").trim();
         if (quote.length < 18) continue;
+        const protectedReturnCondition =
+          /\breturn\b[^.]{0,120}\bclean(?:liness)?\b/i.test(quote) &&
+          /\b(?:ordinary|normal)\s+wear\s+and\s+tear\s+(?:is\s+)?excepted\b/i.test(quote);
+        if (protectedReturnCondition) continue;
         matches.push({ page: page.page, quote });
       }
     }
@@ -230,7 +246,7 @@ export function findMaintenanceSnippets(pages: ExtractedTextPage[]): RentSnippet
 export function findUtilitiesSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\butilities\b[^.\n]{0,200}/gi,
-    /\b(?:tenant|landlord)\b[^.\n]{0,120}\b(?:responsible|pays?|payment)\b[^.\n]{0,120}\b(?:electric|gas|water|sewer|trash|internet|cable|heat)\b/gi,
+    /\b(?:tenant|landlord)\b[^.\n]{0,120}\b(?:responsible|pays?|payment|reimburs(?:e|es|ement))\b[^.\n]{0,120}\b(?:electric|gas|water|sewer|trash|internet|cable|heat)\b/gi,
     /\b(?:electric|gas|water|sewer|trash)\b[^.\n]{0,120}\b(?:tenant|landlord)\b/gi,
   ];
 
@@ -257,7 +273,7 @@ export function findUtilitiesSnippets(pages: ExtractedTextPage[]): RentSnippet[]
 export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\bmonthly\s+installments?\s+(?:of|at)\s+\$[\d,]+(?:\.\d{2})?\b/gi,
-    /(?<!pet[\s-])\brent\b[^.\n]{0,200}\$[\d,]+(?:\.\d{2})?\b/gi,
+    /(?<!pet[\s-])\brent\b[^.;\n]{0,200}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,200}\b(per\s+month|monthly|\/mo|each\s+month)\b/gi,
   ];
 

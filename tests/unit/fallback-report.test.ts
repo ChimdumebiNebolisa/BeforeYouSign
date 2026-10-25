@@ -72,6 +72,54 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts a renewal deadline when notice is stated as notifying in writing", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "The lease renews automatically for another one-year term unless Tenant notifies Landlord in writing at least 30 days before the lease ends.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.noticeSnippets).toHaveLength(0);
+    expect(analysis.renewalSnippets).toHaveLength(1);
+    expect(report.deadlinesAndNotice).toContainEqual(
+      expect.objectContaining({
+        value: "30 days",
+      }),
+    );
+  });
+
+  it("extracts an ordinal monthly notice deadline", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant must provide written notice on or before the 15th day of the month before the desired move-out date.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.noticeSnippets).toHaveLength(1);
+    expect(report.deadlinesAndNotice).toContainEqual(
+      expect.objectContaining({
+        label: "Notice requirement",
+        value: "the 15th day of the month",
+      }),
+    );
+  });
+
   it("extracts a written-notice deadline stated in hours", () => {
     const pages = [
       {
@@ -120,6 +168,54 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("labels a vacating notice as a move-out notice", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant must give 60 days written notice before vacating the premises.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.noticeSnippets).toHaveLength(1);
+    expect(report.deadlinesAndNotice).toContainEqual(
+      expect.objectContaining({
+        label: "Move-out notice",
+        value: "60 days",
+      }),
+    );
+  });
+
+  it("extracts a hyphenated move-out notice deadline", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant must give a 30-day written notice before move-out.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.noticeSnippets).toHaveLength(1);
+    expect(report.deadlinesAndNotice).toContainEqual(
+      expect.objectContaining({
+        label: "Move-out notice",
+        value: "30-day",
+      }),
+    );
+  });
+
   it("preserves both parts of a greater-of late charge", () => {
     const pages = [
       {
@@ -164,6 +260,30 @@ describe("buildRuleOnlyFallbackReport", () => {
       expect.objectContaining({
         label: "Late fee",
         value: "lesser of $75 or 5% of the monthly rent",
+      }),
+    );
+  });
+
+  it("preserves both parts of a lesser-of past-due-rent late charge", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Late charge: the lesser of $75 or 5% of the past-due rent will be charged if rent is more than five days late.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Late fee",
+        value: "lesser of $75 or 5% of the past-due rent",
       }),
     );
   });
@@ -240,6 +360,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("preserves both parts of a fixed-plus-daily late charge", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Late charge: Tenant must pay $50 plus $10 per day until all past-due rent is paid.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Late fee",
+        value: "$50 plus $10 per day",
+      }),
+    );
+  });
+
   it("extracts a percentage-based payment convenience fee", () => {
     const pages = [
       {
@@ -269,6 +413,30 @@ describe("buildRuleOnlyFallbackReport", () => {
       {
         page: 1,
         text: "A $35 fee will be charged for each payment returned due to insufficient funds.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Returned payment fee",
+        value: "$35",
+      }),
+    );
+  });
+
+  it("extracts a returned-check fee", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Each returned check will incur a $35 fee.",
       },
     ];
     const analysis = runDeterministicAnalysis(pages);
@@ -337,6 +505,31 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts an early-termination fee stated as two months' rent", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant may terminate early upon payment of an early termination fee equal to two months' rent.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(analysis.deterministicRisk.reasons).toContain("Ending the lease early may trigger extra charges.");
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Early termination fee",
+        value: "two months' rent",
+      }),
+    );
+  });
+
   it("extracts percentage-based holdover rent", () => {
     const pages = [
       {
@@ -357,6 +550,30 @@ describe("buildRuleOnlyFallbackReport", () => {
       expect.objectContaining({
         label: "Holdover rent",
         value: "150% of the monthly rent",
+      }),
+    );
+  });
+
+  it("preserves a holdover rate based on the then-current daily rental rate", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Holdover rent: Tenant shall pay 200% of the then-current daily rental rate for each day Tenant remains after the lease term ends.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Holdover rent",
+        value: "200% of the then-current daily rental rate",
       }),
     );
   });
@@ -405,6 +622,30 @@ describe("buildRuleOnlyFallbackReport", () => {
       expect.objectContaining({
         label: "Holdover rent",
         value: "$75 per day",
+      }),
+    );
+  });
+
+  it("preserves a per-diem late-fee rate", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Late fee: Tenant must pay $10 per diem until the unpaid rent is paid in full.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.feeSnippets).toHaveLength(1);
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Late fee",
+        value: "$10 per diem",
       }),
     );
   });
@@ -459,6 +700,28 @@ describe("buildRuleOnlyFallbackReport", () => {
       "maintenance",
     ]);
     expect(report.potentialRedFlags.map((finding) => finding.severity)).toEqual(["minor", "minor"]);
+  });
+
+  it("recognizes tenant utility reimbursement as a clear allocation", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant shall reimburse Landlord for all water, sewer, and trash charges.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.utilitiesSnippets).toHaveLength(1);
+    expect(report.responsibilities).toContain(
+      "Utilities: Tenant shall reimburse Landlord for all water, sewer, and trash",
+    );
+    expect(report.potentialRedFlags.find((finding) => finding.category === "utilities")?.severity).toBe("minor");
   });
 
   it("does not relabel a maintenance clause as a guest finding because guests are mentioned incidentally", () => {

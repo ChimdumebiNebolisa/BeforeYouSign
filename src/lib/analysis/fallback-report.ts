@@ -17,12 +17,12 @@ function extractCurrencyValue(text: string): string | null {
 
 function extractFeeValue(text: string): string | null {
   const greaterOf = text.match(
-    /\b(?:greater|lesser)\s+of\s+(?:\$[\d,]+(?:\.\d{2})?\s*,?\s*or\s+\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly)\s+){0,2}rent|\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly)\s+){0,2}rent\s*,?\s*or\s+\$[\d,]+(?:\.\d{2})?)\b/i,
+    /\b(?:greater|lesser)\s+of\s+(?:\$[\d,]+(?:\.\d{2})?\s*,?\s*or\s+\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly|past-due|unpaid)\s+){0,3}(?:rent|balance|amount\s+due)|\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly|past-due|unpaid)\s+){0,3}(?:rent|balance|amount\s+due)\s*,?\s*or\s+\$[\d,]+(?:\.\d{2})?)\b/i,
   );
   if (greaterOf) return greaterOf[0];
 
   const percentageOfRent = text.match(
-    /\b\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:current|monthly|past-due|unpaid)\s+){0,3}(?:rent|balance|amount\s+due)(?:\s+per\s+(?:annum|year|month))?\b/i,
+    /\b\d+(?:\.\d+)?\s*%\s+of\s+(?:the\s+)?(?:(?:(?:then[-\s])?current|monthly|daily|past-due|unpaid)\s+){0,3}(?:rental\s+rate|rent|balance|amount\s+due)(?:\s+per\s+(?:annum|year|month))?\b/i,
   );
   if (percentageOfRent) return percentageOfRent[0];
 
@@ -37,20 +37,24 @@ function extractFeeValue(text: string): string | null {
   if (monthsOfRent) return monthsOfRent[0];
 
   const fixedPlusRate = text.match(
-    /\$[\d,]+(?:\.\d{2})?\s*(?:plus|\+)\s*\$[\d,]+(?:\.\d{2})?\s*(?:per|\/)\s*(?:day|week|month|year)\b/i,
+    /\$[\d,]+(?:\.\d{2})?\s*,?\s*(?:plus|and|\+)\s+\$[\d,]+(?:\.\d{2})?\s*(?:per|\/)\s*(?:day|week|month|year)\b/i,
   );
   if (fixedPlusRate) return fixedPlusRate[0];
 
-  const currencyRate = text.match(/\$[\d,]+(?:\.\d{2})?\s*(?:per|\/)\s*(?:day|week|month|year)\b/i);
+  const currencyRate = text.match(
+    /\$[\d,]+(?:\.\d{2})?\s*(?:per\s+(?:day|week|month|year|diem)|\/\s*(?:day|week|month|year))\b/i,
+  );
   return currencyRate ? currencyRate[0] : extractCurrencyValue(text);
 }
 
 function extractDeadlineValue(text: string): string | null {
-  const dayWindow = text.match(/\b(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?\s*(?:(?:calendar|business)\s+)?(?:days?|hours?)\b/i);
+  const dayWindow = text.match(
+    /\b(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?(?:[-\s\u2010-\u2015])*(?:(?:calendar|business)\s+)?(?:days?|hours?)\b/i,
+  );
   if (dayWindow) return dayWindow[0];
 
   const date = text.match(
-    /\b(?:(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?|(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[12]\d|3[01])\/\d{2,4})\b/i,
+    /\b(?:(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?|(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[12]\d|3[01])\/\d{2,4}|(?:the\s+)?\d{1,2}(?:st|nd|rd|th)\s+day\s+of\s+(?:the\s+)?month)\b/i,
   );
   return date ? date[0] : null;
 }
@@ -103,7 +107,7 @@ function findingSeverity(finding: RuleBasedFinding): RedFlagSeverity {
   if (
     finding.category === "utilities" &&
     !(
-      /\b(?:tenant|landlord)\b[^.]{0,200}\b(?:responsible(?:\s+for)?|pays?|shall\s+pay|must\s+pay)\b/i.test(
+      /\b(?:tenant|landlord)\b[^.]{0,200}\b(?:responsible(?:\s+for)?|pays?|shall\s+pay|must\s+pay|reimburs(?:e|es|ement))\b/i.test(
         quote,
       ) ||
       /\b(?:utilities?|electric|gas|water|sewer|trash)\b[^.]{0,200}\b(?:paid\s+by|responsibility\s+of)\s+(?:the\s+)?(?:tenant|landlord)\b/i.test(
@@ -134,7 +138,7 @@ function noticeLabelFromQuote(quote: string): string {
   if (/\brent increase\b|\bincrease rent\b|\brent may be adjusted\b/.test(q)) {
     return "Rent increase notice";
   }
-  if (/\bmove\s*out\b|\bmove-out\b|\bvacate\b/.test(q)) {
+  if (/\bmove\s*out\b|\bmove-out\b|\bvacat(?:e|ed|ing)\b/.test(q)) {
     return "Move-out notice";
   }
   if (/\brenew\b|\bnon-renew\b|\bend of the initial term\b|\bmonth-to-month\b/.test(q)) {
@@ -530,7 +534,7 @@ export function buildRuleOnlyFallbackReport(input: {
       label: "Renewal Terms",
       value: /month-?to-?month/i.test(renewalFinding.quote)
         ? "Potential month-to-month renewal"
-        : "Review renewal clause",
+        : (extractDeadlineValue(renewalFinding.quote) ?? "Review renewal clause"),
       evidence: toEvidence(input.evidenceRegistry, input.documentId, renewalFinding, pageTexts, "renewal"),
     });
   }

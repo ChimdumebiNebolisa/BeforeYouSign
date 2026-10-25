@@ -38,6 +38,17 @@ describe("findRentSnippets", () => {
     ).toEqual([]);
   });
 
+  it("does not capture a semicolon-separated late fee as rent", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Rent is due on the first day of each month; a $75 late fee applies after the fifth.",
+      },
+    ];
+
+    expect(findRentSnippets(pages)).toEqual([]);
+  });
+
   it("does not mistake a one-time rent credit for the recurring rent amount", () => {
     expect(
       findRentSnippets([
@@ -175,6 +186,22 @@ describe("findFeeSnippets", () => {
     expect(hits).toHaveLength(1);
     expect(hits[0]?.quote).toContain("charge equal to 10%");
   });
+
+  it("finds an early-termination fee stated as a multiple of monthly rent", () => {
+    const hits = findFeeSnippets([
+      {
+        page: 1,
+        text: "Tenant may terminate early upon payment of an early termination fee equal to two months' rent.",
+      },
+    ]);
+
+    expect(hits).toEqual([
+      {
+        page: 1,
+        quote: "early termination fee equal to two months' rent",
+      },
+    ]);
+  });
 });
 
 describe("findNoticeSnippets", () => {
@@ -281,6 +308,17 @@ describe("findMaintenanceSnippets", () => {
     expect(hits.some((h) => /maintenance/i.test(h.quote))).toBe(true);
   });
 
+  it("does not flag an ordinary-wear-and-tear return-condition exception", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant shall return the Premises in clean condition, ordinary wear and tear excepted.",
+      },
+    ];
+
+    expect(findMaintenanceSnippets(pages)).toEqual([]);
+  });
+
   it("finds tenant obligations to replace HVAC filters", () => {
     const hits = findMaintenanceSnippets([
       {
@@ -293,6 +331,22 @@ describe("findMaintenanceSnippets", () => {
       {
         page: 1,
         quote: "Tenant shall replace the HVAC air filters every 60 days and keep proof of replacement upon request",
+      },
+    ]);
+  });
+
+  it("finds pest-control responsibilities assigned to the tenant", () => {
+    const hits = findMaintenanceSnippets([
+      {
+        page: 1,
+        text: "Tenant is responsible for all pest control and extermination services during the lease.",
+      },
+    ]);
+
+    expect(hits).toEqual([
+      {
+        page: 1,
+        quote: "Tenant is responsible for all pest control and extermination services during the lease",
       },
     ]);
   });
