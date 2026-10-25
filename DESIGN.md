@@ -172,7 +172,7 @@ The selected landing reference from 2026-10-25 governs the public page. Preserve
 Center the complete headline, description, actions, and disclaimer group against the intake panel through grid alignment.
 Keep the existing intake logic, property-state selection, validation, disclosures, and confirmation flow.
 
-The illustrative preview uses a narrow introduction beside a larger white lease sheet on pale blue-gray.
+The illustrative preview places its introduction above the white lease sheet on pale blue-gray at every screen size. The shared column is capped at 52rem, with text aligned to the sheet's left edge.
 Three ruled rows pair sample rent, late-fee, and move-out excerpts with yellow, lavender, and pale-blue question notes.
 Notes have sharp corners, centered text, slight static rotation, and soft paper shadows. Short curved connectors and a restrained paperclip complete the sheet.
 Printed sample excerpts use a serif face; surrounding explanations retain Inter and headings retain Manrope.
@@ -184,7 +184,7 @@ A compact limitations strip precedes one FAQ heading and a white accordion with 
 The footer keeps the brand, section links, and a native disclosure containing the existing privacy-processing notice.
 The former summary tiles, floating feature slogans, and What it checks section are removed.
 
-Below 48rem, hero and sample introduction stack naturally. Sample notes move below their excerpts when the sheet's content width is below 22rem.
+Below 48rem, the hero stacks naturally. The sample introduction stays above its sheet, and sample notes move below their excerpts when the sheet's content width is below 22rem.
 Below 40rem, the process becomes a connected vertical sequence. The limitations strip also stacks on narrow screens.
 All illustrative decoration is static. FAQ answers expand and fade over 220ms, with a matching chevron rotation. Reduced motion disables these transitions, closed answers are inaccessible, and keyboard focus remains visible.
 
