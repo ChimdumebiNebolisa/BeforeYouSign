@@ -131,7 +131,7 @@ export function AnalysisInProgressView({ intake, onCancel }: { intake: Intake; o
               </h1>
               <p className="max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
                 We&apos;re extracting key terms, checking notable clauses, and generating a plain-English report.
-                Progress below is estimated — not a live server stage.
+                Progress below is estimated. It is not a live server stage.
               </p>
             </div>
 

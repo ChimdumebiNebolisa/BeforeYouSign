@@ -1,46 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { LANDING_FAQ } from "@/lib/public-copy";
 
 export function LandingFaq() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const faqId = useId();
 
   return (
-    <section id="faq" className="bys-section-gap mb-4 scroll-mt-28">
-      <h2 className="mx-auto max-w-[960px] text-center font-[family-name:var(--font-headline)] text-2xl font-bold text-foreground sm:text-3xl lg:text-left">
-        FAQ
-      </h2>
-      <div className="mx-auto mt-8 max-w-[960px] overflow-hidden rounded-2xl border border-border/40 bg-card">
+    <section id="faq" className="bys-landing-container bys-landing-faq" aria-labelledby="faq-heading">
+      <h2 id="faq-heading" className="bys-landing-heading">FAQ</h2>
+      <p className="bys-faq-intro">Common questions about BeforeYouSign.</p>
+      <div className="bys-faq-surface">
         {LANDING_FAQ.map((item, index) => {
           const isOpen = openIndex === index;
           return (
             <div
               key={item.question}
-              className={[
-                "border-b border-border/60 last:border-b-0",
-                index === 0 ? "rounded-t-2xl" : "",
-                index === LANDING_FAQ.length - 1 ? "rounded-b-2xl" : "",
-              ].join(" ")}
+              className="bys-faq-item border-b border-border/60 last:border-b-0"
+              data-open={isOpen}
             >
-              <button
-                type="button"
-                className="flex min-h-14 w-full items-center justify-between gap-4 px-5 py-4 text-left sm:px-6"
-                aria-expanded={isOpen}
-                onClick={() => setOpenIndex(isOpen ? null : index)}
+              <h3>
+                <button
+                  type="button"
+                  id={`${faqId}-question-${index}`}
+                  className="bys-faq-trigger"
+                  aria-expanded={isOpen}
+                  aria-controls={`${faqId}-answer-${index}`}
+                  onClick={() => setOpenIndex(isOpen ? null : index)}
+                >
+                  <span className="font-semibold">{item.question}</span>
+                  <ChevronDown
+                    className="bys-faq-chevron h-5 w-5 shrink-0 text-muted-foreground"
+                    aria-hidden
+                  />
+                </button>
+              </h3>
+              <div
+                id={`${faqId}-answer-${index}`}
+                role="region"
+                aria-labelledby={`${faqId}-question-${index}`}
+                aria-hidden={!isOpen}
+                inert={!isOpen}
+                className="bys-faq-answer"
               >
-                <span className="font-medium text-foreground">{item.question}</span>
-                <ChevronDown
-                  className={["h-5 w-5 shrink-0 text-muted-foreground transition-transform", isOpen ? "rotate-180" : ""].join(
-                    " ",
-                  )}
-                  aria-hidden
-                />
-              </button>
-              {isOpen ? (
-                <div className="px-5 pb-5 text-sm leading-relaxed text-muted-foreground sm:px-6">{item.answer}</div>
-              ) : null}
+                <div className="bys-faq-answer-content">
+                  <p>{item.answer}</p>
+                </div>
+              </div>
             </div>
           );
         })}

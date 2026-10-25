@@ -1,6 +1,6 @@
 /** Shared user-facing copy for disclaimers and privacy notices. */
 
-/** Landing intake/footer — processing only; legal disclaimer lives in hero + footer disclaimer. */
+/** Landing intake/footer: processing only; legal disclaimer lives in hero + footer disclaimer. */
 export const LANDING_PRIVACY_PROCESSING =
   "We do not save your lease or report after you close the page. For AI-assisted review, extracted lease text is sent to OpenAI through its API. OpenAI does not train its models on API data by default and may retain API content for up to 30 days for abuse monitoring.";
 
@@ -16,7 +16,7 @@ export const FIXED_REPORT_DISCLAIMER =
 export const LOCAL_LAW_BANNER =
   "Local landlord-tenant law was not checked. Review important terms with a qualified attorney, tenant resource, or university legal service.";
 
-/* Landing page — state-aware positioning */
+/* Landing page: state-aware positioning */
 
 export const LANDING_HEADLINE = "Understand your lease before you sign.";
 
@@ -60,12 +60,4 @@ export const LANDING_FAQ = [
     question: "What if my PDF is scanned?",
     answer: OCR_WARNING,
   },
-] as const;
-
-export const LANDING_LIMITATIONS = [
-  "It does not provide legal advice.",
-  "It does not recommend whether to sign.",
-  "It does not decide whether a term is lawful.",
-  "It does not check city rules.",
-  "It does not replace an attorney, tenant resource, or university legal service.",
 ] as const;

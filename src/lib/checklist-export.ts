@@ -26,7 +26,7 @@ export function buildChecklistMarkdown(input: {
     stateGuidance = getStateGuidanceStatus(stateCode),
   } = input;
   const lines: string[] = [
-    "# BeforeYouSign — Question checklist",
+    "# BeforeYouSign: Question checklist",
     "",
     FIXED_REPORT_DISCLAIMER,
     "",

@@ -84,7 +84,7 @@ export function TechnicalDetailsPanel({ receipt }: { receipt: TechnicalDetailsRe
             <dt className={dtClass}>Size</dt>
             <dd className={ddClass}>{receipt.fileSizeBytes.toLocaleString()} bytes</dd>
             <dt className={dtClass}>Type</dt>
-            <dd className={ddClass}>{receipt.contentType ?? "—"}</dd>
+            <dd className={ddClass}>{receipt.contentType ?? "Not available"}</dd>
           </dl>
         </section>
 
@@ -100,7 +100,7 @@ export function TechnicalDetailsPanel({ receipt }: { receipt: TechnicalDetailsRe
               <p className="mt-1.5 whitespace-pre-wrap break-words">
                 {receipt.extractedPages[0]?.text
                   ? truncQuote(receipt.extractedPages[0].text, 320)
-                  : "—"}
+                  : "Not available"}
               </p>
             </div>
           </section>

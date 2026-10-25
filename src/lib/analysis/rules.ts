@@ -314,7 +314,7 @@ export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
 }
 
 /**
- * Phrases that suggest open-ended money or policy terms — surfaced for review, not interpreted as firm numbers.
+ * Phrases that suggest open-ended money or policy terms: surfaced for review, not interpreted as firm numbers.
  */
 export function findUnclearLeasePhrases(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [

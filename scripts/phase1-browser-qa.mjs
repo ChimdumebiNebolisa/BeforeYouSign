@@ -88,11 +88,20 @@ async function run() {
   );
   note("Section: See what it finds", /See what it finds/i.test(body));
   note("Section: How it works", /How it works/i.test(body));
-  note("Section: What it checks", /What it checks/i.test(body));
+  note(
+    "Retired What it checks section is absent",
+    (await page.getByRole("heading", { name: "What it checks", exact: true }).count()) === 0,
+  );
   note("Landing has state-aware lease positioning", /Choose the property state before review|Rental property state/i.test(body));
-  note("Section: What it does not do", /What it does not do/i.test(body));
+  note(
+    "Section: limitations",
+    await page.getByRole("heading", { name: /A starting point\.\s*Not a legal opinion\./i }).isVisible(),
+  );
   note("Section: FAQ", /\bFAQ\b/i.test(body));
-  note("Footer: disclaimer present", /Educational information only\. Not legal advice\./i.test(body));
+  note(
+    "Footer: disclaimer present",
+    /For education, not legal advice\./i.test(await page.locator("footer").innerText()),
+  );
 
   // Brand-only navbar
   const header = page.locator("header");

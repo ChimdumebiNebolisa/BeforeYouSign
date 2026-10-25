@@ -166,6 +166,30 @@ The palette is mostly paper, ink, and graphite; blue identifies evidence and int
 
 ## Layout
 
+### Landing page
+
+The selected landing reference from 2026-10-25 governs the public page. Preserve the apartment background and floating wordmark.
+Center the complete headline, description, actions, and disclaimer group against the intake panel through grid alignment.
+Keep the existing intake logic, property-state selection, validation, disclosures, and confirmation flow.
+
+The illustrative preview uses a narrow introduction beside a larger white lease sheet on pale blue-gray.
+Three ruled rows pair sample rent, late-fee, and move-out excerpts with yellow, lavender, and pale-blue question notes.
+Notes have sharp corners, centered text, slight static rotation, and soft paper shadows. Short curved connectors and a restrained paperclip complete the sheet.
+Printed sample excerpts use a serif face; surrounding explanations retain Inter and headings retain Manrope.
+Sample highlights wrap per line and remain selectable. They never reuse verified-evidence classes or imply a legal judgment.
+The introduction explicitly identifies the examples as illustrative, not the visitor's report.
+
+The process uses three navy nodes on a fine connecting line. Shared heading and description rows keep the left-aligned text consistent when a heading wraps. It has no card containers.
+A compact limitations strip precedes one FAQ heading and a white accordion with fine separators and stronger question text.
+The footer keeps the brand, section links, and a native disclosure containing the existing privacy-processing notice.
+The former summary tiles, floating feature slogans, and What it checks section are removed.
+
+Below 48rem, hero and sample introduction stack naturally. Sample notes move below their excerpts when the sheet's content width is below 22rem.
+Below 40rem, the process becomes a connected vertical sequence. The limitations strip also stacks on narrow screens.
+All illustrative decoration is static. FAQ answers expand and fade over 220ms, with a matching chevron rotation. Reduced motion disables these transitions, closed answers are inaccessible, and keyboard focus remains visible.
+
+### Completed report
+
 The reusable page container tops out at 73.75rem and uses responsive side padding. The result surface starts with completion, a compact document/state/source receipt, review priority, and the first action. At the extra-large breakpoint, the reading area becomes a 3:2 report/source grid; the source remains sticky and independently scrollable. Below that breakpoint, the report remains first and the source follows as a collapsible panel.
 
 Desktop report navigation is a numbered left rail beside the active section. Mobile replaces it with a full-width section select, keeps the receipt to three compact columns, stacks action downloads, and moves “Review another lease” to the end of the flow. Section rhythm moves from 3rem on small screens to 5rem from the medium breakpoint; dense report interiors use 0.5–2rem increments.

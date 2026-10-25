@@ -15,7 +15,7 @@ export type TexasReferenceFreshness = "current" | "stale" | "unknown";
 
 export const LEGAL_REFERENCE_MAX_AGE_DAYS = 180;
 
-/** Curated topic record — static links only; never scraped at runtime. */
+/** Curated topic record: static links only; never scraped at runtime. */
 export type TexasRenterTopicRecord = {
   id: string;
   topic: TexasRenterTopic;
@@ -41,7 +41,7 @@ export const TEXAS_RENTER_TOPIC_RECORDS: Record<TexasRenterTopic, TexasRenterTop
     topic: "securityDeposit",
     topicLabel: "Security deposit",
     jurisdiction: "Texas",
-    sourceTitle: "Texas Property Code Chapter 92 — Residential Tenancies",
+    sourceTitle: "Texas Property Code Chapter 92: Residential Tenancies",
     sourceUrl: "https://statutes.capitol.texas.gov/Docs/PR/htm/PR.92.htm#92.103",
     sourceType: "official_statute",
     sourceSectionLabel: "Security deposits and return of deposit",
@@ -57,7 +57,7 @@ export const TEXAS_RENTER_TOPIC_RECORDS: Record<TexasRenterTopic, TexasRenterTop
     topic: "repairs",
     topicLabel: "Repairs",
     jurisdiction: "Texas",
-    sourceTitle: "Texas Property Code Chapter 92 — Residential Tenancies",
+    sourceTitle: "Texas Property Code Chapter 92: Residential Tenancies",
     sourceUrl: "https://statutes.capitol.texas.gov/Docs/PR/htm/PR.92.htm#92.056",
     sourceType: "official_statute",
     sourceSectionLabel: "Repairs and remedies",
@@ -74,7 +74,7 @@ export const TEXAS_RENTER_TOPIC_RECORDS: Record<TexasRenterTopic, TexasRenterTop
     topic: "lateFees",
     topicLabel: "Late fees",
     jurisdiction: "Texas",
-    sourceTitle: "Texas State Law Library — Landlord/Tenant Law",
+    sourceTitle: "Texas State Law Library: Landlord/Tenant Law",
     sourceUrl: "https://guides.sll.texas.gov/landlord-tenant-law/rent",
     sourceType: "state_law_library",
     sourceSectionLabel: "Rent, late charges, and fees",
@@ -90,7 +90,7 @@ export const TEXAS_RENTER_TOPIC_RECORDS: Record<TexasRenterTopic, TexasRenterTop
     topic: "lockoutOrUtilities",
     topicLabel: "Lockout or utilities",
     jurisdiction: "Texas",
-    sourceTitle: "Texas Property Code Chapter 92 — Residential Tenancies",
+    sourceTitle: "Texas Property Code Chapter 92: Residential Tenancies",
     sourceUrl: "https://statutes.capitol.texas.gov/Docs/PR/htm/PR.92.htm#92.0081",
     sourceType: "official_statute",
     sourceSectionLabel: "Lockouts and interruption of utilities",
@@ -106,7 +106,7 @@ export const TEXAS_RENTER_TOPIC_RECORDS: Record<TexasRenterTopic, TexasRenterTop
     topic: "landlordEntry",
     topicLabel: "Landlord entry",
     jurisdiction: "Texas",
-    sourceTitle: "Texas State Law Library — Landlord Entry FAQ",
+    sourceTitle: "Texas State Law Library: Landlord Entry FAQ",
     sourceUrl: "https://sll.texas.gov/faqs/landlord-entry/",
     sourceType: "state_law_library",
     sourceSectionLabel: "Landlord entry and lease terms",
@@ -129,7 +129,7 @@ export const TEXAS_RENTER_SUPPLEMENTAL_SOURCES: Omit<
   {
     id: "texaslawhelp-house-apartment",
     jurisdiction: "Texas",
-    sourceTitle: "TexasLawHelp — House & Apartment",
+    sourceTitle: "TexasLawHelp: House & Apartment",
     sourceUrl: "https://texaslawhelp.org/house-apartment",
     sourceType: "legal_aid_resource",
     sourceSectionLabel: "Residential lease overview",
@@ -142,7 +142,7 @@ export const TEXAS_RENTER_SUPPLEMENTAL_SOURCES: Omit<
   {
     id: "texaslawhelp-security-deposits",
     jurisdiction: "Texas",
-    sourceTitle: "TexasLawHelp — Security Deposits",
+    sourceTitle: "TexasLawHelp: Security Deposits",
     sourceUrl: "https://texaslawhelp.org/article/security-deposits",
     sourceType: "legal_aid_resource",
     sourceSectionLabel: "Security deposits",
@@ -155,7 +155,7 @@ export const TEXAS_RENTER_SUPPLEMENTAL_SOURCES: Omit<
   {
     id: "texaslawhelp-repairs",
     jurisdiction: "Texas",
-    sourceTitle: "TexasLawHelp — Right to Repairs as a Tenant",
+    sourceTitle: "TexasLawHelp: Right to Repairs as a Tenant",
     sourceUrl: "https://texaslawhelp.org/article/right-to-repairs-as-a-tenant",
     sourceType: "legal_aid_resource",
     sourceSectionLabel: "Repairs and habitability",
@@ -168,7 +168,7 @@ export const TEXAS_RENTER_SUPPLEMENTAL_SOURCES: Omit<
   {
     id: "texaslawhelp-lockouts",
     jurisdiction: "Texas",
-    sourceTitle: "TexasLawHelp — When Tenants Get Locked Out",
+    sourceTitle: "TexasLawHelp: When Tenants Get Locked Out",
     sourceUrl: "https://texaslawhelp.org/article/when-tenants-get-locked-out",
     sourceType: "legal_aid_resource",
     sourceSectionLabel: "Residential tenant lockouts",
@@ -181,7 +181,7 @@ export const TEXAS_RENTER_SUPPLEMENTAL_SOURCES: Omit<
   {
     id: "tx-sll-landlord-tenant",
     jurisdiction: "Texas",
-    sourceTitle: "Texas State Law Library — Landlord/Tenant Law",
+    sourceTitle: "Texas State Law Library: Landlord/Tenant Law",
     sourceUrl: "https://guides.sll.texas.gov/landlord-tenant-law",
     sourceType: "state_law_library",
     sourceSectionLabel: "Landlord-tenant law guide",

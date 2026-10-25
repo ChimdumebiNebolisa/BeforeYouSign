@@ -1,43 +1,39 @@
 const STEPS = [
   {
     step: "1",
-    title: "Upload or paste your lease",
-    description: "Add a PDF, paste text, or run the sample lease.",
+    title: "Add your lease",
+    description: "Upload a PDF, paste text, or try a sample lease.",
   },
   {
     step: "2",
     title: "Review key terms",
-    description: "See costs, deadlines, responsibilities, and terms to review.",
+    description: "See important costs, deadlines, and responsibilities with plain-language notes.",
   },
   {
     step: "3",
-    title: "Ask better questions",
-    description: "Use the questions to clarify the lease before signing.",
+    title: "Prepare your questions",
+    description: "Use the notes to understand the lease and know what to ask.",
   },
 ] as const;
 
 export function LandingHowItWorks() {
   return (
-    <section id="how-it-works" className="bys-section-gap scroll-mt-28">
-      <h2 className="font-[family-name:var(--font-headline)] text-2xl font-bold text-foreground sm:text-3xl">
-        How it works
-      </h2>
-      <div className="mt-8 grid gap-6 sm:grid-cols-3">
+    <section id="how-it-works" className="bys-landing-container bys-process" aria-labelledby="process-heading">
+      <p className="bys-landing-label">How it works</p>
+      <h2 id="process-heading" className="bys-landing-heading">Three steps from upload to clarity.</h2>
+      <ol className="bys-process-list">
         {STEPS.map((item) => (
-          <div
-            key={item.step}
-            className="flex min-h-[160px] flex-col gap-3 rounded-xl border border-border bg-card p-7 shadow-sm lg:p-8"
-          >
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+          <li key={item.step} className="bys-process-step">
+            <span className="bys-process-node" aria-hidden="true">
               {item.step}
             </span>
-            <h3 className="font-[family-name:var(--font-headline)] text-lg font-semibold text-foreground">
-              {item.title}
-            </h3>
-            <p className="text-sm leading-relaxed text-muted-foreground">{item.description}</p>
-          </div>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </div>
+          </li>
         ))}
-      </div>
+      </ol>
     </section>
   );
 }
