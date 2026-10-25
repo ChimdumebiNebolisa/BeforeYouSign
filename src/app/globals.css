@@ -601,6 +601,11 @@
   .bys-faq-trigger:hover { background-color: color-mix(in srgb, var(--secondary) 50%, white); }
 }
 
+@media (width < 40rem) {
+  .bys-process-step > div { align-self: center; }
+  .bys-process-step p { display: none; }
+}
+
 @media (min-width: 40rem) {
   .bys-process-list { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: auto auto auto; gap: 1.75rem 3rem; }
   .bys-process-list::before {
