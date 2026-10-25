@@ -179,8 +179,8 @@ Printed sample excerpts use a serif face; surrounding explanations retain Inter 
 Sample highlights wrap per line and remain selectable. They never reuse verified-evidence classes or imply a legal judgment.
 The introduction explicitly identifies the examples as illustrative, not the visitor's report.
 
-The process uses three navy nodes on a fine connecting line. Shared heading and description rows keep the left-aligned text consistent when a heading wraps. It has no card containers.
-A compact limitations strip precedes one FAQ heading and a white accordion with fine separators and stronger question text.
+The process uses three navy nodes on a fine connecting line beneath a centered label and heading. Shared heading and description rows keep centered desktop copy aligned beneath each node when a heading wraps. The compact mobile sequence keeps titles beside the nodes and hides descriptions. It has no card containers.
+A compact limitations strip precedes a centered FAQ heading and subtitle, then a white accordion with fine separators and stronger question text.
 The footer keeps the brand, section links, and a native disclosure containing the existing privacy-processing notice.
 The former summary tiles, floating feature slogans, and What it checks section are removed.
 
