@@ -279,6 +279,7 @@
 
 .bys-sample-layout {
   display: grid;
+  max-inline-size: 52rem;
   align-items: start;
   gap: clamp(2.5rem, 4vw, 4rem);
 }
@@ -304,11 +305,9 @@
 .bys-sample-intro {
   display: grid;
   gap: 1.5rem;
-  padding-block-start: 1.5rem;
 }
 
 .bys-sample-intro h2 {
-  max-inline-size: 8ch;
   font-size: var(--bys-landing-display);
 }
 
@@ -626,7 +625,6 @@
   .bys-hero-layout { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
   .bys-hero-headline { max-inline-size: 14ch; }
   .bys-hero-intake { justify-self: end; }
-  .bys-sample-layout { grid-template-columns: minmax(0, 0.85fr) minmax(0, 2fr); }
   .bys-landing-limitations { grid-template-columns: minmax(14rem, 0.8fr) minmax(0, 2fr); align-items: center; gap: 2rem; }
   .bys-landing-limitations > p { padding-inline-start: 2rem; border-inline-start: 1px solid var(--border); }
 }
