@@ -172,7 +172,7 @@ The selected landing reference from 2026-10-25 governs the public page. Preserve
 Center the complete headline, description, actions, and disclaimer group against the intake panel through grid alignment.
 Keep the existing intake logic, property-state selection, validation, disclosures, and confirmation flow.
 
-The illustrative preview places its introduction above the white lease sheet on pale blue-gray at every screen size. The shared column is capped at 52rem, with text aligned to the sheet's left edge.
+The illustrative preview centers its introduction above the white lease sheet on pale blue-gray at every screen size. The shared column is capped at 52rem, with the heading, explanation, and disclosure centered over the sheet.
 Three ruled rows pair sample rent, late-fee, and move-out excerpts with yellow, lavender, and pale-blue question notes.
 Notes have sharp corners, centered text, slight static rotation, and soft paper shadows. Short curved connectors and a restrained paperclip complete the sheet.
 Printed sample excerpts use a serif face; surrounding explanations retain Inter and headings retain Manrope.
