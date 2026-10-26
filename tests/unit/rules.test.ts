@@ -38,6 +38,22 @@ describe("findRentSnippets", () => {
     ).toEqual([]);
   });
 
+  it("keeps the rent amount when a later fee appears in the same clause", () => {
+    const hits = findRentSnippets([
+      {
+        page: 1,
+        text: "Monthly rent is $1,200 per month, plus a $50 utility fee.",
+      },
+    ]);
+
+    expect(hits).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ page: 1, quote: expect.stringContaining("$1,200") }),
+      ]),
+    );
+    expect(hits.every(({ quote }) => !quote.includes("$50"))).toBe(true);
+  });
+
   it("does not capture a semicolon-separated late fee as rent", () => {
     const pages = [
       {
