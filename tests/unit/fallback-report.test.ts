@@ -192,6 +192,30 @@ describe("buildRuleOnlyFallbackReport", () => {
     );
   });
 
+  it("extracts a move-out deadline spelled out without a parenthetical numeral", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Tenant must provide sixty days' written notice before vacating the premises.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(analysis.noticeSnippets).toHaveLength(1);
+    expect(report.deadlinesAndNotice).toContainEqual(
+      expect.objectContaining({
+        label: "Move-out notice",
+        value: "sixty days",
+      }),
+    );
+  });
+
   it("extracts a hyphenated move-out notice deadline", () => {
     const pages = [
       {

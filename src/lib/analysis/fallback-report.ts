@@ -1,6 +1,6 @@
 import { classifyLeaseMoneyLabel, normalizeReportForCredibility } from "@/lib/analysis/report-normalization";
 import type { BeforeYouSignReport, FindingCategory } from "@/lib/analysis/schema";
-import type { RuleBasedFinding } from "@/lib/analysis/rules";
+import { SPELLED_NUMBER_PATTERN, type RuleBasedFinding } from "@/lib/analysis/rules";
 import type { DeterministicLeaseRisk } from "@/lib/analysis/scoring";
 import { FIXED_REPORT_DISCLAIMER } from "@/lib/public-copy";
 import type { ExtractedTextPage } from "@/lib/pdf/extract-text";
@@ -52,6 +52,11 @@ function extractDeadlineValue(text: string): string | null {
     /\b(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?(?:[-\s\u2010-\u2015])*(?:(?:calendar|business)\s+)?(?:days?|hours?)\b/i,
   );
   if (dayWindow) return dayWindow[0];
+
+  const spelledDayWindow = text.match(
+    new RegExp(`\\b${SPELLED_NUMBER_PATTERN}[-\\s]+(?:(?:calendar|business)\\s+)?(?:days?|hours?)\\b`, "i"),
+  );
+  if (spelledDayWindow) return spelledDayWindow[0];
 
   const date = text.match(
     /\b(?:(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?|(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[12]\d|3[01])\/\d{2,4}|(?:the\s+)?\d{1,2}(?:st|nd|rd|th)\s+day\s+of\s+(?:the\s+)?month)\b/i,
