@@ -20,6 +20,9 @@ export type RuleBasedFinding = {
   quote: string;
 };
 
+export const SPELLED_NUMBER_PATTERN =
+  "(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|thirty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|forty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|fifty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|sixty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|seventy(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|eighty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|ninety(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?)";
+
 export function buildRuleBasedFindings(groups: {
   rent: RentSnippet[];
   deposit: RentSnippet[];
@@ -151,6 +154,10 @@ export function findNoticeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
     /\b(?:written\s+)?notice\b[^.\n]{0,160}\b(?:no\s+later\s+than|on\s+or\s+before|by)\s+(?:(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?|(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[12]\d|3[01])\/\d{2,4}|(?:the\s+)?\d{1,2}(?:st|nd|rd|th)\s+day\s+of\s+(?:the\s+)?month)\b/gi,
     /\bnotice\s+period\b[^.\n]{0,160}/gi,
     /\b(?:terminate|termination)\b[^.\n]{0,120}\b\d{1,3}\s*days?'?\s+(?:written\s+)?notice\b/gi,
+    new RegExp(
+      `\\b${SPELLED_NUMBER_PATTERN}[-\\s]+days?['’]?\\s+(?:prior\\s+)?(?:written\\s+)?notice\\b[^.\\n]{0,120}`,
+      "gi",
+    ),
   ];
 
   const matches: RentSnippet[] = [];
