@@ -168,6 +168,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Pest control and extermination responsibilities assigned to the tenant"
+    },
+    {
+      "id": "synthetic-pest-control-tenant-responsibility-subject-first",
+      "path": "synthetic/pest-control-tenant-responsibility-subject-first.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Pest-control responsibility clause phrased with service as grammatical subject"
     }
   ]
 }
