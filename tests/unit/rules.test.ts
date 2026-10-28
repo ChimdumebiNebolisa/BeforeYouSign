@@ -350,6 +350,22 @@ describe("findMaintenanceSnippets", () => {
       },
     ]);
   });
+
+  it("finds pest-control responsibility when the clause names the service first", () => {
+    expect(
+      findMaintenanceSnippets([
+        {
+          page: 1,
+          text: "Pest control and extermination are the tenant's responsibility during the lease.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "Pest control and extermination are the tenant's responsibility during the lease",
+      },
+    ]);
+  });
 });
 
 describe("findUtilitiesSnippets", () => {
