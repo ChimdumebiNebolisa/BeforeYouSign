@@ -176,6 +176,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Pest-control responsibility clause phrased with service as grammatical subject"
+    },
+    {
+      "id": "synthetic-security-deposit-return-no-later-than",
+      "path": "synthetic/security-deposit-return-no-later-than.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Security-deposit return deadline written as no later than thirty (30) days"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "fixtureCount": 22,
+  "fixtureCount": 23,
   "avgGroundingRate": 1,
   "results": [
     {
@@ -310,6 +310,24 @@
     },
     {
       "fixtureId": "synthetic-security-deposit-return-deadline",
+      "mode": "rules_only",
+      "metrics": {
+        "groundingRate": 1,
+        "unsupportedFindingRate": 0,
+        "expectedValueAccuracy": 1,
+        "ruleCategoryPrecision": 1,
+        "ruleCategoryRecall": 1,
+        "texasTopicPrecision": 1,
+        "texasTopicRecall": 1,
+        "annotationSpanRecall": 1,
+        "riskBandAccuracy": 1,
+        "ruleFindings": 1,
+        "texasTopics": 1
+      },
+      "errors": []
+    },
+    {
+      "fixtureId": "synthetic-security-deposit-return-no-later-than",
       "mode": "rules_only",
       "metrics": {
         "groundingRate": 1,
