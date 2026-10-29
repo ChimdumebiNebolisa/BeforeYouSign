@@ -138,6 +138,38 @@ describe("findDepositSnippets", () => {
     expect(hits).toHaveLength(1);
     expect(hits[0]?.quote).toContain("returned within thirty (30) days");
   });
+
+  it("finds a deposit return deadline phrased as no later than", () => {
+    const hits = findDepositSnippets([
+      {
+        page: 1,
+        text: "Landlord shall refund the security deposit no later than thirty (30) days after Tenant surrenders possession.",
+      },
+    ]);
+
+    expect(hits).toEqual([
+      {
+        page: 1,
+        quote: "refund the security deposit no later than thirty (30) days",
+      },
+    ]);
+  });
+
+  it("finds a no-later-than deadline when the deposit is the grammatical subject", () => {
+    expect(
+      findDepositSnippets([
+        {
+          page: 1,
+          text: "The security deposit will be returned no later than thirty (30) days after move-out.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "security deposit will be returned no later than thirty (30) days",
+      },
+    ]);
+  });
 });
 
 describe("findFeeSnippets", () => {

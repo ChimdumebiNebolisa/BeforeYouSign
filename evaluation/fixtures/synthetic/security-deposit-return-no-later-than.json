@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-security-deposit-return-no-later-than",
+  "text": "A residential lease gives a security-deposit return deadline using no-later-than wording.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Landlord shall refund the security deposit no later than thirty (30) days after Tenant surrenders possession."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 15,
+      "end": 73,
+      "category": "deposit",
+      "text": "refund the security deposit no later than thirty (30) days"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["deposit"],
+    "texasTopics": ["securityDeposit"],
+    "riskBand": "low"
+  }
+}

@@ -23,6 +23,8 @@ export type RuleBasedFinding = {
 export const SPELLED_NUMBER_PATTERN =
   "(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|thirty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|forty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|fifty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|sixty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|seventy(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|eighty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|ninety(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?)";
 
+const NO_LATER_DEPOSIT_DEADLINE = `\\b(?:no|not)\\s+later\\s+than\\s+(?:${SPELLED_NUMBER_PATTERN}(?:\\s*\\(\\s*\\d{1,3}\\s*\\))?|\\d{1,3})\\s+days?\\b`;
+
 export function buildRuleBasedFindings(groups: {
   rent: RentSnippet[];
   deposit: RentSnippet[];
@@ -71,6 +73,8 @@ export function findDepositSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
     /\bsecurity\s+deposit\b[^.\n]{0,180}\b(?:one(?:\s*\(\s*1\s*\))?|1)\s+month'?s?\s+rent\b[^.\n]{0,120}/gi,
     /\b(?:return(?:ed)?|refund(?:ed)?)\b[^.\n]{0,100}\b(?:security\s+)?deposit\b[^.\n]{0,80}\bwithin\s+(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?\s+days?\b/gi,
     /\b(?:security\s+)?deposit\b[^.\n]{0,100}\b(?:return(?:ed)?|refund(?:ed)?)\b[^.\n]{0,80}\bwithin\s+(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?\s+days?\b/gi,
+    new RegExp(`\\b(?:return(?:ed)?|refund(?:ed)?)\\b[^.\\n]{0,100}\\b(?:security\\s+)?deposit\\b[^.\\n]{0,100}${NO_LATER_DEPOSIT_DEADLINE}`, "gi"),
+    new RegExp(`\\b(?:security\\s+)?deposit\\b[^.\\n]{0,100}\\b(?:return(?:ed)?|refund(?:ed)?)\\b[^.\\n]{0,100}${NO_LATER_DEPOSIT_DEADLINE}`, "gi"),
     /\bdeposit\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}\b(?:as\s+(?:a\s+)?)?(?:security\s+)?deposit\b/gi,
   ];
