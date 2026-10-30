@@ -184,6 +184,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Security-deposit return deadline written as no later than thirty (30) days"
+    },
+    {
+      "id": "synthetic-monthly-service-charge",
+      "path": "synthetic/monthly-service-charge.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Recurring service charge listed separately from base rent"
     }
   ]
 }
