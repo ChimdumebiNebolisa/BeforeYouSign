@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-monthly-service-charge",
+  "text": "A residential lease lists a recurring service charge separately from base rent.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "A monthly service charge of $18 per month applies."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 2,
+      "end": 41,
+      "category": "fees",
+      "text": "monthly service charge of $18 per month"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["fees"],
+    "texasTopics": [],
+    "riskBand": "low"
+  }
+}

@@ -207,6 +207,22 @@ describe("findFeeSnippets", () => {
     expect(hits[0]?.quote).toContain("amenity fee of $35 per month");
   });
 
+  it("finds a recurring service charge stated separately from base rent", () => {
+    expect(
+      findFeeSnippets([
+        {
+          page: 1,
+          text: "A monthly service charge of $18 per month applies.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "monthly service charge of $18 per month",
+      },
+    ]);
+  });
+
   it("finds a rent penalty described as a charge on unpaid rent", () => {
     const hits = findFeeSnippets([
       {
