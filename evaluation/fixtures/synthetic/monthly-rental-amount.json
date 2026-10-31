@@ -1,0 +1,25 @@
+{
+  "id": "synthetic-monthly-rental-amount",
+  "text": "Base rent stated as a monthly rental amount.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant shall pay monthly rental of $1,650 upon commencement of the lease."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 17,
+      "end": 41,
+      "category": "rent",
+      "text": "monthly rental of $1,650"
+    }
+  ],
+  "expected": {
+    "rentAmount": "$1,650",
+    "ruleCategories": ["rent"],
+    "texasTopics": [],
+    "riskBand": "low"
+  }
+}

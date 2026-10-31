@@ -192,6 +192,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Recurring service charge listed separately from base rent"
+    },
+    {
+      "id": "synthetic-monthly-rental-amount",
+      "path": "synthetic/monthly-rental-amount.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Base rent described as a monthly rental amount"
     }
   ]
 }
