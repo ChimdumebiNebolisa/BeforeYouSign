@@ -79,6 +79,22 @@ describe("findRentSnippets", () => {
       },
     ]);
   });
+
+  it("finds base rent described as a monthly rental", () => {
+    expect(
+      findRentSnippets([
+        {
+          page: 1,
+          text: "Tenant shall pay monthly rental of $1,650 upon commencement of the lease.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "monthly rental of $1,650",
+      },
+    ]);
+  });
 });
 
 describe("findDepositSnippets", () => {

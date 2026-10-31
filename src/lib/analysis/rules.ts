@@ -286,6 +286,7 @@ export function findUtilitiesSnippets(pages: ExtractedTextPage[]): RentSnippet[]
 export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\bmonthly\s+installments?\s+(?:of|at)\s+\$[\d,]+(?:\.\d{2})?\b/gi,
+    /\bmonthly\s+rental\b[^.;\n]{0,80}\$[\d,]+(?:\.\d{2})?\b/gi,
     /(?<!pet[\s-])\brent\b[^.;\n]{0,200}\$[\d,]+(?:\.\d{2})?\b/gi,
     /\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,200}\b(per\s+month|monthly|\/mo|each\s+month)\b/gi,
   ];
