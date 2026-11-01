@@ -200,6 +200,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Base rent described as a monthly rental amount"
+    },
+    {
+      "id": "synthetic-security-deposit-one-and-half-months",
+      "path": "synthetic/security-deposit-one-and-half-months.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Security deposit expressed as one and one-half months of rent"
     }
   ]
 }
