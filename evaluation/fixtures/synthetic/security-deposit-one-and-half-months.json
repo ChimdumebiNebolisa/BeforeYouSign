@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-security-deposit-one-and-half-months",
+  "text": "A lease sets the security deposit at one and one-half months' rent.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "The security deposit is equal to one and one-half months' rent."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 4,
+      "end": 62,
+      "category": "deposit",
+      "text": "security deposit is equal to one and one-half months' rent"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["deposit"],
+    "texasTopics": ["securityDeposit"],
+    "riskBand": "low"
+  }
+}
