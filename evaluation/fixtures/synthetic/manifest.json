@@ -208,6 +208,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Security deposit expressed as one and one-half months of rent"
+    },
+    {
+      "id": "synthetic-security-deposit-two-weeks-rent",
+      "path": "synthetic/security-deposit-two-weeks-rent.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Security deposit expressed as two weeks' rent"
     }
   ]
 }
