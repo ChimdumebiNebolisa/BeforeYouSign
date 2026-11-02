@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-security-deposit-two-weeks-rent",
+  "text": "Security deposit stated as two weeks of rent with a parenthetical numeral.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "The security deposit is equal to two (2) weeks' rent."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 4,
+      "end": 52,
+      "category": "deposit",
+      "text": "security deposit is equal to two (2) weeks' rent"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["deposit"],
+    "texasTopics": ["securityDeposit"],
+    "riskBand": "low"
+  }
+}

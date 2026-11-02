@@ -159,6 +159,22 @@ describe("findDepositSnippets", () => {
     ]);
   });
 
+  it("finds a security deposit expressed as two weeks' rent", () => {
+    expect(
+      findDepositSnippets([
+        {
+          page: 1,
+          text: "The security deposit is equal to two (2) weeks' rent.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "security deposit is equal to two (2) weeks' rent",
+      },
+    ]);
+  });
+
   it("finds a deposit deadline stated with a word number and parenthetical numeral", () => {
     const hits = findDepositSnippets([
       {
