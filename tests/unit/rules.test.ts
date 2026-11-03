@@ -470,6 +470,22 @@ describe("findUtilitiesSnippets", () => {
     expect(hits.length).toBeGreaterThan(0);
     expect(hits.some((h) => /utilities/i.test(h.quote))).toBe(true);
   });
+
+  it("finds tenant-paid electricity when the lease uses electricity instead of electric", () => {
+    expect(
+      findUtilitiesSnippets([
+        {
+          page: 1,
+          text: "Tenant is responsible for electricity service during the lease.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "Tenant is responsible for electricity",
+      },
+    ]);
+  });
 });
 
 describe("findUnclearLeasePhrases", () => {

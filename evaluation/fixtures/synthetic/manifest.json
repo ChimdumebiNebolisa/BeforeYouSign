@@ -216,6 +216,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Security deposit expressed as two weeks' rent"
+    },
+    {
+      "id": "synthetic-tenant-electricity-responsibility",
+      "path": "synthetic/tenant-electricity-responsibility.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Tenant responsibility for electricity stated as electricity service"
     }
   ]
 }
