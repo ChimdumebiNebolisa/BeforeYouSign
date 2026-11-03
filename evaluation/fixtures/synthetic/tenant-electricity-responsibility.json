@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-tenant-electricity-responsibility",
+  "text": "A residential lease assigning electricity service charges to the tenant.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant is responsible for electricity service during the lease."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 0,
+      "end": 37,
+      "category": "utilities",
+      "text": "Tenant is responsible for electricity"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["utilities"],
+    "texasTopics": [],
+    "riskBand": "low"
+  }
+}
