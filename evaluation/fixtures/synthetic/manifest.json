@@ -224,6 +224,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Tenant responsibility for electricity stated as electricity service"
+    },
+    {
+      "id": "synthetic-written-notice-one-calendar-month",
+      "path": "synthetic/written-notice-one-calendar-month.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Move-out notice deadline expressed as one full calendar month"
     }
   ]
 }
