@@ -372,6 +372,30 @@ describe("findNoticeSnippets", () => {
     expect(hits).toHaveLength(1);
     expect(hits[0]?.quote).toContain("notify management in writing no fewer than 60 days before");
   });
+
+  it("finds a move-out deadline expressed as one full calendar month's written notice", () => {
+    const hits = findNoticeSnippets([
+      {
+        page: 1,
+        text: "Tenant must provide written notice at least one full calendar month before vacating.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("written notice at least one full calendar month");
+  });
+
+  it("finds a word-number calendar-month notice deadline before the notice term", () => {
+    const hits = findNoticeSnippets([
+      {
+        page: 1,
+        text: "Tenant must give one (1) calendar month's written notice before vacating.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("one (1) calendar month's written notice");
+  });
 });
 
 describe("findRenewalSnippets", () => {

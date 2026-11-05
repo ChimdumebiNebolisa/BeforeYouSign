@@ -1,0 +1,23 @@
+{
+  "id": "synthetic-written-notice-one-calendar-month",
+  "text": "A residential lease requiring a full calendar month's notice before move-out.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant must provide written notice at least one full calendar month before vacating."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 0,
+      "end": 82,
+      "category": "notice",
+      "text": "Tenant must provide written notice at least one full calendar month before vacating."
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["notice"],
+    "texasTopics": []
+  }
+}

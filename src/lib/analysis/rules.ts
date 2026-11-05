@@ -24,6 +24,7 @@ export const SPELLED_NUMBER_PATTERN =
   "(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|thirty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|forty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|fifty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|sixty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|seventy(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|eighty(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?|ninety(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?)";
 
 const NO_LATER_DEPOSIT_DEADLINE = `\\b(?:no|not)\\s+later\\s+than\\s+(?:${SPELLED_NUMBER_PATTERN}(?:\\s*\\(\\s*\\d{1,3}\\s*\\))?|\\d{1,3})\\s+days?\\b`;
+const NOTICE_MONTH_COUNT = `(?:${SPELLED_NUMBER_PATTERN}(?:\\s*\\(\\s*\\d{1,2}\\s*\\))?|\\d{1,2})`;
 
 export function buildRuleBasedFindings(groups: {
   rent: RentSnippet[];
@@ -159,6 +160,14 @@ export function findNoticeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
     /\bwritten\s+notice\b[^.\n]{0,160}\b(?:at\s+least\s+)?(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?(?:[-\s\u2010-\u2015])*(?:(?:calendar|business)\s+)?(?:days?|hours?)(?:\b|['’](?=\s|[.,;:]|$))/gi,
     /\b(?:notify|notifies|notified)\b[^.\n]{0,100}\b(?:in\s+writing|written)\b[^.\n]{0,100}\b(?:(?:at\s+least|no\s+fewer\s+than|no\s+less\s+than|not\s+less\s+than)\s+)?(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?(?:[-\s\u2010-\u2015])*(?:(?:calendar|business)\s+)?days?\b[^.\n]{0,100}\b(?:before|prior\s+to)\b[^.\n]{0,80}/gi,
     /\b(?:written\s+)?notice\b[^.\n]{0,160}\b(?:no\s+later\s+than|on\s+or\s+before|by)\s+(?:(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?|(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[12]\d|3[01])\/\d{2,4}|(?:the\s+)?\d{1,2}(?:st|nd|rd|th)\s+day\s+of\s+(?:the\s+)?month)\b/gi,
+    new RegExp(
+      `\\b${NOTICE_MONTH_COUNT}[-\\s]+(?:full\\s+)?(?:calendar\\s+)?months?(?:['’]s?)?\\s+(?:(?:advance|prior)\\s+)?(?:written\\s+)?notice\\b[^.\\n]{0,120}`,
+      "gi",
+    ),
+    new RegExp(
+      `\\b(?:written\\s+)?notice\\b[^.\\n]{0,160}\\b(?:at\\s+least\\s+)?${NOTICE_MONTH_COUNT}\\s+(?:full\\s+)?(?:calendar\\s+)?months?\\b[^.\\n]{0,80}`,
+      "gi",
+    ),
     /\bnotice\s+period\b[^.\n]{0,160}/gi,
     /\b(?:terminate|termination)\b[^.\n]{0,120}\b\d{1,3}\s*days?'?\s+(?:written\s+)?notice\b/gi,
     new RegExp(
