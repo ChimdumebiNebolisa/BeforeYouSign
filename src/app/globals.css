@@ -23,6 +23,7 @@
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
+  --color-control-border: var(--control-border);
   --color-destructive: var(--destructive);
   --color-destructive-surface: var(--destructive-surface);
   --color-success: var(--success);
@@ -55,7 +56,7 @@
 
 :root {
   color-scheme: light;
-  --background: #f3f4f2;
+  --background: #f5f9fc;
   --foreground: #182133;
   --card: #ffffff;
   --card-foreground: #182133;
@@ -64,12 +65,14 @@
   --primary: #16385f;
   --primary-foreground: #ffffff;
   --primary-container: #244c78;
-  --secondary: #edf2f5;
+  --secondary: oklch(96% 0.012 228);
   --secondary-foreground: #182133;
   --muted: #e9ebe8;
   --muted-foreground: #4f5a69;
   --accent: #dce9f8;
   --accent-foreground: #16385f;
+  --action: #b3dcf6;
+  --action-hover: #9ccdec;
   --destructive: #a22636;
   --destructive-surface: #fff0f1;
   --success: #17624b;
@@ -79,7 +82,8 @@
   --evidence: #215fa8;
   --evidence-surface: #eaf2ff;
   --link: #124f91;
-  --border: #c6cac6;
+  --border: #c3d1dc;
+  --control-border: #536f85;
   --input: #eef0ed;
   --ring: #215fa8;
   --bys-annotation-yellow: #f4dc86;
@@ -142,10 +146,24 @@
 
 @layer utilities {
   .bys-hero-gradient {
-    background-image: linear-gradient(180deg, rgb(255 255 255 / 0.7), rgb(243 244 242 / 0));
+    background-image: linear-gradient(180deg, color-mix(in srgb, var(--card) 70%, transparent), transparent);
   }
-  .bys-gradient-cta {
-    background-color: var(--primary);
+  .bys-primary-action {
+    @apply inset-ring inset-ring-control-border;
+    background-color: var(--action);
+    color: var(--primary);
+  }
+  @media (hover: hover) {
+    .bys-primary-action:hover:not(:disabled),
+    .bys-upload-trigger:hover .bys-primary-action {
+      background-color: var(--action-hover);
+    }
+  }
+  .bys-primary-action:disabled {
+    @apply inset-ring-border;
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+    opacity: 1;
   }
   .bys-sticky-note-yellow {
     background-color: var(--bys-annotation-yellow);
@@ -199,7 +217,6 @@
   --bys-landing-space: clamp(3rem, 1rem + 4vw, 5.5rem);
   --bys-landing-display: clamp(2.25rem, 1.25rem + 2.8vw, 3.75rem);
   --bys-landing-title: clamp(2rem, 1.25rem + 2vw, 3rem);
-  --bys-sample-surface: oklch(96% 0.012 228);
 }
 
 .bys-landing-container {
@@ -220,7 +237,10 @@
   inset-block: -6rem 0;
   inset-inline: 0;
   pointer-events: none;
-  background-image: linear-gradient(90deg, rgb(243 244 242 / 88%), rgb(243 244 242 / 80%)), linear-gradient(0deg, rgb(243 244 242 / 82%), rgb(243 244 242 / 42%)), url('/images/apartment-living-room.jpg');
+  background-image:
+    linear-gradient(90deg, color-mix(in srgb, var(--background) 88%, transparent), color-mix(in srgb, var(--background) 80%, transparent)),
+    linear-gradient(0deg, color-mix(in srgb, var(--background) 82%, transparent), color-mix(in srgb, var(--background) 42%, transparent)),
+    url('/images/apartment-living-room.jpg');
   background-size: cover;
   background-position: center;
 }
@@ -274,7 +294,7 @@
 
 .bys-sample-section {
   padding-block: var(--bys-landing-space);
-  background-color: var(--bys-sample-surface);
+  background-color: var(--secondary);
 }
 
 .bys-sample-layout {

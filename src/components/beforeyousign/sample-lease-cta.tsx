@@ -38,7 +38,7 @@ export function SampleLeaseCta({
         )}
         <select
           className={[
-            "w-full rounded-xl bg-muted px-3 py-3 text-sm font-medium text-foreground outline-none transition focus:bg-card focus:ring-2 focus:ring-primary/20",
+            "w-full rounded-xl bg-card px-3 py-3 text-sm font-medium text-foreground inset-ring inset-ring-control-border transition",
             embedded ? "mt-3" : "mt-2 text-center [text-align-last:center]",
           ].join(" ")}
           value={sampleKey}
@@ -58,7 +58,7 @@ export function SampleLeaseCta({
 
       <button
         type="button"
-        className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-xl border border-primary/35 bg-card px-3 text-sm font-semibold text-primary shadow-sm transition hover:border-primary/55 hover:bg-muted active:scale-[0.99] disabled:opacity-60"
+        className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-xl border border-control-border bg-card px-3 text-sm font-semibold text-primary shadow-sm transition enabled:hover:bg-secondary active:scale-[0.99] disabled:border-border disabled:bg-muted disabled:text-muted-foreground"
         disabled={isLoading}
         onClick={() => {
           const run = async () => {

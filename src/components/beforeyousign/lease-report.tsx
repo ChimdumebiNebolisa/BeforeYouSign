@@ -211,7 +211,7 @@ export function LeaseReportView({
           id="report-section-select"
           value={activeSection.id}
           onChange={(event) => selectSection(event.target.value as ReportSectionId)}
-          className="mt-2 min-h-11 w-full rounded-lg border border-border bg-card px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+          className="mt-2 min-h-11 w-full rounded-lg border border-control-border bg-accent px-3 text-sm font-semibold text-accent-foreground"
         >
           {sections.map((section) => (
             <option key={section.id} value={section.id}>
@@ -232,10 +232,10 @@ export function LeaseReportView({
                     type="button"
                     aria-current={selected ? "page" : undefined}
                     className={[
-                      "flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
+                      "flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold",
                       selected
-                        ? "bg-accent text-primary"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                        ? "bg-accent text-accent-foreground inset-ring inset-ring-control-border"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground",
                     ].join(" ")}
                     onClick={() => selectSection(section.id)}
                   >
