@@ -93,8 +93,8 @@ export function IntakeDocumentPreview({ intake }: { intake: IntakeDocumentPrevie
   return (
     <div className="rounded-2xl border border-border/80 bg-secondary p-5 shadow-sm">
       <div className="flex gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-card shadow-sm ring-1 ring-border">
-          <FileText className="h-6 w-6 text-primary" strokeWidth={1.75} aria-hidden />
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent shadow-sm ring-1 ring-border">
+          <FileText className="h-6 w-6 text-accent-foreground" strokeWidth={1.75} aria-hidden />
         </div>
         <div className="min-w-0 flex-1 space-y-3">
           <div>

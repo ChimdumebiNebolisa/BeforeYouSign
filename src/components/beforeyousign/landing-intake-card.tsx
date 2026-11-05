@@ -65,7 +65,7 @@ export function LandingIntakeCard({
           id="lease-state"
           value={stateCode}
           onChange={(event) => onStateChange(event.target.value as StateCode)}
-          className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-primary/30"
+          className="h-9 w-full rounded-lg border border-control-border bg-card px-3 text-sm text-foreground shadow-sm"
         >
           {STATE_OPTIONS.map((state) => (
             <option key={state.code} value={state.code}>
@@ -95,8 +95,8 @@ export function LandingIntakeCard({
             className={[
               "min-h-9 flex-1 rounded-md px-2 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:text-sm",
               activeTab === tab.id
-                ? "bg-card text-primary shadow-sm ring-1 ring-primary/20"
-                : "text-muted-foreground hover:text-foreground",
+                ? "bg-accent text-accent-foreground shadow-sm inset-ring inset-ring-control-border"
+                : "text-muted-foreground hover:bg-card hover:text-foreground",
             ].join(" ")}
             onClick={() => onTabChange(tab.id)}
             onKeyDown={(event) => {

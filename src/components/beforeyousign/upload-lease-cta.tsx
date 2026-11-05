@@ -49,10 +49,10 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
         <button
           type="button"
           className={[
-            "relative flex min-h-[9rem] w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-card px-4 py-4 text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            "bys-upload-trigger relative flex min-h-[9rem] w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-4 text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             isDragActive
-              ? "border-primary/45 bys-float-shadow"
-              : "border-border/35 hover:border-primary/35",
+              ? "border-ring bg-secondary bys-float-shadow"
+              : "border-control-border bg-card hover:bg-secondary",
           ].join(" ")}
           onClick={() => fileInputRef.current?.click()}
           onDragEnter={(e) => {
@@ -78,12 +78,12 @@ export function UploadLeaseCta({ onStartUpload }: { onStartUpload: (file: File) 
             handleFile(file);
           }}
         >
-          <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-accent text-primary transition-transform hover:scale-105">
+          <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-accent text-accent-foreground transition-transform hover:scale-105">
             <Upload className="h-5 w-5" strokeWidth={2} aria-hidden />
           </span>
           <span className="mt-2 block text-sm font-semibold text-foreground">Click to upload or drag &amp; drop</span>
           <span className="mt-0.5 block text-xs text-muted-foreground">PDF lease document</span>
-          <span className="mt-3 flex h-9 w-full items-center justify-center rounded-lg bys-gradient-cta text-sm font-bold text-primary-foreground shadow-sm transition hover:opacity-95 active:scale-[0.99]">
+          <span className="mt-3 flex h-9 w-full items-center justify-center rounded-lg bys-primary-action text-sm font-bold shadow-sm transition active:scale-[0.99]">
             Choose PDF
           </span>
         </button>

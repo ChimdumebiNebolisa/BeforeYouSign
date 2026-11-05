@@ -85,12 +85,12 @@ export function PasteTextDialog({
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           aria-describedby={helperId}
-          className="mt-4 h-48 w-full resize-none rounded-xl bg-muted p-3 text-sm text-foreground outline-none ring-1 ring-border/40 focus:bg-card focus:ring-2 focus:ring-primary/25"
+          className="mt-4 h-48 w-full resize-none rounded-xl bg-card p-3 text-sm text-foreground inset-ring inset-ring-control-border placeholder:text-muted-foreground"
           placeholder="Paste your residential lease text here…"
         />
         <button
           type="button"
-          className="mt-4 h-11 w-full rounded-xl bys-gradient-cta text-sm font-bold text-primary-foreground shadow-sm"
+          className="mt-4 h-11 w-full rounded-xl bys-primary-action text-sm font-bold shadow-sm"
           onClick={() => {
             const next = draft.trim();
             if (next.length > ANALYSIS_LIMITS.maxChars) {
@@ -117,7 +117,7 @@ export function PasteTextDialog({
       <button
         type="button"
         ref={triggerRef}
-        className="mt-3 min-h-11 w-full rounded-xl border border-border/60 bg-card py-3 text-sm font-semibold text-foreground transition hover:bg-muted active:scale-[0.99]"
+        className="mt-3 min-h-11 w-full rounded-xl border border-control-border bg-card py-3 text-sm font-semibold text-primary transition hover:bg-secondary active:scale-[0.99]"
         onClick={() => setIsOpen(true)}
       >
         Paste Lease Text
@@ -165,13 +165,13 @@ export function PasteTextDialog({
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               aria-describedby={helperId}
-              className="mt-4 h-56 w-full resize-none rounded-xl bg-muted p-3 text-sm text-foreground outline-none ring-1 ring-border/25 focus:bg-card focus:ring-2 focus:ring-ring/25"
+              className="mt-4 h-56 w-full resize-none rounded-xl bg-card p-3 text-sm text-foreground inset-ring inset-ring-control-border"
             />
 
             <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                className="h-11 w-full rounded-xl bys-gradient-cta text-sm font-bold text-primary-foreground shadow-sm sm:w-auto sm:px-6"
+                className="h-11 w-full rounded-xl bys-primary-action text-sm font-bold shadow-sm sm:w-auto sm:px-6"
                 onClick={() => {
                   const next = draft.trim();
                   setPasted(next.length ? next : null);
@@ -183,7 +183,7 @@ export function PasteTextDialog({
               </button>
               <button
                 type="button"
-                className="h-11 w-full rounded-xl bg-border text-sm font-semibold text-foreground sm:w-auto sm:px-6"
+                className="h-11 w-full rounded-xl bg-card text-sm font-semibold text-primary inset-ring inset-ring-control-border hover:bg-secondary sm:w-auto sm:px-6"
                 onClick={closeDialog}
               >
                 Cancel

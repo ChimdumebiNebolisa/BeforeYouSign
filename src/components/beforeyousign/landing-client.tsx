@@ -359,14 +359,14 @@ export function LandingClient() {
             </div>
             <Button
               variant="outline"
-              className="hidden h-11 shrink-0 rounded-xl border-border bg-card text-foreground hover:bg-muted sm:inline-flex"
+              className="hidden h-11 shrink-0 rounded-xl sm:inline-flex"
               onClick={reviewAnotherLease}
             >
               Review another lease
             </Button>
           </header>
 
-          <dl className="mt-4 grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] gap-2 border-y border-border bg-muted/55 px-3 py-3 text-xs sm:px-4">
+          <dl className="mt-4 grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] gap-2 border-y border-border bg-secondary px-3 py-3 text-xs sm:px-4">
             <div className="min-w-0">
               <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Document</dt>
               <dd className="mt-0.5 truncate font-semibold text-foreground">{uploadReceipt.fileName}</dd>
@@ -439,7 +439,7 @@ export function LandingClient() {
           {uploadReceipt.report ? (
             <section
               aria-labelledby="review-ready-heading"
-              className="mt-8 rounded-xl border border-primary/25 bg-primary px-5 py-6 text-primary-foreground sm:px-7 sm:py-7 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-10"
+              className="mt-8 rounded-xl border border-border bg-secondary px-5 py-6 text-primary sm:px-7 sm:py-7 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-10"
             >
               <div>
                 <h2 id="review-ready-heading" className="font-[family-name:var(--font-headline)] text-2xl font-bold">
@@ -447,8 +447,8 @@ export function LandingClient() {
                 </h2>
                 <ol className="mt-4 grid gap-3 md:grid-cols-3">
                   {displayedReviewSteps.map((step, index) => (
-                    <li key={`${index}-${step.slice(0, 24)}`} className="flex gap-3 text-sm leading-relaxed text-primary-foreground/90">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15 text-xs font-bold tabular-nums">
+                    <li key={`${index}-${step.slice(0, 24)}`} className="flex gap-3 text-sm leading-relaxed text-foreground">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground tabular-nums">
                         {index + 1}
                       </span>
                       <span>{step}</span>
@@ -456,7 +456,7 @@ export function LandingClient() {
                   ))}
                 </ol>
               </div>
-              <div className="mt-6 flex flex-wrap gap-3 border-t border-primary-foreground/25 pt-5 lg:mt-0 lg:flex-col lg:border-t-0 lg:pt-0">
+              <div className="mt-6 flex flex-wrap gap-3 border-t border-border pt-5 lg:mt-0 lg:flex-col lg:border-t-0 lg:pt-0">
                 <ReportDownloadButton
                   report={uploadReceipt.report}
                   texasRenterFindings={uploadReceipt.texasRenterFindings ?? []}
@@ -489,7 +489,7 @@ export function LandingClient() {
             {uploadReceipt.report ? <FixedReportDisclaimer report={uploadReceipt.report} /> : null}
             <Button
               variant="outline"
-              className="h-11 w-full rounded-xl border-border bg-card text-foreground hover:bg-muted sm:hidden"
+              className="h-11 w-full rounded-xl sm:hidden"
               onClick={reviewAnotherLease}
             >
               Review another lease
@@ -541,7 +541,7 @@ export function LandingClient() {
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <Button
               variant="outline"
-              className="h-11 rounded-xl border-border/35 bg-muted text-foreground hover:bg-muted"
+              className="h-11 rounded-xl"
               onClick={() => {
                 resetIntakeUi();
                 setIntake(null);
@@ -551,7 +551,7 @@ export function LandingClient() {
             </Button>
             <Button
               ref={continueButtonRef}
-              className="h-11 rounded-xl bys-gradient-cta px-6 text-primary-foreground shadow-sm transition-none hover:opacity-95 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
+              className="h-11 rounded-xl px-6 shadow-sm transition-none"
               onClick={() => void runLeaseAnalysis()}
               disabled={isSubmitting || !stateConfirmed}
             >
@@ -573,13 +573,13 @@ export function LandingClient() {
                 Your lease text was not changed. You can retry, go back to pick a different file, or paste the text instead.
               </p>
               <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                <Button className="h-11 rounded-xl bys-gradient-cta text-primary-foreground" onClick={() => void runLeaseAnalysis()}>
+                <Button className="h-11 rounded-xl" onClick={() => void runLeaseAnalysis()}>
                   Try again
                 </Button>
                 {intake.kind === "upload" ? (
                   <Button
                     variant="outline"
-                    className="h-11 rounded-xl border-destructive/30 bg-card hover:bg-destructive-surface"
+                    className="h-11 rounded-xl hover:bg-destructive-surface"
                     onClick={() => {
                       resetIntakeUi();
                       setIntake(null);

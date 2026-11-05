@@ -2,14 +2,19 @@
 name: BeforeYouSign
 description: A report-first lease review system where verified evidence leads.
 colors:
-  paper: "#f3f4f2"
+  paper: "#f5f9fc"
   surface: "#ffffff"
   ink-navy: "#182133"
   primary-navy: "#16385f"
   primary-navy-raised: "#244c78"
-  graphite: "#c6cac6"
+  graphite: "#c3d1dc"
+  control-border: "#536f85"
   muted-paper: "#e9ebe8"
   muted-ink: "#4f5a69"
+  icy-blue: "oklch(96% 0.012 228)"
+  selected-blue: "#dce9f8"
+  action-blue: "#b3dcf6"
+  action-hover-blue: "#9ccdec"
   evidence-blue: "#215fa8"
   evidence-paper: "#eaf2ff"
   link-blue: "#124f91"
@@ -74,8 +79,8 @@ spacing:
   section-desktop: "5rem"
 components:
   button-primary:
-    backgroundColor: "{colors.primary-navy}"
-    textColor: "{colors.surface}"
+    backgroundColor: "{colors.action-blue}"
+    textColor: "{colors.primary-navy}"
     rounded: "{rounded.lg}"
     padding: "0.5rem 1rem"
     height: "2.75rem"
@@ -122,12 +127,13 @@ The completed journey tells one story: choose a lease and state, run determinist
 
 ## Colors
 
-The palette is mostly paper, ink, and graphite; blue identifies evidence and interaction, while amber, green, and red appear only for semantic meaning.
+The icy blue behind “See what it finds” also fills informational panels. Stronger blues identify selections and primary actions. Report severity and status use their own colors.
 
 ### Primary
 
-- **Ink Navy:** Primary reading color and the high-contrast action-panel field.
-- **Primary Navy:** Brand wordmark, primary actions, and emphasized navigation.
+- **Ink Navy** is the main reading color.
+- **Primary Navy** colors the wordmark, action labels, selected navigation text, and small accents.
+- **Action Blue** fills primary actions. Use the deeper blue on hover and muted paper with muted ink when disabled.
 
 ### Secondary
 
@@ -212,9 +218,9 @@ Corners are restrained and functional: report interiors use small or medium roun
 
 ### Buttons
 
-- **Primary:** Navy field, white label, medium weight, and a 44px minimum target for journey actions.
-- **Outline:** White surface with graphite border for secondary or reversible actions.
-- **Download:** White-on-navy-panel action with an inline download icon, small shadow, and strong navy label.
+- **Primary** uses a sky-blue fill and a navy label. Journey actions have a 44px minimum target.
+- **Outline** uses a white surface and a blue-gray border for secondary actions.
+- **Download** uses the outline treatment with an inline icon.
 - **Hover / Focus:** Tonal hover only; focus is a 2px evidence-blue outline or ring with visible offset. Active controls may shift down by one pixel.
 
 ### Status Pills and Badges
@@ -227,18 +233,18 @@ Corners are restrained and functional: report interiors use small or medium roun
 
 - **Report shell:** Surface background, graphite border, largest radius, and no resting shadow.
 - **Report sections:** Transparent or lightly tinted paper with horizontal rules.
-- **Review-ready panel:** Full primary-navy field with numbered steps and download actions.
+- **Review-ready panel** uses the icy-blue surface with numbered steps and download actions.
 - **Technical and legal disclosures:** Muted paper or secondary surface with graphite border and compact type.
 
 ### Inputs / Fields
 
 - **Style:** 44px minimum height, paper or white field, graphite stroke, larger control radius, and readable labels above.
 - **Focus:** Evidence-blue ring with sufficient offset and no motion dependency.
-- **Tabs:** Muted-paper group; the selected tab becomes a white inset surface with navy text and a subtle rule.
+- **Tabs** sit on muted paper. The selected tab has a light blue fill, navy text, and a blue-gray outline.
 
 ### Navigation
 
-The global wordmark sits in a centered, floating white bar. Report navigation is content navigation: a numbered vertical rail on desktop and a labeled select on mobile. The active section uses evidence-paper with navy text; inactive items remain quiet until hover or focus.
+The global wordmark sits in a centered, floating white bar. Report navigation uses a numbered vertical rail on desktop and a labeled select on mobile. Both use the selected blue fill with navy text to show the active section.
 
 ### Evidence Viewer
 

@@ -137,8 +137,8 @@ export function AnalysisInProgressView({ intake, onCancel }: { intake: Intake; o
 
             <div className="rounded-2xl border border-border/80 bg-secondary p-5 shadow-sm">
               <div className="flex gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-card shadow-sm ring-1 ring-border">
-                  <FileText className="h-6 w-6 text-primary" strokeWidth={1.75} aria-hidden />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent shadow-sm ring-1 ring-border">
+                  <FileText className="h-6 w-6 text-accent-foreground" strokeWidth={1.75} aria-hidden />
                 </div>
                 <div className="min-w-0">
                   <p className="font-[family-name:var(--font-headline)] text-sm font-bold text-foreground sm:text-base">
@@ -157,7 +157,7 @@ export function AnalysisInProgressView({ intake, onCancel }: { intake: Intake; o
             </div>
           </div>
 
-          <div className="relative rounded-[1.75rem] bg-muted p-4 sm:p-5">
+          <div className="relative rounded-[1.75rem] bg-secondary p-4 sm:p-5">
             <div
               className="pointer-events-none absolute inset-0 rounded-[1.75rem] ring-1 ring-border/80"
               aria-hidden
@@ -196,7 +196,7 @@ export function AnalysisInProgressView({ intake, onCancel }: { intake: Intake; o
                             </span>
                           ) : current ? (
                             <span
-                              className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-sm font-bold text-primary shadow-sm ring-2 ring-ring/25 tabular-nums sm:h-10 sm:w-10 sm:text-base"
+                              className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-foreground shadow-sm ring-2 ring-control-border tabular-nums sm:h-10 sm:w-10 sm:text-base"
                               aria-current="step"
                               aria-label={`Step ${i + 1} in progress`}
                             >
@@ -255,7 +255,7 @@ export function AnalysisInProgressView({ intake, onCancel }: { intake: Intake; o
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3 sm:mt-6">
               <button
                 type="button"
-                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-card px-4 text-sm font-semibold text-foreground hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-control-border bg-card px-4 text-sm font-semibold text-primary hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 onClick={onCancel}
               >
                 <X className="h-4 w-4" aria-hidden />
