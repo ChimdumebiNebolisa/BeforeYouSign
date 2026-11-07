@@ -1,0 +1,23 @@
+{
+  "id": "synthetic-late-payment-penalty-wording",
+  "text": "A residential lease sets a fixed penalty for rent paid late without calling it a fee or late charge.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "If Tenant's rental payment is not received within five calendar days after the due date, Tenant must pay a late payment penalty of $75."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 107,
+      "end": 134,
+      "category": "fees",
+      "text": "late payment penalty of $75"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["fees"],
+    "texasTopics": []
+  }
+}

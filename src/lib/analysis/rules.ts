@@ -123,6 +123,8 @@ export function findFeeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
     /\bpet[-\s]+rent\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}/gi,
     /\bholdover\b[^.\n]{0,160}\brent\b[^.\n]{0,160}(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,120}/gi,
     /\blate\s+charge\b[^.\n]{0,160}(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,120}/gi,
+    /\blate[-\s]+payment\s+(?:fee|charge|penalty|assessment)\b[^.\n]{0,160}(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,120}/gi,
+    /(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,120}\blate[-\s]+payment\s+(?:fee|charge|penalty|assessment)\b/gi,
     /\b(?:past[-\s]due|overdue|delinquent|unpaid)\s+rent\b[^.\n]{0,160}\binterest\b[^.\n]{0,120}\d+(?:\.\d+)?\s*%[^.\n]{0,120}/gi,
     /\b(?:past[-\s]due|overdue|delinquent|unpaid)\s+rent\b[^.\n]{0,120}\b(?:fee|charge|penalty)\b[^.\n]{0,100}(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,100}/gi,
     /\b(?:credit[-\s]?card\s+)?convenience\s+fee\b[^.\n]{0,120}\d+(?:\.\d+)?\s*%[^.\n]{0,120}/gi,
