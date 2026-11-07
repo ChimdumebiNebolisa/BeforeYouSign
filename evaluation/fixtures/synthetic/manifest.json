@@ -232,6 +232,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Move-out notice deadline expressed as one full calendar month"
+    },
+    {
+      "id": "synthetic-late-payment-penalty-wording",
+      "path": "synthetic/late-payment-penalty-wording.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Late-payment penalty stated without using fee or late-charge terminology"
     }
   ]
 }

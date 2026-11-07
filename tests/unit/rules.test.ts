@@ -298,6 +298,30 @@ describe("findFeeSnippets", () => {
       },
     ]);
   });
+
+  it("finds a late-payment penalty when the clause does not call it a fee or late charge", () => {
+    const hits = findFeeSnippets([
+      {
+        page: 1,
+        text: "If Tenant's rental payment is not received within five calendar days after the due date, Tenant must pay a late payment penalty of $75.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("late payment penalty of $75");
+  });
+
+  it("finds a late-payment penalty when the amount precedes its label", () => {
+    const hits = findFeeSnippets([
+      {
+        page: 1,
+        text: "Tenant must pay a $75 late-payment penalty for a late rental payment.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("$75 late-payment penalty");
+  });
 });
 
 describe("findNoticeSnippets", () => {
