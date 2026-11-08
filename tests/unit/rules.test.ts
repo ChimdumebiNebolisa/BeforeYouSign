@@ -322,6 +322,30 @@ describe("findFeeSnippets", () => {
     expect(hits).toHaveLength(1);
     expect(hits[0]?.quote).toContain("$75 late-payment penalty");
   });
+
+  it("finds a renewal charge that is not labeled as a fee", () => {
+    const hits = findFeeSnippets([
+      {
+        page: 1,
+        text: "Tenant must pay a renewal charge of $200 if Tenant elects to renew.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("renewal charge of $200");
+  });
+
+  it("finds a renewal charge when the amount comes first", () => {
+    const hits = findFeeSnippets([
+      {
+        page: 1,
+        text: "Tenant owes $200 as a renewal charge if Tenant elects to renew.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("$200 as a renewal charge");
+  });
 });
 
 describe("findNoticeSnippets", () => {

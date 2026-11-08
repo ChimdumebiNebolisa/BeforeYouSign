@@ -240,6 +240,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Late-payment penalty stated without using fee or late-charge terminology"
+    },
+    {
+      "id": "synthetic-renewal-charge-not-fee",
+      "path": "synthetic/renewal-charge-not-fee.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Fixed lease renewal charge labeled as a charge rather than a fee"
     }
   ]
 }

@@ -1,0 +1,23 @@
+{
+  "id": "synthetic-renewal-charge-not-fee",
+  "text": "A residential lease requires a fixed charge when the tenant elects a renewal.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant must pay a renewal charge of $200 if Tenant elects to renew."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 18,
+      "end": 66,
+      "category": "fees",
+      "text": "renewal charge of $200 if Tenant elects to renew"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["fees"],
+    "texasTopics": []
+  }
+}
