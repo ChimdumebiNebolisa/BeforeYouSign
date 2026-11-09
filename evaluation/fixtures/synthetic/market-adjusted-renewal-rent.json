@@ -1,0 +1,16 @@
+{
+  "id": "synthetic-market-adjusted-renewal-rent",
+  "text": "Renewal rent is determined by a market rate that is not stated in the lease.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "If Tenant renews, monthly rent will be adjusted to the then-current market rate."
+    }
+  ],
+  "annotations": [],
+  "expected": {
+    "ruleCategories": [],
+    "texasTopics": [],
+    "riskBand": "medium"
+  }
+}

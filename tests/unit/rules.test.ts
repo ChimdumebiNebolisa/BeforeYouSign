@@ -567,6 +567,22 @@ describe("findUnclearLeasePhrases", () => {
     expect(hits.some((h) => /discretion/i.test(h.quote))).toBe(true);
   });
 
+  it("flags renewal rent tied to an unspecified market rate", () => {
+    const hits = findUnclearLeasePhrases([
+      {
+        page: 1,
+        text: "If Tenant renews, monthly rent will be adjusted to the then-current market rate.",
+      },
+    ]);
+
+    expect(hits).toEqual([
+      {
+        page: 1,
+        quote: "monthly rent will be adjusted to the then-current market rate",
+      },
+    ]);
+  });
+
   it("finds fees imposed at management's sole discretion", () => {
     const hits = findUnclearLeasePhrases([
       {

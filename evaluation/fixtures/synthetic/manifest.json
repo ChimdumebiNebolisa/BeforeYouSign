@@ -248,6 +248,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Fixed lease renewal charge labeled as a charge rather than a fee"
+    },
+    {
+      "id": "synthetic-market-adjusted-renewal-rent",
+      "path": "synthetic/market-adjusted-renewal-rent.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Renewal rent tied to an unspecified current market rate"
     }
   ]
 }

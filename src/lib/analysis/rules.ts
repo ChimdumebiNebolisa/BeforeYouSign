@@ -352,6 +352,7 @@ export function findUnclearLeasePhrases(pages: ExtractedTextPage[]): RentSnippet
     /\bfees?\s+may\s+apply\b[^.\n]{0,120}/gi,
     /\b(?:fees?|charges?)\b[^.\n]{0,120}\b(?:amounts?\s+)?(?:determined|set)\s+by\s+(?:the\s+)?(?:landlord|management|owner|lessor)\b[^.\n]{0,120}/gi,
     /\b(?:fees?|charges?|(?:fee|rate|charge)\s+schedules?)\b[^.\n]{0,160}\b(?:may|can)\s+be\s+(?:revised|updated|changed|modified)\b[^.\n]{0,100}/gi,
+    /\b(?:monthly\s+)?(?:rent|rental rate)\b[^.\n]{0,160}\b(?:then[-\s]?current|prevailing|fair)\s+market\s+(?:rent|rate)\b[^.\n]{0,80}/gi,
     /\bat\s+(?:the\s+)?landlord'?s?\s+discretion\b[^.\n]{0,120}/gi,
     /\b(?:its|their)\s+sole\s+discretion\b[^.\n]{0,120}/gi,
     /\bsubject\s+to\s+change\b[^.\n]{0,120}/gi,
