@@ -256,6 +256,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Renewal rent tied to an unspecified current market rate"
+    },
+    {
+      "id": "synthetic-early-termination-one-half-months-rent",
+      "path": "synthetic/early-termination-one-half-months-rent.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Early-termination fee expressed as one and one-half months' rent"
     }
   ]
 }
