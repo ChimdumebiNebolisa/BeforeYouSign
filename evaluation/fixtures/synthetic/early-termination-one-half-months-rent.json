@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-early-termination-one-half-months-rent",
+  "text": "An early-termination fee set at one and one-half months' rent.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant may terminate early upon payment of an early termination fee equal to 1.5 months' rent."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 46,
+      "end": 93,
+      "category": "fees",
+      "text": "early termination fee equal to 1.5 months' rent"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["fees"],
+    "texasTopics": [],
+    "riskBand": "medium"
+  }
+}

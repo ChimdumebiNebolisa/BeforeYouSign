@@ -299,6 +299,22 @@ describe("findFeeSnippets", () => {
     ]);
   });
 
+  it("finds an early-termination fee stated as one and one-half months' rent", () => {
+    const hits = findFeeSnippets([
+      {
+        page: 1,
+        text: "Tenant may terminate early upon payment of an early termination fee equal to 1.5 months' rent.",
+      },
+    ]);
+
+    expect(hits).toEqual([
+      {
+        page: 1,
+        quote: "early termination fee equal to 1.5 months' rent",
+      },
+    ]);
+  });
+
   it("finds a late-payment penalty when the clause does not call it a fee or late charge", () => {
     const hits = findFeeSnippets([
       {
