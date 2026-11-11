@@ -256,6 +256,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Renewal rent tied to an unspecified current market rate"
+    },
+    {
+      "id": "synthetic-security-deposit-one-and-a-half-months",
+      "path": "synthetic/security-deposit-one-and-a-half-months.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Security deposit expressed as one and a half months' rent"
     }
   ]
 }
