@@ -264,6 +264,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Security deposit expressed as one and a half months' rent"
+    },
+    {
+      "id": "synthetic-security-deposit-percent-monthly-rent",
+      "path": "synthetic/security-deposit-percent-monthly-rent.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Security deposit expressed as a percentage of monthly rent"
     }
   ]
 }

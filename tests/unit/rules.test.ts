@@ -175,6 +175,22 @@ describe("findDepositSnippets", () => {
     ]);
   });
 
+  it("finds a security deposit expressed as a percentage of monthly rent", () => {
+    expect(
+      findDepositSnippets([
+        {
+          page: 1,
+          text: "The security deposit is 150% of the monthly rent and is due before move-in.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "security deposit is 150% of the monthly rent and is due before move-in",
+      },
+    ]);
+  });
+
   it("finds a security deposit expressed as two weeks' rent", () => {
     expect(
       findDepositSnippets([
