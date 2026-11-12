@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-security-deposit-percent-monthly-rent",
+  "text": "A lease sets the security deposit at 150% of monthly rent.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "The security deposit is 150% of the monthly rent and is due before move-in."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 4,
+      "end": 74,
+      "category": "deposit",
+      "text": "security deposit is 150% of the monthly rent and is due before move-in"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["deposit"],
+    "texasTopics": ["securityDeposit"],
+    "riskBand": "low"
+  }
+}
