@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-late-fee-written-percent",
+  "text": "A lease states a percentage-based late fee using a written number and parenthetical numeral.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Rent not received by the end of the grace period will incur a late fee equal to five (5) percent of the past-due rent."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 62,
+      "end": 117,
+      "category": "fees",
+      "text": "late fee equal to five (5) percent of the past-due rent"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["fees"],
+    "texasTopics": ["lateFees"],
+    "riskBand": "low"
+  }
+}
