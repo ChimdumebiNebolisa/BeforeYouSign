@@ -1,5 +1,5 @@
 {
-  "fixtureCount": 34,
+  "fixtureCount": 35,
   "avgGroundingRate": 1,
   "results": [
     {
@@ -166,6 +166,24 @@
     },
     {
       "fixtureId": "synthetic-hvac-filter-maintenance",
+      "mode": "rules_only",
+      "metrics": {
+        "groundingRate": 1,
+        "unsupportedFindingRate": 0,
+        "expectedValueAccuracy": 1,
+        "ruleCategoryPrecision": 1,
+        "ruleCategoryRecall": 1,
+        "texasTopicPrecision": 1,
+        "texasTopicRecall": 1,
+        "annotationSpanRecall": 1,
+        "riskBandAccuracy": 1,
+        "ruleFindings": 1,
+        "texasTopics": 1
+      },
+      "errors": []
+    },
+    {
+      "fixtureId": "synthetic-late-fee-written-percent",
       "mode": "rules_only",
       "metrics": {
         "groundingRate": 1,

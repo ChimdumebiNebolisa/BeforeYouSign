@@ -355,6 +355,20 @@ describe("findFeeSnippets", () => {
     expect(hits[0]?.quote).toContain("$75 late-payment penalty");
   });
 
+  it("finds a late fee expressed as a written percentage with a parenthetical numeral", () => {
+    const hits = findFeeSnippets([
+      {
+        page: 1,
+        text: "Rent not received by the end of the grace period will incur a late fee equal to five (5) percent of the past-due rent.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toBe(
+      "late fee equal to five (5) percent of the past-due rent",
+    );
+  });
+
   it("finds a renewal charge that is not labeled as a fee", () => {
     const hits = findFeeSnippets([
       {

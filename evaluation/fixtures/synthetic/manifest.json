@@ -272,6 +272,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Security deposit expressed as a percentage of monthly rent"
+    },
+    {
+      "id": "synthetic-late-fee-written-percent",
+      "path": "synthetic/late-fee-written-percent.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Late fee expressed as a written percentage with a parenthetical numeral"
     }
   ]
 }
