@@ -17,6 +17,6 @@
     "depositAmount": "$1,800",
     "ruleCategories": ["rent", "deposit", "fees"],
     "texasTopics": ["securityDeposit", "lateFees"],
-    "riskBand": "low"
+    "riskBand": "medium"
   }
 }

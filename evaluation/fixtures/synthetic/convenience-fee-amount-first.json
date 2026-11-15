@@ -1,0 +1,23 @@
+{
+  "id": "synthetic-convenience-fee-amount-first",
+  "text": "A lease states a fixed payment-processing convenience fee with the amount before the label.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "A $4.95 convenience fee applies to each credit-card rent payment."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 2,
+      "end": 64,
+      "category": "fees",
+      "text": "$4.95 convenience fee applies to each credit-card rent payment"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["fees"],
+    "texasTopics": []
+  }
+}
