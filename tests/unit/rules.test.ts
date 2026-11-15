@@ -303,6 +303,22 @@ describe("findFeeSnippets", () => {
     ]);
   });
 
+  it("finds a convenience fee when its dollar amount precedes the label", () => {
+    expect(
+      findFeeSnippets([
+        {
+          page: 1,
+          text: "A $4.95 convenience fee applies to each credit-card rent payment.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "$4.95 convenience fee applies to each credit-card rent payment",
+      },
+    ]);
+  });
+
   it("finds a rent penalty described as a charge on unpaid rent", () => {
     const hits = findFeeSnippets([
       {
