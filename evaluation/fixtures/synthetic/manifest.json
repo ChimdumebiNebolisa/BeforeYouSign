@@ -288,6 +288,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Convenience fee amount written before the fee label"
+    },
+    {
+      "id": "synthetic-daily-unpaid-rent-assessment",
+      "path": "synthetic/daily-unpaid-rent-assessment.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Daily assessment for rent that remains unpaid without calling it a late fee"
     }
   ]
 }

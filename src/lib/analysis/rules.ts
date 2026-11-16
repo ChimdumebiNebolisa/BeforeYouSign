@@ -129,6 +129,7 @@ export function findFeeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
     /(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,120}\blate[-\s]+payment\s+(?:fee|charge|penalty|assessment)\b/gi,
     /\b(?:past[-\s]due|overdue|delinquent|unpaid)\s+rent\b[^.\n]{0,160}\binterest\b[^.\n]{0,120}\d+(?:\.\d+)?\s*%[^.\n]{0,120}/gi,
     /\b(?:past[-\s]due|overdue|delinquent|unpaid)\s+rent\b[^.\n]{0,120}\b(?:fee|charge|penalty)\b[^.\n]{0,100}(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,100}/gi,
+    /\bassessment\b[^.\n]{0,100}\$[\d,]+(?:\.\d{2})?\s+per\s+day\b[^.\n]{0,100}\b(?:rent|rental payment)\b[^.\n]{0,60}\b(?:unpaid|overdue|past[-\s]?due|delinquent|late)\b[^.\n]{0,80}/gi,
     /\b(?:credit[-\s]?card\s+)?convenience\s+fee\b[^.\n]{0,120}\d+(?:\.\d+)?\s*%[^.\n]{0,120}/gi,
     /\b\d+(?:\.\d+)?\s*%\s+(?:credit[-\s]?card\s+)?convenience\s+fee\b[^.\n]{0,120}/gi,
     /\$[\d,]+(?:\.\d{2})?\s+(?:credit[-\s]?card\s+)?convenience\s+fee\b[^.\n]{0,120}/gi,
@@ -335,6 +336,7 @@ export function findRentSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
         const previousPeriod = text.lastIndexOf(".", Math.max(0, match.index - 1));
         const previousLineBreak = text.lastIndexOf("\n", Math.max(0, match.index - 1));
         const clausePrefix = text.slice(Math.max(previousPeriod, previousLineBreak) + 1, match.index);
+        if (/\bassessment\b/i.test(clausePrefix)) continue;
         if (!/\brent\b/i.test(quote) && /\b(?:fee|charge|deposit)\b/i.test(clausePrefix)) continue;
         if (/\bpet[-\s]+rent\b|\bper\s+(?:approved\s+)?pets?\b/i.test(quote)) continue;
         matches.push({ page: page.page, quote });

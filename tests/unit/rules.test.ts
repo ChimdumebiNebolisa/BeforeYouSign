@@ -331,6 +331,34 @@ describe("findFeeSnippets", () => {
     expect(hits[0]?.quote).toContain("charge equal to 10%");
   });
 
+  it("finds a daily assessment for rent that remains unpaid", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "An assessment of $10 per day applies while monthly rent remains unpaid after the fifth day.",
+      },
+    ];
+
+    expect(findFeeSnippets(pages)).toEqual([
+      {
+        page: 1,
+        quote: "assessment of $10 per day applies while monthly rent remains unpaid after the fifth day",
+      },
+    ]);
+    expect(findRentSnippets(pages)).toEqual([]);
+  });
+
+  it("does not treat an unrelated per-day penalty as a rent fee", () => {
+    expect(
+      findFeeSnippets([
+        {
+          page: 1,
+          text: "A $10 per day penalty applies if the tenant returns the keys late.",
+        },
+      ]),
+    ).toEqual([]);
+  });
+
   it("finds an early-termination fee stated as a multiple of monthly rent", () => {
     const hits = findFeeSnippets([
       {
