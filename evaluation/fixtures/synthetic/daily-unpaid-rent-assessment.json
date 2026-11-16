@@ -1,0 +1,23 @@
+{
+  "id": "synthetic-daily-unpaid-rent-assessment",
+  "text": "A residential lease imposes a daily assessment while rent remains unpaid.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "An assessment of $10 per day applies while monthly rent remains unpaid after the fifth day."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 0,
+      "end": 87,
+      "category": "fees",
+      "text": "An assessment of $10 per day applies while monthly rent remains unpaid after the fifth day"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["fees"],
+    "texasTopics": []
+  }
+}
