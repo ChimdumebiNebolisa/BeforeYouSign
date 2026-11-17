@@ -624,6 +624,22 @@ describe("findMaintenanceSnippets", () => {
       },
     ]);
   });
+
+  it("finds tenant pest-control duties phrased as bearing the cost", () => {
+    expect(
+      findMaintenanceSnippets([
+        {
+          page: 1,
+          text: "Tenant shall bear the cost of extermination services during the lease.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "Tenant shall bear the cost of extermination services during the lease",
+      },
+    ]);
+  });
 });
 
 describe("findUtilitiesSnippets", () => {

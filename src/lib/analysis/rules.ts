@@ -246,6 +246,7 @@ export function findMaintenanceSnippets(pages: ExtractedTextPage[]): RentSnippet
     /\btenant\b[^.\n]{0,120}\b(?:maintain|maintenance|repair|clean|cleanliness)\b[^.\n]{0,120}/gi,
     /\btenant\b[^.\n]{0,120}\bresponsible\s+for\b[^.\n]{0,120}\b(?:pest\s+control|extermination)\b[^.\n]{0,120}/gi,
     /\b(?:pest\s+control|extermination)\b[^.\n]{0,120}\b(?:is|are)\s+(?:the\s+)?(?:tenant|resident)['’]s\s+responsibilit(?:y|ies)\b[^.\n]{0,120}/gi,
+    /\btenant\b[^.\n]{0,120}\b(?:bear|pay|cover|reimburse)\b[^.\n]{0,80}\b(?:costs?|expenses?)\b[^.\n]{0,100}\b(?:pest\s+control|extermination)\b[^.\n]{0,100}/gi,
     /\blandlord\b[^.\n]{0,120}\b(?:maintain|maintenance|repair|structural)\b[^.\n]{0,120}/gi,
     /\b(?:minor|major)\s+repairs?\b[^.\n]{0,160}/gi,
     /\bmaintenance\s+and\s+repairs?\b[^.\n]{0,160}/gi,

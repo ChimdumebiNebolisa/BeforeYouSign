@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-tenant-extermination-cost",
+  "text": "A residential lease assigns extermination costs to the tenant.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tenant shall bear the cost of extermination services during the lease."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 0,
+      "end": 69,
+      "category": "maintenance",
+      "text": "Tenant shall bear the cost of extermination services during the lease"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["maintenance"],
+    "texasTopics": [],
+    "riskBand": "low"
+  }
+}
