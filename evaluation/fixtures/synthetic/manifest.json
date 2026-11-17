@@ -296,6 +296,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Daily assessment for rent that remains unpaid without calling it a late fee"
+    },
+    {
+      "id": "synthetic-tenant-extermination-cost",
+      "path": "synthetic/tenant-extermination-cost.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Tenant extermination responsibility phrased as bearing the cost"
     }
   ]
 }
