@@ -648,6 +648,22 @@ describe("findUtilitiesSnippets", () => {
       },
     ]);
   });
+
+  it("finds utility responsibility when the lease calls the tenant a resident", () => {
+    expect(
+      findUtilitiesSnippets([
+        {
+          page: 1,
+          text: "Resident is responsible for electricity service during the lease.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "Resident is responsible for electricity",
+      },
+    ]);
+  });
 });
 
 describe("findUnclearLeasePhrases", () => {
