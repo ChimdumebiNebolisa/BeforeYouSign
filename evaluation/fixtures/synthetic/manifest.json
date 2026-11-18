@@ -296,6 +296,14 @@
       "consent": "synthetic",
       "redaction": "synthetic",
       "description": "Daily assessment for rent that remains unpaid without calling it a late fee"
+    },
+    {
+      "id": "synthetic-resident-electricity-responsibility",
+      "path": "synthetic/resident-electricity-responsibility.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Electricity service responsibility assigned to a resident rather than a tenant"
     }
   ]
 }
