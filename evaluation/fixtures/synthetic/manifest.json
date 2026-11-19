@@ -2,6 +2,14 @@
   "version": 1,
   "fixtures": [
     {
+      "id": "synthetic-amendable-fee-schedule",
+      "path": "synthetic/amendable-fee-schedule.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "Fees controlled by a schedule that management may amend unilaterally"
+    },
+    {
       "id": "synthetic-annual-rent-monthly-installments",
       "path": "synthetic/annual-rent-monthly-installments.json",
       "license": "MIT",

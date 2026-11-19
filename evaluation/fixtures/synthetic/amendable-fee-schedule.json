@@ -1,0 +1,16 @@
+{
+  "id": "synthetic-amendable-fee-schedule",
+  "text": "A lease incorporates a management fee schedule that can be changed unilaterally.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Additional fees are listed in the community fee schedule; management may amend that schedule at any time, and residents must pay the listed charges."
+    }
+  ],
+  "annotations": [],
+  "expected": {
+    "ruleCategories": [],
+    "texasTopics": [],
+    "riskBand": "medium"
+  }
+}
