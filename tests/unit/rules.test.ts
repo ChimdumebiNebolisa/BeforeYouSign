@@ -715,6 +715,18 @@ describe("findUnclearLeasePhrases", () => {
     expect(hits[0]?.quote).toContain("fee schedule, which may be revised");
   });
 
+  it("flags fees controlled by a schedule management may amend", () => {
+    const hits = findUnclearLeasePhrases([
+      {
+        page: 1,
+        text: "Additional fees are listed in the community fee schedule; management may amend that schedule at any time, and residents must pay the listed charges.",
+      },
+    ]);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.quote).toContain("fee schedule; management may amend that schedule");
+  });
+
   it("returns empty for clear text", () => {
     expect(findUnclearLeasePhrases([{ page: 1, text: "Rent is $1,200 due on the 1st." }])).toEqual([]);
   });
