@@ -1,0 +1,24 @@
+{
+  "id": "synthetic-security-deposit-two-months-rent",
+  "text": "A residential lease sets the security deposit at two months' rent.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "The security deposit is equal to two (2) months' rent."
+    }
+  ],
+  "annotations": [
+    {
+      "page": 1,
+      "start": 4,
+      "end": 53,
+      "category": "deposit",
+      "text": "security deposit is equal to two (2) months' rent"
+    }
+  ],
+  "expected": {
+    "ruleCategories": ["deposit"],
+    "texasTopics": ["securityDeposit"],
+    "riskBand": "low"
+  }
+}
