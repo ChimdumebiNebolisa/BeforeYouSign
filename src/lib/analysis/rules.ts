@@ -75,6 +75,7 @@ export function findDepositSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
     /\bsecurity\s+deposit\b[^.\n]{0,180}\b\d{1,3}(?:\.\d+)?\s*(?:%|percent)\s+of\s+(?:(?:the|current)\s+)?monthly\s+(?:rent|rental\s+rate)\b[^.\n]{0,120}/gi,
     new RegExp(`\\bsecurity\\s+deposit\\b[^.\\n]{0,180}\\b(?:${SPELLED_NUMBER_PATTERN}(?:\\s*\\(\\s*\\d{1,2}\\s*\\))?|\\d{1,2})\\s+weeks?['’]?\\s+rent\\b[^.\\n]{0,120}`, "gi"),
     /\bsecurity\s+deposit\b[^.\n]{0,180}\b(?:one(?:\s*\(\s*1\s*\))?|1)\s+month'?s?\s+rent\b[^.\n]{0,120}/gi,
+    new RegExp(`\\bsecurity\\s+deposit\\b[^.\\n]{0,180}\\b(?:${SPELLED_NUMBER_PATTERN}(?:\\s*\\(\\s*\\d{1,2}\\s*\\))?|\\d{1,2})\\s+months?['’]?\\s+rent\\b[^.\\n]{0,120}`, "gi"),
     /\b(?:return(?:ed)?|refund(?:ed)?)\b[^.\n]{0,100}\b(?:security\s+)?deposit\b[^.\n]{0,80}\bwithin\s+(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?\s+days?\b/gi,
     /\b(?:security\s+)?deposit\b[^.\n]{0,100}\b(?:return(?:ed)?|refund(?:ed)?)\b[^.\n]{0,80}\bwithin\s+(?:[a-z]+\s*\(\s*)?\d{1,3}\s*\)?\s+days?\b/gi,
     new RegExp(`\\b(?:return(?:ed)?|refund(?:ed)?)\\b[^.\\n]{0,100}\\b(?:security\\s+)?deposit\\b[^.\\n]{0,100}${NO_LATER_DEPOSIT_DEADLINE}`, "gi"),
