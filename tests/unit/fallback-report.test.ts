@@ -4,6 +4,29 @@ import { buildRuleOnlyFallbackReport } from "@/lib/analysis/fallback-report";
 import { runDeterministicAnalysis } from "@/lib/analysis/pipeline/deterministic";
 
 describe("buildRuleOnlyFallbackReport", () => {
+  it("does not attribute a separate key charge to a one-month security deposit", () => {
+    const pages = [
+      {
+        page: 1,
+        text: "Monthly rent is $1,500. The security deposit is one month's rent; a separate $200 replacement-key charge is due at signing.",
+      },
+    ];
+    const analysis = runDeterministicAnalysis(pages);
+    const report = buildRuleOnlyFallbackReport({
+      documentId: "test-document",
+      pages,
+      ruleBasedFindings: analysis.ruleBasedFindings,
+      deterministicRisk: analysis.deterministicRisk,
+    });
+
+    expect(report.moneyAndFees).toContainEqual(
+      expect.objectContaining({
+        label: "Security deposit",
+        value: "one month's rent",
+      }),
+    );
+  });
+
   it("extracts a parenthetical move-out notice deadline", () => {
     const report = buildRuleOnlyFallbackReport({
       documentId: "test-document",

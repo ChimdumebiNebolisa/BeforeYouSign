@@ -218,6 +218,14 @@
       "description": "Security deposit expressed as two weeks' rent"
     },
     {
+      "id": "synthetic-security-deposit-one-month-separate-key-charge",
+      "path": "synthetic/security-deposit-one-month-separate-key-charge.json",
+      "license": "MIT",
+      "consent": "synthetic",
+      "redaction": "synthetic",
+      "description": "One-month security deposit with a separate key charge in the same clause"
+    },
+    {
       "id": "synthetic-tenant-electricity-responsibility",
       "path": "synthetic/tenant-electricity-responsibility.json",
       "license": "MIT",

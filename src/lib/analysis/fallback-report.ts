@@ -32,7 +32,7 @@ function extractFeeValue(text: string): string | null {
   if (percentageRate) return percentageRate[0];
 
   const monthsOfRent = text.match(
-    /\b(?:(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)(?:\s*\(\s*\d{1,2}\s*\))?|\d{1,2})\s+months?'?\s+rent\b/i,
+    /\b(?:(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)(?:\s*\(\s*\d{1,2}\s*\))?|\d{1,2})\s+month(?:s|['’]s?)?['’]?\s+rent\b/i,
   );
   if (monthsOfRent) return monthsOfRent[0];
 
@@ -513,7 +513,7 @@ export function buildRuleOnlyFallbackReport(input: {
   if (depositFinding) {
     moneyAndFees.push({
       label: "Security deposit",
-      value: extractCurrencyValue(depositFinding.quote) ?? "See lease clause",
+      value: extractFeeValue(depositFinding.quote) ?? "See lease clause",
       evidence: toEvidence(input.evidenceRegistry, input.documentId, depositFinding, pageTexts, "fees"),
     });
   }
