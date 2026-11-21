@@ -1,0 +1,16 @@
+{
+  "id": "synthetic-security-deposit-one-month-separate-key-charge",
+  "text": "The lease defines a security deposit as one month's rent and lists a separate replacement-key charge.",
+  "pages": [
+    {
+      "page": 1,
+      "text": "Monthly rent is $1,500. The security deposit is one month's rent; a separate $200 replacement-key charge is due at signing."
+    }
+  ],
+  "annotations": [],
+  "expected": {
+    "ruleCategories": ["rent", "deposit"],
+    "texasTopics": ["securityDeposit"],
+    "riskBand": "low"
+  }
+}
