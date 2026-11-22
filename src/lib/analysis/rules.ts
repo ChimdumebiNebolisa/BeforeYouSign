@@ -267,6 +267,23 @@ export function findMaintenanceSnippets(pages: ExtractedTextPage[]): RentSnippet
           /\breturn\b[^.]{0,120}\bclean(?:liness)?\b/i.test(quote) &&
           /\b(?:ordinary|normal)\s+wear\s+and\s+tear\s+(?:is\s+)?excepted\b/i.test(quote);
         if (protectedReturnCondition) continue;
+        const clauseStart = Math.max(
+          text.lastIndexOf(".", match.index - 1),
+          text.lastIndexOf(";", match.index - 1),
+          text.lastIndexOf("\n", match.index - 1),
+        ) + 1;
+        const clauseEndCandidates = [
+          text.indexOf(".", match.index),
+          text.indexOf(";", match.index),
+          text.indexOf("\n", match.index),
+        ].filter((index) => index >= 0);
+        const clauseEnd = clauseEndCandidates.length ? Math.min(...clauseEndCandidates) : text.length;
+        const clause = text.slice(clauseStart, clauseEnd);
+        const prohibitedTenantRepair =
+          /\b(?:tenant|resident)\b[^.!?;\n]{0,100}\b(?:may\s+not|must\s+not|shall\s+not|cannot|is\s+not\s+permitted\s+to|is\s+not\s+allowed\s+to)\b[^.!?;\n]{0,100}\b(?:make|perform|do|undertake|complete|carry\s+out)?\s*(?:any\s+)?(?:maintenance|repairs?|repair\s+work)\b/i.test(
+            clause,
+          );
+        if (prohibitedTenantRepair) continue;
         matches.push({ page: page.page, quote });
       }
     }

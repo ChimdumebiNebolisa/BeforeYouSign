@@ -624,6 +624,17 @@ describe("findMaintenanceSnippets", () => {
       },
     ]);
   });
+
+  it("does not treat a prohibition on tenant repairs as a tenant maintenance duty", () => {
+    expect(
+      findMaintenanceSnippets([
+        {
+          page: 1,
+          text: "Tenant may not repair the premises without the Landlord's prior written consent.",
+        },
+      ]),
+    ).toEqual([]);
+  });
 });
 
 describe("findUtilitiesSnippets", () => {
