@@ -275,6 +275,22 @@ describe("findFeeSnippets", () => {
     expect(findRentSnippets(pages)).toEqual([]);
   });
 
+  it("finds pet rent when its amount precedes the fee label", () => {
+    expect(
+      findFeeSnippets([
+        {
+          page: 1,
+          text: "Base rent is $1,800 plus $35 per month as pet rent for each approved pet.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "$35 per month as pet rent for each approved pet",
+      },
+    ]);
+  });
+
   it("finds a required monthly amenity fee stated after its label", () => {
     const hits = findFeeSnippets([
       {

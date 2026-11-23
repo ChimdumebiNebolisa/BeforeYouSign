@@ -122,6 +122,7 @@ export function findFeeSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
     /\bpackage(?:\s+acceptance)?\s+fee\b[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?(?:\s*(?:per|\/)\s*package)?\b/gi,
     /\breserved\s+parking(?:\s+stall)?\s+fee\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?(?:\s*(?:per|\/)\s*(?:month|mo|vehicle))?\b/gi,
     /\bpet[-\s]+rent\b[^.\n]{0,140}\$[\d,]+(?:\.\d{2})?\b[^.\n]{0,120}/gi,
+    /\$[\d,]+(?:\.\d{2})?\b[^$\.\n]{0,80}\bpet[-\s]+rent\b[^.\n]{0,120}/gi,
     /\bholdover\b[^.\n]{0,160}\brent\b[^.\n]{0,160}(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,120}/gi,
     /\blate\s+charge\b[^.\n]{0,160}(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,120}/gi,
     /\blate[-\s]+payment\s+(?:fee|charge|penalty|assessment)\b[^.\n]{0,160}(?:\$[\d,]+(?:\.\d{2})?|\d+(?:\.\d+)?\s*%)[^.\n]{0,120}/gi,
