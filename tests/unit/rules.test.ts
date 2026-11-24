@@ -534,6 +534,22 @@ describe("findNoticeSnippets", () => {
     expect(hits).toHaveLength(1);
     expect(hits[0]?.quote).toContain("one (1) calendar month's written notice");
   });
+
+  it("finds a month-end notice deadline tied to lease expiration", () => {
+    expect(
+      findNoticeSnippets([
+        {
+          page: 1,
+          text: "To avoid automatic renewal, Tenant must give written notice by the last day of the month before the lease expires.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "written notice by the last day of the month before the lease expires",
+      },
+    ]);
+  });
 });
 
 describe("findRenewalSnippets", () => {
