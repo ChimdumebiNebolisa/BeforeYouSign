@@ -673,6 +673,22 @@ describe("findUnclearLeasePhrases", () => {
     ]);
   });
 
+  it("flags a rent increase tied to a future consumer price index value", () => {
+    expect(
+      findUnclearLeasePhrases([
+        {
+          page: 1,
+          text: "On each anniversary, rent will increase by the percentage change in the Consumer Price Index (CPI).",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "rent will increase by the percentage change in the Consumer Price Index (CPI)",
+      },
+    ]);
+  });
+
   it("finds fees imposed at management's sole discretion", () => {
     const hits = findUnclearLeasePhrases([
       {
