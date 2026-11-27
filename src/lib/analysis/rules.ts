@@ -243,6 +243,7 @@ export function findRenewalSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
 export function findMaintenanceSnippets(pages: ExtractedTextPage[]): RentSnippet[] {
   const patterns: RegExp[] = [
     /\btenant\b[^.\n]{0,120}\b(?:replace|change)\b[^.\n]{0,80}\b(?:air\s+filters?|(?:hvac|furnace)(?:\s+air)?\s+filters?)\b[^.\n]{0,120}/gi,
+    /\btenant\b[^.\n]{0,100}\b(?:(?:must|shall|will)\s+(?:replace|change)|(?:is|remains)\s+responsible\s+for\s+(?:replacing|changing))\b[^.\n]{0,80}\b(?:smoke|carbon monoxide|CO)\s+(?:detectors?|alarms?)\s+batter(?:y|ies)\b[^.\n]{0,120}/gi,
     /\btenant\b[^.\n]{0,120}\b(?:maintain|maintenance|repair|clean|cleanliness)\b[^.\n]{0,120}/gi,
     /\btenant\b[^.\n]{0,120}\bresponsible\s+for\b[^.\n]{0,120}\b(?:pest\s+control|extermination)\b[^.\n]{0,120}/gi,
     /\b(?:pest\s+control|extermination)\b[^.\n]{0,120}\b(?:is|are)\s+(?:the\s+)?(?:tenant|resident)['’]s\s+responsibilit(?:y|ies)\b[^.\n]{0,120}/gi,

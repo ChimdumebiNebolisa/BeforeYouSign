@@ -593,6 +593,22 @@ describe("findMaintenanceSnippets", () => {
     ]);
   });
 
+  it("finds a tenant duty to replace smoke detector batteries", () => {
+    expect(
+      findMaintenanceSnippets([
+        {
+          page: 1,
+          text: "Tenant must replace smoke detector batteries when they are depleted.",
+        },
+      ]),
+    ).toEqual([
+      {
+        page: 1,
+        quote: "Tenant must replace smoke detector batteries when they are depleted",
+      },
+    ]);
+  });
+
   it("finds pest-control responsibilities assigned to the tenant", () => {
     const hits = findMaintenanceSnippets([
       {
